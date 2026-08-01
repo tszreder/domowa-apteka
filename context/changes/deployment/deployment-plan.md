@@ -12,7 +12,7 @@ Two things discovered during research **update infrastructure.md's assumptions**
 
 **Plan artifact location (user directed):** this plan is persisted to `context/changes/deployment/deployment-plan.md`, following the repo's existing `context/changes/<change-id>/` convention (see `context/changes/README.md`, and the sibling `context/changes/bootstrap-verification/`) rather than the `context/deployment/deploy-plan.md` path that `CLAUDE.md`'s Module 1 Lesson 5 notes describe for Plan Mode's output. The two serve different purposes and both get written: `deployment-plan.md` (this document, the upfront plan) written here directly, and `context/deployment/deploy-plan.md` (a short post-deploy record of what actually got deployed — domain, wired secrets, confirmed working state) written in Phase 5 once verification passes, matching what CLAUDE.md says downstream milestone-planning skills expect to find there.
 
-**Status: Phases 0–3 complete (2026-08-01).** Local code changes done, verified, and committed on branch `deploy/railway-phase-0`. Railway project `domowa-apteka` exists with a `Postgres` service and a `web` service whose environment variables and `railway.json` are configured. **No code has been deployed yet** — Phase 4 is the first `railway up`. See the Execution Log at the bottom for what was done and where it deviated from the plan as drafted. Phase 6 remains blocked on feature work.
+**Status: deployed and live (2026-08-01) — `https://web-production-f61ed.up.railway.app`.** Phases 0–3 complete; Phase 4 deployed successfully with `/health/`, the admin login page, and WhiteNoise static files all verified over HTTPS. One Phase 4 verification remains: an actual admin login POST, which is the only thing that exercises CSRF + proxy headers together (blocked on the superuser decision). Phase 5 not started. Phase 6 remains blocked on feature work. See the Execution Log at the bottom for what was done and where it deviated from the plan as drafted.
 
 ---
 
@@ -85,12 +85,13 @@ Everything in this phase is done **once**, before any project-specific work. Thi
 
 ## Phase 4 — First deploy & verification
 
-- [ ] `railway up` from repo root.
-- [ ] **If build fails with `uv: command not found`**: confirm `.python-version` (Phase 0) is committed and matches a version Railpack supports; alternatively set `RAILPACK_PYTHON_VERSION` as a build-time env var.
-- [ ] **If deploy fails healthcheck repeatedly (looks like a crash loop)**: check `railway logs` for a 400 response on `/health/` first — that's `ALLOWED_HOSTS` rejecting the healthcheck's Host header, not an app crash. Fix per Phase 0's `ALLOWED_HOSTS` step before assuming the app is broken.
-- [ ] Generate a public domain (Railway dashboard → service → Networking → Generate Domain, or `railway domain` if the CLI supports it — confirm via `--help`).
-- [ ] Set `CSRF_TRUSTED_ORIGINS=https://<the-generated-domain>` and re-run `railway variable set` + redeploy (`railway up` again, or `railway redeploy`) now that the domain is known.
-- [ ] Verify: visit `https://<domain>/health/` → expect `ok`. Create a superuser (`railway run python manage.py createsuperuser` — runs the command against the deployed environment) and log into `https://<domain>/admin/` to confirm DB connectivity, static CSS loads (WhiteNoise), and CSRF/proxy headers are correct end-to-end.
+- [x] `railway up` from repo root. *(Ran `railway up --service web --ci`; `--ci` streams build logs then exits, which is what makes it usable non-interactively.)*
+- [x] **If build fails with `uv: command not found`** — **did not occur.** The `.python-version` pin worked; Railpack installed uv and ran `uv sync --locked --no-dev`. Note the `--locked`: Railpack builds from `uv.lock`, so a lockfile out of sync with `pyproject.toml` fails the build rather than silently installing something else.
+- [x] **If deploy fails healthcheck repeatedly** — **did not occur** on the first deploy (`ALLOWED_HOSTS=*` accepted everything, by design), and did not occur on the tightened redeploy either.
+- [x] Generate a public domain — **the CLI does support this**, no dashboard step needed: `railway domain --service web --port 8080 --json` → `https://web-production-f61ed.up.railway.app`.
+- [x] Set `CSRF_TRUSTED_ORIGINS=https://<the-generated-domain>` and re-run `railway variable set` + redeploy. *(Both variables set with `--skip-deploys`, then a single `railway redeploy --service web --yes`.)*
+- [x] Verify: `https://<domain>/health/` → `200 ok`; `/admin/login/` → `200` with a CSRF token in the form; `/static/admin/css/base.css` → `200`, 22 120 bytes, `text/css` (WhiteNoise serving).
+- [ ] **Remaining:** create a superuser and complete an actual admin *login* (a POST), which is the only step that exercises CSRF + `SECURE_PROXY_SSL_HEADER` end-to-end. Blocked on a human decision — `createsuperuser` prompts interactively; either the user runs it, or supplies a password for `DJANGO_SUPERUSER_PASSWORD` with `--noinput`.
 
 ## Phase 5 — Operational hardening
 
@@ -228,3 +229,22 @@ Variables set on service `web`, all with `--skip-deploys` so the four changes co
 **Deviation — `--stdin` and trailing newlines.** `$key | railway variable set SECRET_KEY --stdin` from PowerShell stored a **51**-character key: the pipeline appends a newline and Railway keeps it. Functionally harmless, but a latent footgun — the trailing whitespace is invisible in the dashboard and would be dropped if the value were ever copied by hand, silently invalidating every session and password-reset token. Re-set via Bash `printf '%s' "$KEY" | railway variable set ... --stdin`, which does not append. Verified stored length is now exactly 50 with no trailing whitespace. **Use `printf`, not a PowerShell pipe, whenever piping a secret to `--stdin`.**
 
 **Verified before deploying:** `.gitignore` excludes `.env`, `.venv/`, and `db.sqlite3` from `railway up`'s upload — so no local secrets and no local SQLite file reach the platform. `railway.json` itself is tracked and will upload.
+
+### Phase 4 — first deploy done 2026-08-01; one verification step outstanding
+
+**Live at `https://web-production-f61ed.up.railway.app`.**
+
+| Deployment | Status | Note |
+| --- | --- | --- |
+| `bdc70297` | REMOVED | first deploy, `ALLOWED_HOSTS=*` |
+| `343f48e9` | SUCCESS | current; tightened hosts + CSRF origins |
+
+Build and boot both clean on the first attempt — neither failure mode the plan budgeted for occurred. Deploy log confirms all three `startCommand` stages: 18 migrations applied to Postgres (`contenttypes`, `auth`, `admin`, `sessions`), 127 static files collected and post-processed, gunicorn 26.0.0 listening on `0.0.0.0:8080`.
+
+**Verified over HTTPS:** `/health/` → `200 ok`; `/admin/login/` → `200` with `csrfmiddlewaretoken` present; `/static/admin/css/base.css` → `200`, 22 120 bytes, `text/css`.
+
+**`ALLOWED_HOSTS` tightened off `*`** to `web-production-f61ed.up.railway.app,healthcheck.railway.app,.railway.internal`, and the redeploy passed its healthcheck — confirming the probe's Host header is covered. This was the plan's known-risky step; done in the safe order (tighten, then redeploy) because a failed healthcheck on a *new* deployment leaves the previous one serving, so the downside was a failed deploy rather than an outage.
+
+**Caveat on how that was checked.** A request with a forged `Host: evil.example.com` came back `404` — but that is Railway's **edge router** rejecting an unknown domain before the request ever reaches Django, not Django's `ALLOWED_HOSTS`. The edge makes the public Host header untamperable from outside, which is reassuring, but it also means Django's `ALLOWED_HOSTS` cannot be black-box tested from the internet. It was confirmed by reading the stored variable value instead. Do not treat that 404 as evidence the Django setting is correct.
+
+**Still unproven:** admin **login** (a POST) is what actually exercises `CSRF_TRUSTED_ORIGINS` + `SECURE_PROXY_SSL_HEADER` together. Fetching the login page does not. Until a real login succeeds, the CSRF/proxy configuration is untested.
