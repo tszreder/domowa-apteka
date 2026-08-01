@@ -12,7 +12,7 @@ Two things discovered during research **update infrastructure.md's assumptions**
 
 **Plan artifact location (user directed):** this plan is persisted to `context/changes/deployment/deployment-plan.md`, following the repo's existing `context/changes/<change-id>/` convention (see `context/changes/README.md`, and the sibling `context/changes/bootstrap-verification/`) rather than the `context/deployment/deploy-plan.md` path that `CLAUDE.md`'s Module 1 Lesson 5 notes describe for Plan Mode's output. The two serve different purposes and both get written: `deployment-plan.md` (this document, the upfront plan) written here directly, and `context/deployment/deploy-plan.md` (a short post-deploy record of what actually got deployed — domain, wired secrets, confirmed working state) written in Phase 5 once verification passes, matching what CLAUDE.md says downstream milestone-planning skills expect to find there.
 
-**Status: Phase 0 complete, Phase 1 blocked on `railway login` (2026-08-01).** Phase 0's local code changes are done, verified, and committed (`7ff7d48` on branch `deploy/railway-phase-0`). Phase 1's CLI install is done; the remaining step is human-only. See the Execution Log at the bottom for what was done and where it deviated from the plan as drafted. Phase 6 remains blocked on feature work.
+**Status: Phases 0–2 complete (2026-08-01).** Local code changes done, verified, and committed on branch `deploy/railway-phase-0`. Railway project `domowa-apteka` exists with a `Postgres` service and an empty `web` service; no code deployed yet. Phase 3 (variables + `railway.json`) is next. See the Execution Log at the bottom for what was done and where it deviated from the plan as drafted. Phase 6 remains blocked on feature work.
 
 ---
 
@@ -55,9 +55,9 @@ Everything in this phase is done **once**, before any project-specific work. Thi
 
 ## Phase 2 — Railway project setup (per-project, done once for this repo)
 
-- [ ] From the repo root: `railway init` to create a new Railway project (none is linked yet — confirmed via empty `git remote -v` and no existing Railway link). Name it `domowa-apteka` for consistency with `tech-stack.md`.
-- [ ] Add Postgres: `railway add --database postgres` (confirm exact flag via `railway add --help` first — CLI syntax drift noted above). This auto-provisions a co-located Postgres and exposes reference variables (`${{Postgres.DATABASE_URL}}`, etc.) to other services in the same project.
-- [ ] **Edge case — no service exists yet to attach the database reference to**: if `railway add --database postgres` requires an existing service context, create the web service first via a no-op `railway up` (it will fail on missing env vars — expected, matches the documented Railway/Django guide behavior) or via `railway service create` if that subcommand exists, then add Postgres.
+- [x] From the repo root: `railway init` to create a new Railway project (none is linked yet — confirmed via empty `git remote -v` and no existing Railway link). Name it `domowa-apteka` for consistency with `tech-stack.md`.
+- [x] Add Postgres: `railway add --database postgres` (confirm exact flag via `railway add --help` first — CLI syntax drift noted above). This auto-provisions a co-located Postgres and exposes reference variables (`${{Postgres.DATABASE_URL}}`, etc.) to other services in the same project.
+- [x] **Edge case — no service exists yet to attach the database reference to**: ~~if `railway add --database postgres` requires an existing service context, create the web service first via a no-op `railway up`~~ — did not arise in this direction. Postgres provisioned fine with no pre-existing service. The web service was created afterwards via `railway add --service web --json` (an "Empty Service"), so Phase 3 has a target for its variables *before* any code deploys — avoiding a first `railway up` that boots with no `SECRET_KEY`.
 
 ## Phase 3 — Environment variables & start command (config-as-code)
 
@@ -175,3 +175,22 @@ Revisit both once Phase 4 verification passes.
 **Blocked on:** `railway login` — human-only, interactive OAuth. The agent's shell is non-interactive with stdin at the null device.
 
 **Deviation:** the plan listed account creation and CLI login as two separate steps; the CLI folds them into one OAuth flow.
+
+### Phase 2 — done 2026-08-01
+
+Authenticated as `t.szreder@gmail.com`. Workspace `tszreder's Projects` (`9780cb91-a4f2-4498-904c-b75fa84ee62f`) — sole workspace, and `railway list --json` returned `[]`, so nothing pre-existing was at risk.
+
+| Resource | Name | ID |
+| --- | --- | --- |
+| Project | `domowa-apteka` | `d65038dc-2df8-4a08-91bc-be7255c9154e` |
+| Environment | `production` | `3704dc3d-20dc-4744-97c9-fd94624a7d42` |
+| Database service | `Postgres` | `534de5e9-ce4e-4cde-b1ce-532f6d5988a8` |
+| Web service | `web` (empty, no code yet) | `4adb8513-d6dc-4441-94bd-a375ef368a0d` |
+
+**Verified:** `DATABASE_URL` on the Postgres service resolves to `postgres.railway.internal:5432/railway` — the internal network, matching the plan's cost/latency requirement. `DATABASE_PUBLIC_URL` also exists but has no host (the TCP proxy is not provisioned), which is the desired state.
+
+**Notes:**
+- `railway init` needs `--workspace` with an exact ID when run outside a terminal; it prints its prompt lines to stderr and the result to stdout, so `--json` output is still parseable.
+- **No repo-local link artifact.** Railway stores the directory→project link in its global config, not a `.railway/` folder here, so there is nothing new to gitignore and the working tree stayed clean. The corollary: this link lives on *this machine only* — another clone (or a CI runner) must `railway link` or use `RAILWAY_TOKEN`.
+
+**Discovered, relevant to Phase 5:** `railway usage` exists and per `--help` can "show workspace usage and manage usage limits". The plan asserts "no built-in budget alert is confirmed" and falls back to a manual calendar reminder — worth re-checking against this command before settling for the reminder.
