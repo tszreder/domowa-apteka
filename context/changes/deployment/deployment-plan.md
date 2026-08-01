@@ -12,7 +12,7 @@ Two things discovered during research **update infrastructure.md's assumptions**
 
 **Plan artifact location (user directed):** this plan is persisted to `context/changes/deployment/deployment-plan.md`, following the repo's existing `context/changes/<change-id>/` convention (see `context/changes/README.md`, and the sibling `context/changes/bootstrap-verification/`) rather than the `context/deployment/deploy-plan.md` path that `CLAUDE.md`'s Module 1 Lesson 5 notes describe for Plan Mode's output. The two serve different purposes and both get written: `deployment-plan.md` (this document, the upfront plan) written here directly, and `context/deployment/deploy-plan.md` (a short post-deploy record of what actually got deployed — domain, wired secrets, confirmed working state) written in Phase 5 once verification passes, matching what CLAUDE.md says downstream milestone-planning skills expect to find there.
 
-**Status: Phases 0–2 complete (2026-08-01).** Local code changes done, verified, and committed on branch `deploy/railway-phase-0`. Railway project `domowa-apteka` exists with a `Postgres` service and an empty `web` service; no code deployed yet. Phase 3 (variables + `railway.json`) is next. See the Execution Log at the bottom for what was done and where it deviated from the plan as drafted. Phase 6 remains blocked on feature work.
+**Status: Phases 0–3 complete (2026-08-01).** Local code changes done, verified, and committed on branch `deploy/railway-phase-0`. Railway project `domowa-apteka` exists with a `Postgres` service and a `web` service whose environment variables and `railway.json` are configured. **No code has been deployed yet** — Phase 4 is the first `railway up`. See the Execution Log at the bottom for what was done and where it deviated from the plan as drafted. Phase 6 remains blocked on feature work.
 
 ---
 
@@ -61,13 +61,13 @@ Everything in this phase is done **once**, before any project-specific work. Thi
 
 ## Phase 3 — Environment variables & start command (config-as-code)
 
-- [ ] Generate a fresh production `SECRET_KEY` locally (`uv run python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"`) — never reuse the scaffold's committed insecure key.
-- [ ] Run `railway variable --help` (or `railway variables --help`) to confirm current syntax, then set on the web service:
+- [x] Generate a fresh production `SECRET_KEY` locally (`uv run python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"`) — never reuse the scaffold's committed insecure key.
+- [x] Run `railway variable --help` (or `railway variables --help`) to confirm current syntax, then set on the web service:
   - `SECRET_KEY=<generated>`
   - `DEBUG=False`
   - `ALLOWED_HOSTS=*` (tighten after Phase 4 confirms the real domain/host)
   - `DATABASE_URL=${{Postgres.DATABASE_URL}}` — use the **internal** reference variable, not the public proxy URL (the proxy adds egress cost/latency for services already co-located in the same project).
-- [ ] Create `railway.json` at repo root (config-as-code, git-tracked — keeps the deploy config reviewable and scriptable rather than dashboard-only state):
+- [x] Create `railway.json` at repo root (config-as-code, git-tracked — keeps the deploy config reviewable and scriptable rather than dashboard-only state):
   ```json
   {
     "$schema": "https://railway.com/railway.schema.json",
@@ -81,7 +81,7 @@ Everything in this phase is done **once**, before any project-specific work. Thi
   }
   ```
   Explicit `startCommand` is used instead of relying on Railpack's Django auto-detection — deterministic, includes `collectstatic`, and controls the `$PORT` bind explicitly.
-- [ ] **Guardrail, not a build-now item**: do not raise `numReplicas` above 1 while `migrate` runs inside `startCommand` — concurrent migrate runs across replicas race. If horizontal scaling is ever needed, move `migrate` to a separate one-off release step first.
+- [x] **Guardrail, not a build-now item**: do not raise `numReplicas` above 1 while `migrate` runs inside `startCommand` — concurrent migrate runs across replicas race. If horizontal scaling is ever needed, move `migrate` to a separate one-off release step first. *(Made explicit rather than implicit: `"numReplicas": 1` is written into `railway.json`, so raising it is a visible, deliberate edit that this bullet governs — not a dashboard slider someone nudges without seeing the constraint.)*
 
 ## Phase 4 — First deploy & verification
 
@@ -95,7 +95,24 @@ Everything in this phase is done **once**, before any project-specific work. Thi
 ## Phase 5 — Operational hardening
 
 - [ ] Document the rollback runbook as a two-step script (no single rollback verb exists): `railway deployment list` → copy a prior deployment ID → `railway redeploy <deployment-id>`. Confirm exact subcommand names via `--help` at execution time.
-- [ ] Set a personal calendar/monthly reminder to check the Railway usage dashboard — no built-in budget alert is confirmed, and the pre-mortem in `infrastructure.md` specifically flags silent cost creep as a risk.
+- [ ] **Set enforced usage limits via the CLI — supersedes the calendar reminder.** The plan as drafted assumed "no built-in budget alert is confirmed" and fell back to a monthly manual check. That assumption is wrong: `railway usage limit set` exists and takes both a soft and a hard threshold, so the pre-mortem's silent-cost-creep risk gets an actual control rather than a habit that decays.
+
+  ```powershell
+  railway usage limit set --target workspace --soft <alert> --hard <cutoff> --json
+  railway usage limit status --json   # verify
+  railway usage --json                # current period spend
+  railway usage projects --json       # per-project breakdown
+  ```
+
+  **Understand the two thresholds before setting them — they are not the same kind of control:**
+  - **soft** = notification only. This is the "budget alert" the plan wanted. Safe to set tight.
+  - **hard** = enforcement. Railway shuts resources down when it is reached. On a production service this is a self-inflicted outage, so it must sit well above realistic spend — it is a runaway-cost circuit breaker, not a budget.
+
+  Baseline captured 2026-08-01, before any deploy: `workspaceUsage.usageLimit` = `null` (none set), current period spend $0.0004. Separately, `agentUsage.hardLimitDollars` = $1.50 already applies to Railway's own agent feature — a different meter from workspace compute; do not confuse the two.
+
+  Note: `railway usage limit status` exits **255** when no workspace limit is set while still printing valid JSON — check the payload, not just the exit code, if this is ever scripted.
+
+  Values are a judgement call on expected spend and need a human decision; suggested starting point for a one-week MVP on Hobby is soft ≈ $10, hard ≈ $25. Not applied yet — Phase 5.
 - [ ] Create `context/deployment/` (does not exist yet) and write `context/deployment/deploy-plan.md` — a short post-deploy record (not a duplicate of `deployment-plan.md`): actual domain, which env vars/secrets are wired, confirmed-working verification date. This is the artifact `CLAUDE.md`'s Module 1 Lesson 5 notes say downstream milestone-planning skills expect to find; write it once Phase 4 verification passes.
 
 ## Phase 6 — Daily ingestion cron job — BLOCKED, not just deferred
@@ -193,4 +210,21 @@ Authenticated as `t.szreder@gmail.com`. Workspace `tszreder's Projects` (`9780cb
 - `railway init` needs `--workspace` with an exact ID when run outside a terminal; it prints its prompt lines to stderr and the result to stdout, so `--json` output is still parseable.
 - **No repo-local link artifact.** Railway stores the directory→project link in its global config, not a `.railway/` folder here, so there is nothing new to gitignore and the working tree stayed clean. The corollary: this link lives on *this machine only* — another clone (or a CI runner) must `railway link` or use `RAILWAY_TOKEN`.
 
-**Discovered, relevant to Phase 5:** `railway usage` exists and per `--help` can "show workspace usage and manage usage limits". The plan asserts "no built-in budget alert is confirmed" and falls back to a manual calendar reminder — worth re-checking against this command before settling for the reminder.
+**Discovered, relevant to Phase 5:** `railway usage` exists and per `--help` can "show workspace usage and manage usage limits". Confirmed and folded into Phase 5, replacing the manual calendar reminder — see that phase for the soft-vs-hard distinction.
+
+### Phase 3 — done 2026-08-01
+
+Variables set on service `web`, all with `--skip-deploys` so the four changes cost one deploy in Phase 4 rather than four:
+
+| Variable | Value | Note |
+| --- | --- | --- |
+| `SECRET_KEY` | *(50 chars, not logged)* | freshly generated; never passed on a command line |
+| `DEBUG` | `False` | |
+| `ALLOWED_HOSTS` | `*` | **temporary** — tighten in Phase 4 once the real host is known |
+| `DATABASE_URL` | `${{Postgres.DATABASE_URL}}` | verified to resolve to `postgres.railway.internal:5432/railway`, i.e. the internal network, not the public proxy |
+
+`railway.json` written and validated as parseable JSON.
+
+**Deviation — `--stdin` and trailing newlines.** `$key | railway variable set SECRET_KEY --stdin` from PowerShell stored a **51**-character key: the pipeline appends a newline and Railway keeps it. Functionally harmless, but a latent footgun — the trailing whitespace is invisible in the dashboard and would be dropped if the value were ever copied by hand, silently invalidating every session and password-reset token. Re-set via Bash `printf '%s' "$KEY" | railway variable set ... --stdin`, which does not append. Verified stored length is now exactly 50 with no trailing whitespace. **Use `printf`, not a PowerShell pipe, whenever piping a secret to `--stdin`.**
+
+**Verified before deploying:** `.gitignore` excludes `.env`, `.venv/`, and `db.sqlite3` from `railway up`'s upload — so no local secrets and no local SQLite file reach the platform. `railway.json` itself is tracked and will upload.
