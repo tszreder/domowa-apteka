@@ -248,3 +248,17 @@ Build and boot both clean on the first attempt — neither failure mode the plan
 **Caveat on how that was checked.** A request with a forged `Host: evil.example.com` came back `404` — but that is Railway's **edge router** rejecting an unknown domain before the request ever reaches Django, not Django's `ALLOWED_HOSTS`. The edge makes the public Host header untamperable from outside, which is reassuring, but it also means Django's `ALLOWED_HOSTS` cannot be black-box tested from the internet. It was confirmed by reading the stored variable value instead. Do not treat that 404 as evidence the Django setting is correct.
 
 **Still unproven:** admin **login** (a POST) is what actually exercises `CSRF_TRUSTED_ORIGINS` + `SECURE_PROXY_SSL_HEADER` together. Fetching the login page does not. Until a real login succeeds, the CSRF/proxy configuration is untested.
+
+**Superuser creation — how to actually do it (the plan's command is wrong).**
+
+The plan says `railway run python manage.py createsuperuser`. **That does not work here.** `railway run` executes the command *locally* with the environment's variables injected, so `DATABASE_URL` resolves to `postgres.railway.internal` — a hostname that only exists inside Railway's private network and is unreachable from a developer laptop. The command would fail to connect.
+
+The command must run *inside* the container, which means `railway ssh`:
+
+```powershell
+railway ssh --service web python manage.py createsuperuser
+```
+
+**Prerequisite discovered:** `railway ssh` requires a registered SSH key. Done on 2026-08-01 — a dedicated key was generated at `~/.ssh/id_ed25519_railway` (no passphrase, so it works non-interactively; deliberately *not* the default `id_ed25519` identity) and registered as `domowa-apteka-agent`, fingerprint `SHA256:hlm4FS6ZPTUUEpGIzc86p/KpYPWROz+0NFLnBRQfr90`. Reversible: delete the two key files and `railway ssh keys remove`. Note `--key` needs a **native Windows path**; a Git-Bash-translated path (`/c/Users/...` → `C:/Users/...`) was rejected as "Key not found".
+
+**Agent limitation — `railway ssh` is human-only.** Even `railway ssh --service web echo hello` never returns from a non-interactive shell; it holds a TTY that a stdin-less agent shell cannot satisfy, and hangs until killed. This is not a key or auth problem — the key registered fine and a trivial command hangs identically. **Any `railway ssh` step in this or a future change is a human step.** For agent-driven one-off commands, prefer baking them into `startCommand` behind a guard, or exposing them another way.
