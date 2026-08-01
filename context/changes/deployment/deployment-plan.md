@@ -12,7 +12,7 @@ Two things discovered during research **update infrastructure.md's assumptions**
 
 **Plan artifact location (user directed):** this plan is persisted to `context/changes/deployment/deployment-plan.md`, following the repo's existing `context/changes/<change-id>/` convention (see `context/changes/README.md`, and the sibling `context/changes/bootstrap-verification/`) rather than the `context/deployment/deploy-plan.md` path that `CLAUDE.md`'s Module 1 Lesson 5 notes describe for Plan Mode's output. The two serve different purposes and both get written: `deployment-plan.md` (this document, the upfront plan) written here directly, and `context/deployment/deploy-plan.md` (a short post-deploy record of what actually got deployed — domain, wired secrets, confirmed working state) written in Phase 5 once verification passes, matching what CLAUDE.md says downstream milestone-planning skills expect to find there.
 
-**Status: deployed and live (2026-08-01) — `https://web-production-f61ed.up.railway.app`.** Phases 0–3 complete; Phase 4 deployed successfully with `/health/`, the admin login page, and WhiteNoise static files all verified over HTTPS. One Phase 4 verification remains: an actual admin login POST, which is the only thing that exercises CSRF + proxy headers together (blocked on the superuser decision). Phase 5 not started. Phase 6 remains blocked on feature work. See the Execution Log at the bottom for what was done and where it deviated from the plan as drafted.
+**Status: COMPLETE through Phase 5 — deployed, verified, and live (2026-08-01) at `https://web-production-f61ed.up.railway.app`.** Every verification in the summary below passes, including an end-to-end admin login POST. One Phase 5 item is blocked by the platform rather than by work remaining: enforced usage limits require a paid subscription, so cost monitoring stays manual for now. Phase 6 remains blocked on feature work that does not exist yet. See the Execution Log at the bottom for what was done and where it deviated from the plan as drafted; `context/deployment/deploy-plan.md` is the short "what is deployed" record.
 
 ---
 
@@ -91,11 +91,11 @@ Everything in this phase is done **once**, before any project-specific work. Thi
 - [x] Generate a public domain — **the CLI does support this**, no dashboard step needed: `railway domain --service web --port 8080 --json` → `https://web-production-f61ed.up.railway.app`.
 - [x] Set `CSRF_TRUSTED_ORIGINS=https://<the-generated-domain>` and re-run `railway variable set` + redeploy. *(Both variables set with `--skip-deploys`, then a single `railway redeploy --service web --yes`.)*
 - [x] Verify: `https://<domain>/health/` → `200 ok`; `/admin/login/` → `200` with a CSRF token in the form; `/static/admin/css/base.css` → `200`, 22 120 bytes, `text/css` (WhiteNoise serving).
-- [ ] **Remaining:** create a superuser and complete an actual admin *login* (a POST), which is the only step that exercises CSRF + `SECURE_PROXY_SSL_HEADER` end-to-end. Blocked on a human decision — `createsuperuser` prompts interactively; either the user runs it, or supplies a password for `DJANGO_SUPERUSER_PASSWORD` with `--noinput`.
+- [x] **Superuser created and admin login verified end-to-end.** A scripted login POST (fetch `csrfmiddlewaretoken`, POST with `Referer`) returned the `/admin/` index with "Site administration" — proving DB connectivity, `CSRF_TRUSTED_ORIGINS`, `SECURE_PROXY_SSL_HEADER`, and the secure session cookie all correct *together*. Re-verified after the cleanup redeploy. See "Superuser without a shell" below.
 
 ## Phase 5 — Operational hardening
 
-- [ ] Document the rollback runbook as a two-step script (no single rollback verb exists): `railway deployment list` → copy a prior deployment ID → `railway redeploy <deployment-id>`. Confirm exact subcommand names via `--help` at execution time.
+- [x] Document the rollback runbook as a two-step script (no single rollback verb exists): `railway deployment list` → copy a prior deployment ID → `railway redeploy <deployment-id>`. Confirmed against `railway 5.30.3` and written into `context/deployment/deploy-plan.md` along with the deploy, logs, and variable-setting runbooks. *(Not exercised — rolling back a working deploy to prove the runbook was not worth the disruption; the subcommands are confirmed to exist and `redeploy --yes` was used successfully during Phase 4.)*
 - [ ] **Set enforced usage limits via the CLI — supersedes the calendar reminder.** The plan as drafted assumed "no built-in budget alert is confirmed" and fell back to a monthly manual check. That assumption is wrong: `railway usage limit set` exists and takes both a soft and a hard threshold, so the pre-mortem's silent-cost-creep risk gets an actual control rather than a habit that decays.
 
   ```powershell
@@ -113,8 +113,16 @@ Everything in this phase is done **once**, before any project-specific work. Thi
 
   Note: `railway usage limit status` exits **255** when no workspace limit is set while still printing valid JSON — check the payload, not just the exit code, if this is ever scripted.
 
-  Values are a judgement call on expected spend and need a human decision; suggested starting point for a one-week MVP on Hobby is soft ≈ $10, hard ≈ $25. Not applied yet — Phase 5.
-- [ ] Create `context/deployment/` (does not exist yet) and write `context/deployment/deploy-plan.md` — a short post-deploy record (not a duplicate of `deployment-plan.md`): actual domain, which env vars/secrets are wired, confirmed-working verification date. This is the artifact `CLAUDE.md`'s Module 1 Lesson 5 notes say downstream milestone-planning skills expect to find; write it once Phase 4 verification passes.
+  **Attempted 2026-08-01 with user-chosen values soft $5 / hard $15 — REJECTED:**
+
+  ```
+  {"code":"GRAPHQL_ERROR","error":"Usage limits require an active subscription."}
+  ```
+
+  The account is on the free tier, so enforced limits are **not available**. This partially reinstates the plan's original fallback: cost monitoring stays manual (`railway usage --json`, `railway usage projects --json`) until a subscription exists. Baseline at first deploy: **$0.0023** for the current period, `usageLimit: null`.
+
+  So the plan's "no built-in budget alert" assumption was wrong about the *mechanism* (it exists) but right about the *outcome* on this account (unavailable). Set soft $5 / hard $15 as soon as a subscription is added — recorded in `context/deployment/deploy-plan.md` so the intent is not lost.
+- [x] Create `context/deployment/` (does not exist yet) and write `context/deployment/deploy-plan.md` — a short post-deploy record (not a duplicate of `deployment-plan.md`): actual domain, which env vars/secrets are wired, confirmed-working verification date. This is the artifact `CLAUDE.md`'s Module 1 Lesson 5 notes say downstream milestone-planning skills expect to find; write it once Phase 4 verification passes.
 
 ## Phase 6 — Daily ingestion cron job — BLOCKED, not just deferred
 
@@ -261,4 +269,15 @@ railway ssh --service web python manage.py createsuperuser
 
 **Prerequisite discovered:** `railway ssh` requires a registered SSH key. Done on 2026-08-01 — a dedicated key was generated at `~/.ssh/id_ed25519_railway` (no passphrase, so it works non-interactively; deliberately *not* the default `id_ed25519` identity) and registered as `domowa-apteka-agent`, fingerprint `SHA256:hlm4FS6ZPTUUEpGIzc86p/KpYPWROz+0NFLnBRQfr90`. Reversible: delete the two key files and `railway ssh keys remove`. Note `--key` needs a **native Windows path**; a Git-Bash-translated path (`/c/Users/...` → `C:/Users/...`) was rejected as "Key not found".
 
-**Agent limitation — `railway ssh` is human-only.** Even `railway ssh --service web echo hello` never returns from a non-interactive shell; it holds a TTY that a stdin-less agent shell cannot satisfy, and hangs until killed. This is not a key or auth problem — the key registered fine and a trivial command hangs identically. **Any `railway ssh` step in this or a future change is a human step.** For agent-driven one-off commands, prefer baking them into `startCommand` behind a guard, or exposing them another way.
+**Agent limitation — `railway ssh` is human-only.** Even `railway ssh --service web echo hello` never returns from a non-interactive shell; it holds a TTY that a stdin-less agent shell cannot satisfy, and hangs until killed. This is not a key or auth problem — the key registered fine and a trivial command hangs identically. **Any `railway ssh` step in this or a future change is a human step.**
+
+**Superuser without a shell — the workaround that was actually used.** Railway has **no web terminal** for services, so the dashboard is not an alternative either. Solved entirely through config, no shell of any kind:
+
+1. Set `DJANGO_SUPERUSER_USERNAME` / `_EMAIL` / `_PASSWORD` as service variables (`--skip-deploys`).
+2. Temporarily add `(python manage.py createsuperuser --noinput || true)` to `startCommand` in `railway.json`. **The `|| true` is load-bearing** — `createsuperuser --noinput` exits non-zero when the user already exists, which would break the `&&` chain and crash the container on every later redeploy.
+3. `railway up` → log confirms `Superuser created successfully.`
+4. Revert `railway.json`, **delete all three variables**, redeploy. Verified afterwards that login still works and no `DJANGO_SUPERUSER_*` variable remains.
+
+This is the general shape for any future one-off management command under agent operation.
+
+**The `--stdin` newline trap bit again, and would have been worse here.** Setting `DJANGO_SUPERUSER_PASSWORD` through a PowerShell pipe stored 21 characters for a 20-character password. Unlike the `SECRET_KEY` case this fails *loudly but confusingly*: the admin login would simply reject the correct password with no hint why. Re-set via Bash `printf '%s'` and verified the stored length is exactly 20.
