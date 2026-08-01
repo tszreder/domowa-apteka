@@ -12,7 +12,7 @@ Two things discovered during research **update infrastructure.md's assumptions**
 
 **Plan artifact location (user directed):** this plan is persisted to `context/changes/deployment/deployment-plan.md`, following the repo's existing `context/changes/<change-id>/` convention (see `context/changes/README.md`, and the sibling `context/changes/bootstrap-verification/`) rather than the `context/deployment/deploy-plan.md` path that `CLAUDE.md`'s Module 1 Lesson 5 notes describe for Plan Mode's output. The two serve different purposes and both get written: `deployment-plan.md` (this document, the upfront plan) written here directly, and `context/deployment/deploy-plan.md` (a short post-deploy record of what actually got deployed — domain, wired secrets, confirmed working state) written in Phase 5 once verification passes, matching what CLAUDE.md says downstream milestone-planning skills expect to find there.
 
-**Status: approved for execution; Phase 0 complete (2026-08-01).** Phase 0's local code changes are done and verified — see the Execution Log at the bottom of this file for what was done and where it deviated from the plan as drafted. Phases 1–5 not started; Phase 6 remains blocked on feature work.
+**Status: Phase 0 complete, Phase 1 blocked on `railway login` (2026-08-01).** Phase 0's local code changes are done, verified, and committed (`7ff7d48` on branch `deploy/railway-phase-0`). Phase 1's CLI install is done; the remaining step is human-only. See the Execution Log at the bottom for what was done and where it deviated from the plan as drafted. Phase 6 remains blocked on feature work.
 
 ---
 
@@ -40,18 +40,18 @@ The current `settings.py` is 100% local-dev defaults. Nothing here is Railway-sp
 
 Everything in this phase is done **once**, before any project-specific work. This machine (Windows 11, PowerShell primary, Bash tool also available) already has npm (`npm --version` → `10.8.1`) but not Scoop — that decides which install path is the path of least resistance here.
 
-- [ ] **Install the Railway CLI.** On this machine, npm is already present, so:
+- [x] **Install the Railway CLI.** On this machine, npm is already present, so:
   ```powershell
   npm i -g @railway/cli
   ```
   Alternative if you'd rather not add a global npm package: install [Scoop](https://scoop.sh/) first, then `scoop install railway`. Either produces the same `railway` binary — pick one, don't do both.
   **Edge case — corporate/locked-down npm registry or proxy**: if `npm i -g` fails with a registry/network error, fall back to the pre-built binary from the [railwayapp/cli GitHub releases](https://github.com/railwayapp/cli/releases) and add it to `PATH` manually.
-- [ ] **Verify the install**: `railway --version`. If PowerShell reports `railway` as an unrecognized command right after an npm install, open a new terminal — npm's global bin path is usually only picked up by newly-spawned shells, not the current session.
-- [ ] **Create a Railway account** (if one doesn't already exist) at railway.com — GitHub OAuth or email signup. This is a one-time, human-only step; no CLI equivalent.
-- [ ] **Authenticate the CLI**: `railway login` — opens a browser to complete auth and stores a token locally. **Edge case — headless/remote/SSH environment** (not this machine, but relevant if you ever run this from a remote dev box): use `railway login --browserless`, which prints a one-time code to paste into railway.com/cli-login from any browser instead.
+- [x] **Verify the install**: `railway --version` → `railway 5.30.3`, resolving from `AppData\Roaming\npm`. (No new-terminal problem here: npm's global bin was already on the agent's PATH, unlike `uv`.)
+- [x] ~~**Create a Railway account** at railway.com~~ — **not a separate step.** `railway login --help` states the CLI "uses a single OAuth flow for both sign-in and sign-up; brand-new accounts are detected automatically and land on a welcome page." Folded into the login step below.
+- [ ] **Authenticate the CLI**: `railway login` — opens a browser to complete auth and stores a token locally. **Must be run by the human**: the agent's shell is non-interactive with stdin at the null device, so a browser/OAuth flow cannot complete from it. **Edge case — headless/remote/SSH environment**: use `railway login --browserless`, which prints a one-time code to paste into any browser instead.
 - [ ] **Verify authentication**: `railway whoami` — should print the logged-in account's email/username. If it errors, `railway login` didn't complete; re-run it.
 - [ ] **Decide the CLI-vs-CI auth story now, to avoid re-deriving it later**: interactive `railway login` is fine for this MVP week (CLI-only deploys, confirmed above). If GitHub-linked auto-deploy is wired up later, that flow uses Railway's GitHub App integration, not a CLI token — but if a future CI pipeline needs `railway up` from a non-interactive runner, that's `RAILWAY_TOKEN` (project-scoped) as a secret env var on the runner, not another `railway login`. Not needed now; noted so Phase 5's cron-service work doesn't rediscover this from scratch.
-- [ ] **One-time local dev parity check**: confirm `uv sync` and `uv run manage.py runserver` still work against SQLite before touching Railway at all — Phase 0's settings changes must not break local dev. This is the fallback to diff against if a later Railway-specific step misbehaves and it's unclear whether the bug is local-code or platform-specific.
+- [x] **One-time local dev parity check** *(done during Phase 0 verification: `uv sync` clean, settings resolve to SQLite + `DEBUG=True` via `.env`, `/health/` returns 200)*: confirm `uv sync` and `uv run manage.py runserver` still work against SQLite before touching Railway at all — Phase 0's settings changes must not break local dev. This is the fallback to diff against if a later Railway-specific step misbehaves and it's unclear whether the bug is local-code or platform-specific.
 
 ## Phase 2 — Railway project setup (per-project, done once for this repo)
 
@@ -146,8 +146,32 @@ Everything in this phase is done **once**, before any project-specific work. Thi
 5. **`DEBUG` default confirmed as `'False'`** per the plan. Consequence not called out in the plan: local `runserver` now needs `DEBUG=True` set explicitly, or it serves no admin CSS and returns bare 500s.
 6. **Added `SESSION_COOKIE_SECURE` and `CSRF_COOKIE_SECURE`, both gated on `not DEBUG`** — beyond the plan's Phase 0 list, but load-bearing for Phase 4's "log into `/admin/` over HTTPS" verification, and with zero effect on what the healthcheck receives. This clears `check --deploy`'s `W012` and `W016`. Both gate on `DEBUG`, which compounds deviation 5's ergonomics note rather than adding a new constraint.
 
+**CLI syntax resolved (`railway 5.30.3`, checked 2026-08-01)** — settles the drift flagged in the Context section; Phases 2–5 should use these forms rather than re-deriving them:
+
+| Plan said | Actual | Note |
+| --- | --- | --- |
+| `railway variables set` / `railway variable set` | **`railway variable set KEY=value`** | `variables`, `vars`, `var` are all aliases; the `--set` flag is legacy |
+| `railway add --database postgres` | **confirmed**, `-d/--database` | non-interactive runs must pass one of `--service`/`--database`/`--repo`/`--image` |
+| domain "probably dashboard-only" | **`railway domain`** exists | `railway domain --port <n>`; `railway domain list --json` |
+| rollback = `railway deployment list` + `railway redeploy <id>` | **confirmed** | `deployment list` shows IDs + statuses |
+
+Three capabilities the plan did not anticipate, all worth using:
+- **`--json` on nearly every subcommand** — structured output instead of parsing human text.
+- **`railway variable set KEY --stdin`** — reads the value from stdin, so `SECRET_KEY` never appears in a shell command or terminal history. Use this in Phase 3 instead of an inline `KEY=value`.
+- **`--skip-deploys`** on `variable set` — avoids triggering a redeploy per variable; set all four, then deploy once.
+
+Also noted, **not** adopted: `railway setup agent` installs Railway's skills + MCP server into the editor. Left alone deliberately — `infrastructure.md`'s CLI-vs-MCP analysis chose CLI-first for the MVP, and each MCP server adds tool schemas to every request's context. Revisit if a recurring `--help` traversal pattern shows up.
+
 **Deliberately deferred (not oversights):** `check --deploy` still reports 2 warnings, both left off on purpose until the first deploy is green:
 - `W008` `SECURE_SSL_REDIRECT` — if Railway's healthcheck reaches the container without an `X-Forwarded-Proto` header, the redirect turns `/health/`'s 200 into a 301 and fails the deploy. That is precisely the opaque rollback loop Phase 4 budgets a debugging bullet for; enabling it pre-deploy trades a real risk for a lint clean.
 - `W004` `SECURE_HSTS_SECONDS` — HSTS is cached by browsers and semi-irreversible; not worth enabling before the domain even exists.
 
 Revisit both once Phase 4 verification passes.
+
+### Phase 1 — partially done 2026-08-01, blocked on human login
+
+**Done:** `npm i -g @railway/cli` → `railway 5.30.3`, verified resolving and reporting the expected `Unauthorized`. CLI syntax for later phases confirmed (table above). Added `python-dotenv` + `.env`/`.env.example` (user-requested, beyond the plan as drafted) so local dev no longer needs `DEBUG=True` set per shell; `load_dotenv` does not override real env vars, so platform-injected values still win in production.
+
+**Blocked on:** `railway login` — human-only, interactive OAuth. The agent's shell is non-interactive with stdin at the null device.
+
+**Deviation:** the plan listed account creation and CLI login as two separate steps; the CLI folds them into one OAuth flow.
