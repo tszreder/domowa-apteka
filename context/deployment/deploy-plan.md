@@ -136,6 +136,22 @@ The workaround used, which needs no shell at all:
 
 Reuse this shape for any future one-off management command.
 
+## Orphaned credential — safe to remove
+
+An SSH key was created while trying to reach the container, then made redundant by
+the `startCommand` workaround. **Nothing uses it.**
+
+- Local files: `~/.ssh/id_ed25519_railway` and `.pub` (no passphrase)
+- Registered with Railway as `domowa-apteka-agent`,
+  fingerprint `SHA256:hlm4FS6ZPTUUEpGIzc86p/KpYPWROz+0NFLnBRQfr90`
+
+Keep it only if a human intends to use `railway ssh` interactively. Otherwise remove:
+
+```powershell
+railway ssh keys remove domowa-apteka-agent
+Remove-Item "$env:USERPROFILE\.ssh\id_ed25519_railway*"
+```
+
 ## Known gaps
 
 - `SECURE_SSL_REDIRECT` and `SECURE_HSTS_SECONDS` are **off**. `check --deploy`
