@@ -29,7 +29,12 @@ this file is the short answer to "what is deployed and how do I touch it".
 | Web service | `web` | `4adb8513-d6dc-4441-94bd-a375ef368a0d` |
 | Database | `Postgres` | `534de5e9-ce4e-4cde-b1ce-532f6d5988a8` |
 
-Workspace `tszreder's Projects` (`9780cb91-a4f2-4498-904c-b75fa84ee62f`).
+Workspace `tszreder's Projects` (`9780cb91-a4f2-4498-904c-b75fa84ee62f`),
+workspace `preferredRegion` = `europe-west4-drams3a`.
+
+**Region: EU West / Amsterdam (`ams`, `europe-west4-drams3a`)** for both `web`
+and `Postgres`. Originally deployed to `sfo` (US West) and migrated in place on
+2026-08-02 — see "Region migration" below.
 
 ## Wired secrets and variables (service `web`)
 
@@ -56,7 +61,12 @@ from source rather than dashboard state):
 - `restartPolicyType`: `ON_FAILURE`, max 3 retries
 - `numReplicas`: **1 — do not raise.** `migrate` runs inside `startCommand`, so
   concurrent replicas race on migrations. Move `migrate` to a separate release
-  step before scaling horizontally.
+  step before scaling horizontally. **This also constrains `railway scale`** —
+  region assignments *are* replica counts, so `eu-west=1 us-west=1` means two
+  replicas running `migrate` concurrently.
+- `region`: `europe-west4-drams3a`. Pinned in `railway.json` so a later
+  `railway up` cannot reassert the workspace default and silently move the
+  service. Config-as-code and the live `railway scale` state must agree.
 
 Build: Railpack auto-detects the Python project and runs `uv sync --locked --no-dev`.
 `.python-version` pins 3.11. Because the build installs from `uv.lock`, a lockfile
@@ -151,6 +161,44 @@ Keep it only if a human intends to use `railway ssh` interactively. Otherwise re
 railway ssh keys remove domowa-apteka-agent
 Remove-Item "$env:USERPROFILE\.ssh\id_ed25519_railway*"
 ```
+
+## Region migration (2026-08-02, sfo → ams)
+
+Moved both services from US West to EU West in place. `infrastructure.md` had
+recorded "no easy in-place region migration" as a risk — **that turned out to be
+wrong**; `railway scale` does it without re-provisioning or DNS changes.
+
+```bash
+railway scale --service web      eu-west=1 sfo=0
+railway scale --service Postgres eu-west=1 sfo=0
+```
+
+Three things that bit, worth knowing before repeating this:
+
+1. **`us-west=0` does not zero `sfo`.** The CLI alias `us-west` maps to a
+   *different* US West region (`pdx`/`us-west1`) than the one the services were
+   actually in (`sfo`/`us-west2`). Passing `eu-west=1 us-west=0` left the service
+   at **2 replicas** (EU West + sfo) instead of moving it. Zero the region by its
+   **airport-code ID** (`sfo=0`), which `railway scale` accepts alongside aliases.
+   Confirm the ID first: `railway api 'query { regions(projectId: "...") { id name location } }'`.
+2. **Move `web` and `Postgres` in the same window, then redeploy `web` last.**
+   Railway private networking is a WireGuard mesh scoped to project+environment,
+   not to region — so a split placement *works* but pays a transatlantic RTT on
+   every one of Django's 5–15 queries per request. Worse, while Postgres was
+   being rebuilt in `ams` its `postgres.railway.internal` record disappeared, and
+   the concurrent `web` boot died on
+   `OperationalError: failed to resolve host 'postgres.railway.internal'`.
+   Two `web` deployments failed this way. Harmless (the old `sfo` deployment kept
+   serving) but avoidable: scale Postgres first, wait for it to go green, then
+   `railway up --service web --ci`.
+3. **Volume migration was a non-event.** 103MB moved with the service; the volume
+   came back `Ready` and the boot logged `No migrations to apply`, confirming the
+   `django_migrations` table came across rather than a blank volume being
+   re-migrated from scratch. Row-level contents were **not** independently
+   verified — `DATABASE_PUBLIC_URL` is set but no TCP proxy exists, so the DB is
+   unreachable from outside the private network by design.
+
+Measured effect: `/health/` went from ~292ms to ~88ms from Poland.
 
 ## Known gaps
 
