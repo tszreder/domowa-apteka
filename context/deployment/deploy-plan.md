@@ -68,6 +68,12 @@ from source rather than dashboard state):
   `railway up` cannot reassert the workspace default and silently move the
   service. Config-as-code and the live `railway scale` state must agree.
 
+**This pin covers `web` only.** `Postgres` is template-provisioned and never
+reads this repo's `railway.json` — its EU West placement is **live platform
+state with nothing reproducing it**. If Postgres is ever deleted and
+reprovisioned, it will land in the workspace default region and must be moved
+by hand again with `railway scale --service Postgres eu-west=1 <old-region>=0`.
+
 Build: Railpack auto-detects the Python project and runs `uv sync --locked --no-dev`.
 `.python-version` pins 3.11. Because the build installs from `uv.lock`, a lockfile
 out of sync with `pyproject.toml` **fails the build** — always use `uv add`/`uv lock`,
