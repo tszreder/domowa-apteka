@@ -185,8 +185,14 @@ Same word, two layers apart.
 - The token is a Railway *project* token, scoped to project + environment, which is why
   the workflow needs no `railway link` step — the token carries that context.
 - On GitHub's Free plan, private-repo Actions get 2,000 Linux runner minutes per month
-  with a default spending limit of $0. At ~4 minutes per deploy that's ~500 deploys a
-  month, and no path to a surprise bill. Public repos are unmetered.
+  with a default spending limit of $0. At ~1 minute per deploy that's effectively
+  unlimited for this project, and no path to a surprise bill. Public repos are unmetered.
+- **Branch protection is not available on this repo.** Both the rulesets API and the
+  classic branch-protection API return `403 Upgrade to GitHub Pro or make this
+  repository public to enable this feature`. So the "work on a branch, open a PR" rule
+  here is a convention with nothing enforcing it — a direct `git push origin main` with
+  app code in it deploys, ungated. This is a *plan* limitation, not a technical one; on
+  a paid plan or a public repo the same setup would be enforceable.
 
 ## Go deeper
 
@@ -215,7 +221,8 @@ libraries on every start.
 **Q: The deploy token lives in GitHub. What does that mean for who can deploy?**
 A: Anyone who can merge to `main` can run arbitrary code with that token, because the
 workflow file is itself code in the repo. Branch protection on `main` isn't cosmetic —
-it's the actual access control on production.
+it's the actual access control on production. (On this repo it's unavailable on the
+free plan, so that access control is currently just discipline.)
 
 **Q: When would you choose the platform's own GitHub integration over writing a workflow?**
 A: When you value commit-level traceability and one less credential more than you value
