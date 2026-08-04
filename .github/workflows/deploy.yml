@@ -19,13 +19,17 @@ on:
 permissions:
   contents: read
 
+# Actions are pinned to exact released versions, matching how this project
+# pins everything else (.python-version, uv.lock, the Railway CLI below).
+# Note setup-uv publishes no floating `v9` tag — only `v9.0.0` — so a major-
+# only reference fails to resolve.
 jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
-      - uses: astral-sh/setup-uv@v9
+      - uses: astral-sh/setup-uv@v9.0.0
         with:
           enable-cache: true
 
@@ -62,7 +66,7 @@ jobs:
       group: deploy-main
       cancel-in-progress: false
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
       # Pinned to the version verified locally so a CLI release cannot
       # silently change deploy behaviour.
