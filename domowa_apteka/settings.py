@@ -10,22 +10,63 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
+
+import dj_database_url
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Local-dev convenience: read .env if present. Does NOT override variables
+# already in the environment, so the platform's injected values always win
+# in production (where no .env file is deployed anyway — it is gitignored).
+load_dotenv(BASE_DIR / '.env')
 
-# Quick-start development settings - unsuitable for production
+
+def _csv_env(name: str, default: str = '') -> list[str]:
+    """Read a comma-separated env var as a list, dropping empty entries.
+
+    `''.split(',')` returns `['']`, not `[]`. An empty-string entry in
+    CSRF_TRUSTED_ORIGINS makes Django raise at startup (every origin must
+    carry a scheme), which matters because that setting is deliberately
+    unset until the deploy platform has generated a domain.
+    """
+    return [item.strip() for item in os.environ.get(name, default).split(',') if item.strip()]
+
+
+# Production settings are env-driven; the fallbacks below are local-dev only.
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-vejgs)*mo36o*=#n26r_mq24rhspw(4zq&z-wz08*be%3$u@i$'
+# The fallback is intentionally insecure and must never be used off localhost.
+SECRET_KEY = os.environ.get(
+    'SECRET_KEY',
+    'django-insecure-vejgs)*mo36o*=#n26r_mq24rhspw(4zq&z-wz08*be%3$u@i$',
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Compare against the string: bool('False') is True, which silently ships
+# debug pages to production. Defaults to off, so a missing env var fails
+# safe rather than exposing tracebacks; set DEBUG=True for local work.
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = _csv_env('ALLOWED_HOSTS') or ['localhost', '127.0.0.1']
+
+# Behind a TLS-terminating proxy (Railway), the app itself speaks plain HTTP;
+# without these two settings Django sees the request as insecure and rejects
+# admin logins with a CSRF origin error.
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+CSRF_TRUSTED_ORIGINS = _csv_env('CSRF_TRUSTED_ORIGINS')
+
+# Cookie-only hardening: safe to enable unconditionally in production because
+# it does not affect what the platform's healthcheck receives. Deliberately
+# NOT enabling SECURE_SSL_REDIRECT here — if the healthcheck arrives without
+# an X-Forwarded-Proto header, the redirect turns /health/'s 200 into a 301
+# and fails the deploy. Revisit once the first deploy is green.
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
 
 
 # Application definition
@@ -41,6 +82,9 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    # Must sit directly below SecurityMiddleware: it serves static files in
+    # production, where Django's own staticfiles handler is disabled.
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -72,11 +116,13 @@ WSGI_APPLICATION = 'domowa_apteka.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+# Reads DATABASE_URL from the environment (injected by the platform in
+# production); falls back to the local SQLite file so dev needs no config.
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default=f'sqlite:///{BASE_DIR / "db.sqlite3"}',
+        conn_max_age=600,
+    )
 }
 
 
@@ -115,6 +161,21 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# collectstatic gathers every app's static files here for WhiteNoise to serve.
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# CompressedStaticFilesStorage, not the Manifest variant: the manifest version
+# raises ValueError('Missing staticfiles manifest entry') at request time for
+# any file collectstatic did not see, which is too brittle for an MVP.
+STORAGES = {
+    'default': {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
+    },
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedStaticFilesStorage',
+    },
+}
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

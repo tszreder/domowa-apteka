@@ -1,0 +1,82 @@
+name: deploy
+
+# `check` gates every PR into main. `deploy` runs only after main actually
+# moves, so a merge is what ships — see context/deployment/deploy-plan.md.
+on:
+  push:
+    branches: [main]
+    # Docs-only merges do not need a deploy. This filter is on `push` ONLY:
+    # a path-skipped workflow never reports its checks, so putting it on
+    # `pull_request` too would leave a required check pending forever and
+    # make every docs PR unmergeable.
+    paths-ignore:
+      - 'context/**'
+      - 'docs/**'
+      - '**.md'
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+# Actions are pinned to exact released versions, matching how this project
+# pins everything else (.python-version, uv.lock, the Railway CLI below).
+# Note setup-uv publishes no floating `v9` tag — only `v9.0.0` — so a major-
+# only reference fails to resolve.
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - uses: astral-sh/setup-uv@v9.0.0
+        with:
+          enable-cache: true
+
+      # --locked fails instead of re-resolving. Railway's build runs
+      # `uv sync --locked --no-dev`, so a lockfile out of sync with
+      # pyproject.toml breaks the deploy — catch it here, not there.
+      - name: Install dependencies
+        run: uv sync --locked
+
+      # No .env and no secrets needed: settings.py defaults DEBUG to False,
+      # falls back to the scaffold SECRET_KEY, and uses SQLite when
+      # DATABASE_URL is unset.
+      - name: Django system checks
+        run: uv run python manage.py check
+
+      - name: Tests
+        run: uv run python manage.py test
+
+      # Non-blocking on purpose. SECURE_SSL_REDIRECT and SECURE_HSTS_SECONDS
+      # are deliberately off (see deploy-plan.md "Known gaps"), so this is
+      # red today. Kept visible in the log rather than gating merges.
+      - name: Deployment checks (advisory)
+        continue-on-error: true
+        run: uv run python manage.py check --deploy
+
+  deploy:
+    needs: check
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    # `migrate --noinput` runs inside railway.json's startCommand and
+    # numReplicas is pinned to 1 precisely because concurrent migrations
+    # race. Serialise deploys; never cancel one mid-flight.
+    concurrency:
+      group: deploy-main
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      # Pinned to the version verified locally so a CLI release cannot
+      # silently change deploy behaviour.
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli@5.30.3
+
+      # --ci streams the build log then exits, instead of holding a TTY.
+      # RAILWAY_TOKEN is a project token scoped to the production
+      # environment; it carries the project context, so no `railway link`.
+      - name: Deploy to Railway
+        run: railway up --service web --ci
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}

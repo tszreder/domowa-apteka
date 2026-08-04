@@ -15,8 +15,20 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
+from django.http import HttpRequest, HttpResponse
 from django.urls import path
 
+
+def health(request: HttpRequest) -> HttpResponse:
+    """Liveness probe for the deploy platform's healthcheck.
+
+    Deliberately does not touch the database: this answers "is the process
+    up and routing?", so a DB outage does not also trigger a rollback loop.
+    """
+    return HttpResponse('ok', content_type='text/plain')
+
+
 urlpatterns = [
+    path('health/', health, name='health'),
     path('admin/', admin.site.urls),
 ]
