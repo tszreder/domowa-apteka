@@ -104,8 +104,12 @@ Three things about that workflow that are load-bearing, not stylistic:
   level it would queue PR `check` runs behind an in-flight deploy. The group
   exists to stop two merges from running `migrate` concurrently — see
   `numReplicas: 1` above.
-- **`check --deploy` is `continue-on-error`.** Both settings it flags are
-  deliberately off (see "Known gaps"), so a hard gate would be red on run one.
+- **`check --deploy` is `continue-on-error`.** It reports three findings in CI:
+  `W004` (HSTS) and `W008` (SSL redirect) are the real, accepted gaps below.
+  **`W009` (weak `SECRET_KEY`) is a CI artefact, not a production problem** —
+  the runner has no `.env`, so settings.py falls back to the scaffold key.
+  Production has a fresh 50-char key as a Railway variable. Do not "fix" W009
+  by putting a secret in the workflow.
 
 **The manual path still works and is the escape hatch**: `railway up --service
 web --ci`. `--ci` streams build logs then exits instead of holding a TTY, which

@@ -181,7 +181,6 @@ Foundations below assume these are present and do NOT re-scaffold them.
 1. **What auth mechanism backs the login-based accounts — email/password or passwordless?** — Owner: user. Block: `S-01` (non-blocking; `django.contrib.auth` is already wired, so email/password is the default unless overridden).
 2. **When and how does the deferred child role return?** — Owner: user. Block: roadmap-wide, future version. v1 ships adult-only symmetric accounts; nothing in this roadmap depends on the answer.
 3. **What is the exact integration approach for the official Polish medicinal-products registry?** — Owner: user. Block: `F-01`, and transitively `S-02`, `S-03`, `F-02` (non-blocking for planning; this is the decision that `/10x-plan registry-substance-data` exists to resolve). This is the roadmap's top blocker.
-4. **When does the intended CI pipeline get wired, and does `tech-stack.md` stay aspirational until then?** — Owner: user. Block: roadmap-wide (advisory). Partly resolved on 2026-08-04: `deployment_target` was corrected `fly` → `railway` via `/10x-tech-stack-selector`, so an agent reading the file alone no longer targets the wrong platform. Still open: `ci_provider: github-actions` and `ci_default_flow: auto-deploy-on-merge` describe a pipeline that does not exist (no CI, no git remote, manual `railway up`). Kept deliberately as intent, with the gap recorded in that file's body paragraph. Related Parked item: "CI/CD and auto-deploy on push".
 
 ## Parked
 
@@ -189,7 +188,6 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Child / restricted accounts** — Why parked: PRD §Non-Goals. v1 is adult-only and symmetric; the view-only child role may return later (Open Roadmap Question 2).
 - **Native mobile app / offline-first** — Why parked: PRD §Non-Goals. v1 is mobile-web only.
 - **Expiration alerting and notifications** — Why parked: PRD §Success Criteria explicitly defers alerting; `S-04` records the date so a future alerting feature has data to read.
-- **CI/CD and auto-deploy on push** — Why parked: no GitHub remote exists and deploy is a working one-line manual command. Under a `speed` goal this buys nothing before launch. Recorded in `deploy-plan.md` §Known gaps.
 - **`SECURE_SSL_REDIRECT` and HSTS** — Why parked: both currently off and flagged by `check --deploy`; deferred during deploy because a redirect can turn the healthcheck's 200 into a 301, and HSTS is browser-cached and semi-irreversible. Safe to revisit, but not required to reach the north star.
 
 ## Done
