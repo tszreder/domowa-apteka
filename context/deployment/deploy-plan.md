@@ -100,6 +100,10 @@ Three things about that workflow that are load-bearing, not stylistic:
 - **`paths-ignore` is on `push` only, never on `pull_request`.** A workflow
   skipped by a path filter never reports its checks, so a required check would
   sit pending forever and no docs-only PR could ever merge.
+- **The ignore list is `context/**`, `docs/**`, `**.md` — nothing else.** So a
+  commit touching only `railway.json`, or only `deploy.yml` itself, *does*
+  deploy. That is correct (both change how the app runs) but surprising the
+  first time a workflow-only edit ships a container.
 - **`concurrency` sits on the `deploy` job, not the workflow.** At workflow
   level it would queue PR `check` runs behind an in-flight deploy. The group
   exists to stop two merges from running `migrate` concurrently — see

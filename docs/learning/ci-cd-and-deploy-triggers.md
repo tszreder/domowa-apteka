@@ -74,7 +74,9 @@ aren't there otherwise.
   `railway up --service web --ci`.
 
 So: open PR → `check` runs → merge → `check` runs again on `main` → `deploy` runs →
-Railway builds and restarts the container. Roughly four minutes end to end.
+Railway builds and restarts the container. Measured on the first real run:
+`check` 20s, `deploy` 44s — just over a minute from clicking merge to the new
+container serving.
 
 ### How the runner is allowed to deploy
 
