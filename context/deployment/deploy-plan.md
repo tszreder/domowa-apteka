@@ -139,6 +139,37 @@ Two things the first runs corrected, worth not rediscovering:
 - `actions/checkout@v4` and `setup-uv@v6` target the deprecated Node 20 and
   get force-migrated to Node 24 with a warning. Current majors avoid it.
 
+### Branch protection is unavailable — measured, not assumed
+
+Attempted 2026-08-04, both APIs, on this private repo under the free plan:
+
+```
+gh api -X POST repos/tszreder/domowa-apteka/rulesets            -> 403
+gh api -X PUT  repos/tszreder/domowa-apteka/branches/main/protection -> 403
+```
+
+Both return the identical body:
+
+> `Upgrade to GitHub Pro or make this repository public to enable this feature.`
+
+So **neither rulesets nor classic branch protection** work here — it is the
+plan tier, not the API choice. The intended rule was: require a PR into `main`,
+require the `check` status check, block force-push and deletion.
+
+Consequences to hold in mind, since nothing enforces them:
+
+- **A direct `git push` to `main` deploys.** "Work on a branch, open a PR" is a
+  convention here, not a guardrail. `git push origin main` with app code in it
+  ships to production with no gate.
+- The `check` job still runs on every PR and still blocks `deploy` via
+  `needs:` — that part does not depend on branch protection. What is missing is
+  only the *inability to bypass the PR*.
+
+Three ways to close it if that becomes uncomfortable: GitHub Pro (~$4/month),
+make the repo public (the code is not sensitive; the secret lives in GitHub,
+not the repo), or a local `pre-push` hook rejecting pushes to `main` — weakest,
+since it is per-clone and trivially skipped with `--no-verify`.
+
 ## Runbooks
 
 **Deploy** — normally: merge a PR into `main` and let the workflow run.

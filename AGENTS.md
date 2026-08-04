@@ -35,6 +35,6 @@ domowa-apteka is a household pharmaceutical tracker (resolves products to active
 ## Commit & Pull Request Guidelines
 
 - Remote is `tszreder/domowa-apteka` (private). No commit-message convention is established yet.
-- **Merging to `main` deploys to production.** `.github/workflows/deploy.yml` runs `railway up --service web --ci` on every push to `main` that touches something outside `context/**`, `docs/**`, and `**.md`. Work on a branch, open a PR, merge — do not push to `main` directly.
+- **Merging to `main` deploys to production.** `.github/workflows/deploy.yml` runs `railway up --service web --ci` on every push to `main` that touches something outside `context/**`, `docs/**`, and `**.md`. Work on a branch, open a PR, merge — **never push code to `main` directly**. Nothing stops you: branch protection returns 403 on this repo's plan (measured — see @context/deployment/deploy-plan.md), so this is a convention with no guardrail behind it. A direct push with app code in it ships to production ungated.
 - The `check` job (`uv sync --locked`, `manage.py check`, `manage.py test`) gates every PR and must pass before `deploy` runs. `uv sync --locked` is the important one: a `uv.lock` out of sync with `pyproject.toml` fails Railway's build too, so always change deps with `uv add` / `uv lock`, never pip.
 - Full trigger, secret, and runbook details: @context/deployment/deploy-plan.md.
