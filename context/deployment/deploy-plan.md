@@ -81,16 +81,66 @@ never pip.
 
 ## Deploy trigger
 
-**Manual CLI only** — `railway up --service web --ci`. There is no GitHub remote
-and no auto-deploy on push. `--ci` streams build logs then exits, which is what
-makes it usable from a script or an agent.
+**Auto-deploy on merge to `main`**, via GitHub Actions — not via Railway's own
+GitHub integration. Railway's GitHub App is not installed on the account
+(`railway api 'query { githubRepos { fullName } }'` returns `Not Authorized`),
+and connecting a repo to a service would put the deploy trigger in dashboard
+state, which is the thing `railway.json` exists to avoid.
+
+| | |
+| --- | --- |
+| Repo | `tszreder/domowa-apteka` (private) |
+| Workflow | `.github/workflows/deploy.yml` |
+| Secret | `RAILWAY_TOKEN` — a Railway **project token** scoped to the `production` environment, stored as a GitHub Actions repository secret |
+| Trigger | `push` to `main` (i.e. a PR merge), excluding `context/**`, `docs/**`, `**.md` |
+| Gate | job `check` must pass first: `uv sync --locked`, `manage.py check`, `manage.py test` |
+
+Three things about that workflow that are load-bearing, not stylistic:
+
+- **`paths-ignore` is on `push` only, never on `pull_request`.** A workflow
+  skipped by a path filter never reports its checks, so a required check would
+  sit pending forever and no docs-only PR could ever merge.
+- **`concurrency` sits on the `deploy` job, not the workflow.** At workflow
+  level it would queue PR `check` runs behind an in-flight deploy. The group
+  exists to stop two merges from running `migrate` concurrently — see
+  `numReplicas: 1` above.
+- **`check --deploy` is `continue-on-error`.** Both settings it flags are
+  deliberately off (see "Known gaps"), so a hard gate would be red on run one.
+
+**The manual path still works and is the escape hatch**: `railway up --service
+web --ci`. `--ci` streams build logs then exits instead of holding a TTY, which
+is what makes it usable from both a runner and an agent.
 
 ## Runbooks
 
-**Deploy**
+**Deploy** — normally: merge a PR into `main` and let the workflow run.
+To deploy without a merge (hotfix, or CI is down):
 ```powershell
 railway up --service web --ci
 ```
+
+**Watch a CI deploy**
+```powershell
+gh run list --limit 5
+gh run watch <run-id>
+gh run view <run-id> --log-failed
+```
+
+**Redeploy the current commit without pushing anything**
+```powershell
+railway redeploy --service web --yes
+```
+
+**Rotate `RAILWAY_TOKEN`**
+1. Railway dashboard → project `domowa-apteka` → Settings → Tokens → create a
+   new project token scoped to `production`; delete the old one.
+2. GitHub → repo Settings → Secrets and variables → Actions → update
+   `RAILWAY_TOKEN`.
+
+Do not mint the token with `railway api projectTokenCreate` and do not pass it
+to `gh secret set --body`. Both print or accept the value on a command line,
+which puts a credential with full project access into shell history and, if an
+agent is driving, into its transcript. Dashboard → web UI, by hand.
 
 **Check status / logs**
 ```powershell
@@ -212,9 +262,12 @@ Measured effect: `/health/` went from ~292ms to ~88ms from Poland.
   flags both. `SECURE_SSL_REDIRECT` was deferred because a redirect can turn the
   healthcheck's 200 into a 301 and fail deploys; HSTS is browser-cached and
   semi-irreversible. Both are safe to revisit now that the deploy is green.
-- No CI/CD, no GitHub remote, no auto-deploy.
 - No application code yet beyond the scaffold — no Django app, no models. The
   daily ingestion cron (Phase 6 of the plan) is blocked on that feature work.
+- **CI's `check` job is a thin gate.** `manage.py test` finds 0 tests, so today
+  the only real signals are lockfile sync and Django's system checks. It gets
+  meaningful the moment the first app exists — it is wired now so there is
+  somewhere for those tests to land.
 - `ALLOWED_HOSTS` cannot be black-box tested from the internet: Railway's edge
   router returns 404 for an unknown Host before the request reaches Django.
   Verify by reading the stored variable, not by probing.

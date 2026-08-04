@@ -37,3 +37,15 @@ used the old one needs a look.
 | CSRF (browser auto-attaching credentials cross-site) | A **Logic App with a managed identity** anyone who can trigger it can borrow — ability to invoke becomes ability to act as. | csrf-and-https-behind-a-proxy.md |
 | TLS termination at a platform edge | **Azure Front Door / Application Gateway terminating SSL** in front of an App Service — the backend gets plain HTTP and must be told the original scheme. | csrf-and-https-behind-a-proxy.md |
 | `CSRF_TRUSTED_ORIGINS` | A **CORS / reply-URL allow-list on an app registration** — explicit list of origins permitted to interact. | csrf-and-https-behind-a-proxy.md |
+| CI — automated checks on every proposed change, before merge | An **Azure DevOps build validation policy** on a branch — the build runs on the PR, not after the fact. | ci-cd-and-deploy-triggers.md |
+| CD — main-branch state automatically becoming production | The **ADF release pipeline** that publishes onward as soon as `adf_publish` updates. | ci-cd-and-deploy-triggers.md |
+| A GitHub Actions **runner** | An **ephemeral Databricks job cluster** — spun up per run, torn down after; nothing persists, so every tool the job needs must be installed by the job. | ci-cd-and-deploy-triggers.md |
+| **Workflow / job / step** (the CI YAML) | An ADF **pipeline / activity** definition — declarative, version-controlled, describes what runs in what order. | ci-cd-and-deploy-triggers.md |
+| A **repository secret** (`RAILWAY_TOKEN`) | A **Key Vault–backed secret scope**, but owned by GitHub rather than the runtime platform — write-only, injected at run time, masked in logs. Same shape as the env-var secret mapping above, different vault. | ci-cd-and-deploy-triggers.md |
+| **Required status check** / branch protection | A **branch policy in Azure Repos** requiring a successful build before a PR can complete. | ci-cd-and-deploy-triggers.md |
+| `concurrency` group, `cancel-in-progress: false` | An ADF pipeline with **concurrency set to 1** — runs queue instead of overlapping. | ci-cd-and-deploy-triggers.md |
+| Platform-native repo integration (Railway connecting to GitHub itself) | **App Service Deployment Center** pointed at a repo — the platform owns the trigger, wired by clicking rather than by committing. | ci-cd-and-deploy-triggers.md |
+
+> **Note on "trigger".** `urls.py` is mapped to ADF triggers above (request path → view).
+> A CI deploy trigger is a different layer entirely (repository event → pipeline run).
+> Same word, two layers apart — `ci-cd-and-deploy-triggers.md` says so explicitly.

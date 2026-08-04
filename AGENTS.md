@@ -4,7 +4,7 @@ domowa-apteka is a household pharmaceutical tracker (resolves products to active
 
 ## Hard Rules
 
-- `domowa_apteka/settings.py` still ships the `django-admin startproject` defaults: hardcoded `SECRET_KEY`, `DEBUG = True`, empty `ALLOWED_HOSTS`. Do not deploy or commit real secrets into this file — move `SECRET_KEY` and any credentials to environment variables (`.env`, already gitignored) before any non-local use.
+- `domowa_apteka/settings.py` reads `SECRET_KEY`, `DEBUG`, `ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS`, and `DATABASE_URL` from the environment (`.env` locally, Railway service variables in production). Never commit a real secret into it, and never add a new setting by hardcoding a value — add an `os.environ` read plus a documented entry in `.env.example`.
 - `context/**` is the source of truth for planning docs (PRD, tech-stack decision, shaping notes). Do not hand-edit `context/foundation/*.md`; those are written by the `/10x-*` skill chain.
 
 ## Project Structure
@@ -34,4 +34,7 @@ domowa-apteka is a household pharmaceutical tracker (resolves products to active
 
 ## Commit & Pull Request Guidelines
 
-- History is a single "Initial commit: Django scaffold" — no message convention is established yet. No CI workflow exists in `.github/workflows/`.
+- Remote is `tszreder/domowa-apteka` (private). No commit-message convention is established yet.
+- **Merging to `main` deploys to production.** `.github/workflows/deploy.yml` runs `railway up --service web --ci` on every push to `main` that touches something outside `context/**`, `docs/**`, and `**.md`. Work on a branch, open a PR, merge — do not push to `main` directly.
+- The `check` job (`uv sync --locked`, `manage.py check`, `manage.py test`) gates every PR and must pass before `deploy` runs. `uv sync --locked` is the important one: a `uv.lock` out of sync with `pyproject.toml` fails Railway's build too, so always change deps with `uv add` / `uv lock`, never pip.
+- Full trigger, secret, and runbook details: @context/deployment/deploy-plan.md.
