@@ -115,6 +115,30 @@ Three things about that workflow that are load-bearing, not stylistic:
 web --ci`. `--ci` streams build logs then exits instead of holding a TTY, which
 is what makes it usable from both a runner and an agent.
 
+### Verified end-to-end, 2026-08-04
+
+First CI deploy was the merge of PR #1 (`597a036`), run `30954319213`:
+
+- `check` 20s → `deploy` 44s. Total merge-to-live under two minutes.
+- New deployment `2b6fb397-2385-43c7-90b8-796a46d5d198` SUCCESS; the previous
+  `8ac6ddde` moved to REMOVED.
+- `/health/` **200 in 102ms**, `/admin/login/` **200**, service `● Online`,
+  region still **EU West** — the `railway.json` region pin holds for a
+  CI-originated upload, not just a laptop one.
+- **`RAILWAY_TOKEN` alone carried project and environment context.** No
+  `railway link`, no `.railway/` state, nothing else in the runner's env. This
+  was the main unverified assumption going in; it holds.
+- Runner cost ~1 minute of the 2,000/month GitHub Free allows for private
+  repos. `railway up` returns as soon as the image is pushed, so the runner is
+  not billed for the container restart.
+
+Two things the first runs corrected, worth not rediscovering:
+
+- `astral-sh/setup-uv` publishes **no floating major tag** — `@v9` fails to
+  resolve, only `@v9.0.0` works. Both actions are pinned to exact releases.
+- `actions/checkout@v4` and `setup-uv@v6` target the deprecated Node 20 and
+  get force-migrated to Node 24 with a warning. Current majors avoid it.
+
 ## Runbooks
 
 **Deploy** — normally: merge a PR into `main` and let the workflow run.
