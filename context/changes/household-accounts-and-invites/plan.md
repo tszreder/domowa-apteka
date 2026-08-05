@@ -692,14 +692,14 @@ remain but are unreferenced and harmless. There is no destructive step in this s
 
 #### Automated
 
-- [ ] 2.1 Migration is complete and committed: `uv run python manage.py makemigrations --check --dry-run`
-- [ ] 2.2 Migration applies cleanly from empty: `uv run python manage.py migrate`
-- [ ] 2.3 Model tests pass: `uv run python manage.py test households.tests.test_models`
-- [ ] 2.4 Type checking passes: `uv run mypy .`
+- [x] 2.1 Migration is complete and committed: `uv run python manage.py makemigrations --check --dry-run`
+- [x] 2.2 Migration applies cleanly from empty: `uv run python manage.py migrate`
+- [x] 2.3 Model tests pass: `uv run python manage.py test households.tests.test_models`
+- [x] 2.4 Type checking passes: `uv run mypy .`
 
 #### Manual
 
-- [ ] 2.5 `Household` and `Membership` visible and editable at `/admin/`
+- [x] 2.5 `Household` and `Membership` visible and editable at `/admin/`
 - [ ] 2.6 Production deploy green after merge — migration applied inside `startCommand` without a restart loop
 
 ### Phase 3: Signup, login, logout
