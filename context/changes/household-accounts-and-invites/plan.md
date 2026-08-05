@@ -675,18 +675,18 @@ remain but are unreferenced and harmless. There is no destructive step in this s
 
 #### Automated
 
-- [x] 1.1 Lockfile is in sync: `uv sync --locked`
-- [x] 1.2 Django system checks pass with the new app installed: `uv run python manage.py check`
-- [x] 1.3 Type checking passes: `uv run mypy .`
-- [x] 1.4 Test suite still runs: `uv run python manage.py test`
-- [x] 1.5 Static files collect, including the vendored stylesheet: `uv run python manage.py collectstatic --noinput`
-- [x] 1.6 No model changes were made accidentally: `uv run python manage.py makemigrations --check --dry-run`
+- [x] 1.1 Lockfile is in sync: `uv sync --locked` — 29e4d8e
+- [x] 1.2 Django system checks pass with the new app installed: `uv run python manage.py check` — 29e4d8e
+- [x] 1.3 Type checking passes: `uv run mypy .` — 29e4d8e
+- [x] 1.4 Test suite still runs: `uv run python manage.py test` — 29e4d8e
+- [x] 1.5 Static files collect, including the vendored stylesheet: `uv run python manage.py collectstatic --noinput` — 29e4d8e
+- [x] 1.6 No model changes were made accidentally: `uv run python manage.py makemigrations --check --dry-run` — 29e4d8e
 
 #### Manual
 
-- [x] 1.7 Landing page renders at `/` with the stylesheet applied, readable at phone width without horizontal scrolling
-- [x] 1.8 Final stylesheet chosen after browsing `cssbed.com`
-- [ ] 1.9 CI `check` job green on the PR, with the new mypy step visible in the log
+- [x] 1.7 Landing page renders at `/` with the stylesheet applied, readable at phone width without horizontal scrolling — 29e4d8e
+- [x] 1.8 Final stylesheet chosen after browsing `cssbed.com` — 29e4d8e
+- [x] 1.9 CI `check` job green on the PR, with the new mypy step visible in the log — 29e4d8e
 
 ### Phase 2: Household and Membership models
 
