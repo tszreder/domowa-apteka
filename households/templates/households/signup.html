@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}Załóż konto — Domowa Apteka{% endblock %}
+
+{% block content %}
+    <h1>Załóż konto</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form }}
+        <button type="submit">Załóż konto</button>
+    </form>
+{% endblock %}

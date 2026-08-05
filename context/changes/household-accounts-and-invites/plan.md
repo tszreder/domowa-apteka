@@ -706,10 +706,10 @@ remain but are unreferenced and harmless. There is no destructive step in this s
 
 #### Automated
 
-- [ ] 3.1 Auth tests pass: `uv run python manage.py test households.tests.test_auth`
-- [ ] 3.2 Full suite still passes: `uv run python manage.py test`
-- [ ] 3.3 Type checking passes: `uv run mypy .`
-- [ ] 3.4 System checks pass: `uv run python manage.py check`
+- [x] 3.1 Auth tests pass: `uv run python manage.py test households.tests.test_auth`
+- [x] 3.2 Full suite still passes: `uv run python manage.py test`
+- [x] 3.3 Type checking passes: `uv run mypy .`
+- [x] 3.4 System checks pass: `uv run python manage.py check`
 
 #### Manual
 
