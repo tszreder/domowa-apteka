@@ -78,6 +78,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'households',
 ]
 
 MIDDLEWARE = [
@@ -98,7 +99,7 @@ ROOT_URLCONF = 'domowa_apteka.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -148,7 +149,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'pl'
 
 TIME_ZONE = 'UTC'
 
@@ -161,6 +162,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# Project-level static assets (vendored stylesheets); app-level static/
+# directories are picked up automatically via django.contrib.staticfiles.
+STATICFILES_DIRS = [BASE_DIR / 'static']
 
 # collectstatic gathers every app's static files here for WhiteNoise to serve.
 STATIC_ROOT = BASE_DIR / 'staticfiles'
@@ -181,3 +186,15 @@ STORAGES = {
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# Auth redirects
+# https://docs.djangoproject.com/en/5.2/ref/settings/#login-url
+
+LOGIN_URL = '/login/'
+
+# Points at '/' for now: the list shell (Phase 5) does not exist yet, so
+# pointing here would send every login before then to a 404.
+LOGIN_REDIRECT_URL = '/'
+
+LOGOUT_REDIRECT_URL = '/'

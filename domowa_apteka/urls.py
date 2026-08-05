@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.http import HttpRequest, HttpResponse
-from django.urls import path
+from django.urls import include, path
 
 
 def health(request: HttpRequest) -> HttpResponse:
@@ -31,4 +31,5 @@ def health(request: HttpRequest) -> HttpResponse:
 urlpatterns = [
     path('health/', health, name='health'),
     path('admin/', admin.site.urls),
+    path('', include('households.urls')),
 ]
