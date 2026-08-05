@@ -700,7 +700,7 @@ remain but are unreferenced and harmless. There is no destructive step in this s
 #### Manual
 
 - [x] 2.5 `Household` and `Membership` visible and editable at `/admin/` — ef3bf43
-- [ ] 2.6 Production deploy green after merge — migration applied inside `startCommand` without a restart loop
+- [x] 2.6 Production deploy green after merge — migration applied inside `startCommand` without a restart loop — ef3bf43
 
 ### Phase 3: Signup, login, logout
 
