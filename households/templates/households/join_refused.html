@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Nie można dołączyć — Domowa Apteka{% endblock %}
+
+{% block content %}
+    {% if same_household %}
+        <h1>Już należysz do tego gospodarstwa</h1>
+        <p>Jesteś już członkiem gospodarstwa „{{ household.name }}”.</p>
+    {% else %}
+        <h1>Nie można dołączyć</h1>
+        <p>
+            Należysz już do innego gospodarstwa domowego, więc nie możesz dołączyć do
+            gospodarstwa „{{ household.name }}”.
+        </p>
+    {% endif %}
+    <p><a href="{% url 'households:household_detail' %}">Wróć do swojego gospodarstwa</a></p>
+{% endblock %}

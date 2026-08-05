@@ -18,4 +18,8 @@ urlpatterns = [
         name='login',
     ),
     path('logout/', LogoutView.as_view(), name='logout'),
+    path('join/<str:token>/', views.join, name='join'),
+    path('household/', views.household_detail, name='household_detail'),
+    path('household/create/', views.household_create, name='household_create'),
+    path('household/invite/regenerate/', views.regenerate_invite, name='regenerate_invite'),
 ]

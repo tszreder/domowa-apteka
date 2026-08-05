@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}Załóż gospodarstwo domowe — Domowa Apteka{% endblock %}
+
+{% block content %}
+    <h1>Załóż gospodarstwo domowe</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form }}
+        <button type="submit">Załóż gospodarstwo</button>
+    </form>
+{% endblock %}
