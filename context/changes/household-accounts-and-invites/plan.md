@@ -722,17 +722,17 @@ remain but are unreferenced and harmless. There is no destructive step in this s
 
 #### Automated
 
-- [x] 4.1 Invite tests pass: `uv run python manage.py test households.tests.test_invites`
-- [x] 4.2 Full suite passes: `uv run python manage.py test`
-- [x] 4.3 Type checking passes: `uv run mypy .`
-- [x] 4.4 No stray model changes: `uv run python manage.py makemigrations --check --dry-run`
+- [x] 4.1 Invite tests pass: `uv run python manage.py test households.tests.test_invites` — e59318c
+- [x] 4.2 Full suite passes: `uv run python manage.py test` — e59318c
+- [x] 4.3 Type checking passes: `uv run mypy .` — e59318c
+- [x] 4.4 No stray model changes: `uv run python manage.py makemigrations --check --dry-run` — e59318c
 
 #### Manual
 
-- [ ] 4.5 Two-browser test on the live URL: both accounts show the same household with both members listed
-- [ ] 4.6 The copied link contains the real production host
-- [ ] 4.7 Regenerated token invalidates the previously copied URL
-- [ ] 4.8 An already-in-a-household user clicking another invite sees a readable Polish message, not a stack trace
+- [x] 4.5 Two-browser test on the live URL: both accounts show the same household with both members listed — e59318c
+- [x] 4.6 The copied link contains the real production host — e59318c
+- [x] 4.7 Regenerated token invalidates the previously copied URL — e59318c
+- [x] 4.8 An already-in-a-household user clicking another invite sees a readable Polish message, not a stack trace — e59318c
 
 ### Phase 5: List shell and access-control hardening
 

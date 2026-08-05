@@ -29,15 +29,23 @@ def signup(request: HttpRequest) -> HttpResponse:
         form = SignupForm(request.POST)
         if form.is_valid():
             invite_token = request.session.pop(INVITE_TOKEN_SESSION_KEY, None)
+            invite_expired = False
             with transaction.atomic():
                 user = form.save()
+                household = None
                 if invite_token:
-                    household = Household.objects.get(invite_token=invite_token)
-                else:
+                    household = Household.objects.filter(invite_token=invite_token).first()
+                    invite_expired = household is None
+                if household is None:
                     local_part = form.cleaned_data['email'].split('@')[0]
                     household = Household.objects.create(name=local_part)
                 Membership.objects.create(user=user, household=household)
             auth_login(request, user)
+            if invite_expired:
+                messages.info(
+                    request,
+                    'Link zaproszenia był już nieaktualny, więc założono nowe gospodarstwo domowe.',
+                )
             return redirect(settings.LOGIN_REDIRECT_URL)
     else:
         form = SignupForm()

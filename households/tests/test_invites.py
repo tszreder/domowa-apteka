@@ -111,6 +111,31 @@ class JoinViewTests(TestCase):
         self.assertTrue(Membership.objects.filter(household=self.household).exists())
 
 
+class SignupWithStaleInviteTests(TestCase):
+    def test_signup_falls_back_to_new_household_when_stashed_token_no_longer_resolves(self) -> None:
+        household = Household.objects.create(name='Kowalscy')
+        owner = User.objects.create_user(username='alice@example.com', password='pass12345')
+        Membership.objects.create(user=owner, household=household)
+
+        join_url = reverse('households:join', kwargs={'token': household.invite_token})
+        self.client.get(join_url)
+        household.regenerate_invite_token()
+
+        response = self.client.post(
+            reverse('households:signup'),
+            {
+                'email': 'bob@example.com',
+                'password1': 'wystarczajaco-trudne-haslo',
+                'password2': 'wystarczajaco-trudne-haslo',
+            },
+        )
+
+        self.assertRedirects(response, '/')
+        bob = User.objects.get(username='bob@example.com')
+        membership = Membership.objects.get(user=bob)
+        self.assertNotEqual(membership.household_id, household.id)
+
+
 class RegenerateInviteTests(TestCase):
     def setUp(self) -> None:
         self.household = Household.objects.create(name='Kowalscy')
