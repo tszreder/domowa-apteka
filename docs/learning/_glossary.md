@@ -45,6 +45,17 @@ used the old one needs a look.
 | **Required status check** / branch protection | A **branch policy in Azure Repos** requiring a successful build before a PR can complete. | ci-cd-and-deploy-triggers.md |
 | `concurrency` group, `cancel-in-progress: false` | An ADF pipeline with **concurrency set to 1** — runs queue instead of overlapping. | ci-cd-and-deploy-triggers.md |
 | Platform-native repo integration (Railway connecting to GitHub itself) | **App Service Deployment Center** pointed at a repo — the platform owns the trigger, wired by clicking rather than by committing. | ci-cd-and-deploy-triggers.md |
+| An **assertion** in a test | A **data-quality expectation** on a load — declares what must be true and fails loudly when it isn't, rather than reporting what happened. | automated-testing-types-and-django-mechanics.md |
+| **Unit test** | Validating a single **DAX measure or transformation function** against a tiny hand-built input table — no pipeline, no source systems. | automated-testing-types-and-django-mechanics.md |
+| **Integration test** | An **ADF pipeline debug run** end-to-end against dev linked services — several activities wired together, real connections. | automated-testing-types-and-django-mechanics.md |
+| **Smoke test** | A **"does it run at all" debug run over a tiny sample**, before committing to the full load. | automated-testing-types-and-django-mechanics.md |
+| **End-to-end test** | **UAT against the published report** in the real workspace, driven the way a consumer drives it. | automated-testing-types-and-django-mechanics.md |
+| The **throwaway test database** (created, migrated, destroyed per run) | A **scratch schema spun up for a validation run and dropped afterwards** — never the dev or prod store. | automated-testing-types-and-django-mechanics.md |
+| **Per-test transaction rollback** | A sandbox that **resets between runs**, so run order never affects the result. | automated-testing-types-and-django-mechanics.md |
+| Test **discovery by naming convention** (`test*.py`) | `adf_publish` **picking up everything in the declared folders** — the layout is the registration; you never enumerate items by hand. | automated-testing-types-and-django-mechanics.md |
+| A **regression test** (written after a bug, to pin it shut) | A **data-quality check added after a bad load slipped through** — same mechanism as the checks you wrote up front, added for a different reason, and the one you trust most because you know exactly what it caught. | automated-testing-types-and-django-mechanics.md |
+| A **flaky test** | An **intermittently failing pipeline** whose failures are timing rather than logic — it trains everyone to re-run instead of investigate. | automated-testing-types-and-django-mechanics.md |
+| `manage.py test` (executes your code) | **Actually running the refresh**, as opposed to the static BPA-style audit that `check --deploy` performs (mapped above). | automated-testing-types-and-django-mechanics.md |
 
 > **Note on "trigger".** `urls.py` is mapped to ADF triggers above (request path → view).
 > A CI deploy trigger is a different layer entirely (repository event → pipeline run).
