@@ -8,7 +8,30 @@
     <link rel="stylesheet" href="{% static 'css/app.css' %}">
 </head>
 <body>
-    <main>
+    <header class="container">
+        <nav>
+            <ul>
+                <li><strong>Domowa Apteka</strong></li>
+            </ul>
+            <ul>
+                {% if user.is_authenticated %}
+                    <li>
+                        {{ user.email }}{% if user.membership %} — {{ user.membership.household.name }}{% endif %}
+                    </li>
+                    <li>
+                        <form method="post" action="{% url 'households:logout' %}">
+                            {% csrf_token %}
+                            <button type="submit">Wyloguj</button>
+                        </form>
+                    </li>
+                {% else %}
+                    <li><a href="{% url 'households:login' %}">Zaloguj się</a></li>
+                    <li><a href="{% url 'households:signup' %}" role="button">Załóż konto</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </header>
+    <main class="container">
         {% block content %}{% endblock %}
     </main>
 </body>

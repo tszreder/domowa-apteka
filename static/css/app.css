@@ -1,21 +1,2 @@
 /* Override seam for the vendored classless stylesheet. */
 
-/* Center page content and stack action links vertically instead of side by
-   side. Selectors stay tag/attribute-based (no CSS classes in templates) so
-   the stylesheet stays a drop-in swap. */
-main {
-    text-align: center;
-}
-
-main p:has(a[role='button']) {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-main p:has(a[role='button']) a {
-    width: 100%;
-    max-width: 20rem;
-}
-
