@@ -6,6 +6,7 @@ domowa-apteka is a household pharmaceutical tracker (resolves products to active
 
 - `domowa_apteka/settings.py` reads `SECRET_KEY`, `DEBUG`, `ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS`, and `DATABASE_URL` from the environment (`.env` locally, Railway service variables in production). Never commit a real secret into it, and never add a new setting by hardcoding a value — add an `os.environ` read plus a documented entry in `.env.example`.
 - `context/**` is the source of truth for planning docs (PRD, tech-stack decision, shaping notes). Do not hand-edit `context/foundation/*.md`; those are written by the `/10x-*` skill chain.
+- Never chain commands with `&&` or `;` when each individual command is already allowed by `Bash(git:*)` or similar rules. Use separate parallel Bash tool calls instead — they run concurrently and don't trigger permission prompts.
 
 ## Project Structure
 
