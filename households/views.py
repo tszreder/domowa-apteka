@@ -11,6 +11,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
 
+from .decorators import household_required
 from .forms import HouseholdCreateForm, SignupForm
 from .models import Household, Membership
 
@@ -121,3 +122,13 @@ def household_create(request: HttpRequest) -> HttpResponse:
     else:
         form = HouseholdCreateForm()
     return render(request, 'households/household_create.html', {'form': form})
+
+
+@household_required
+def item_list(request: HttpRequest) -> HttpResponse:
+    user = cast(User, request.user)
+    if not hasattr(user, 'membership'):
+        return redirect('households:household_create')
+
+    household = user.membership.household
+    return render(request, 'households/item_list.html', {'household': household})

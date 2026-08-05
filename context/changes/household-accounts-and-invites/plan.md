@@ -738,15 +738,15 @@ remain but are unreferenced and harmless. There is no destructive step in this s
 
 #### Automated
 
-- [ ] 5.1 Access-control tests pass: `uv run python manage.py test households.tests.test_access_control`
-- [ ] 5.2 Full suite passes: `uv run python manage.py test`
-- [ ] 5.3 Type checking passes: `uv run mypy .`
-- [ ] 5.4 System checks pass: `uv run python manage.py check`
-- [ ] 5.5 Migrations are complete: `uv run python manage.py makemigrations --check --dry-run`
+- [x] 5.1 Access-control tests pass: `uv run python manage.py test households.tests.test_access_control` — 4a0690f
+- [x] 5.2 Full suite passes: `uv run python manage.py test` — 4a0690f
+- [x] 5.3 Type checking passes: `uv run mypy .` — 4a0690f
+- [x] 5.4 System checks pass: `uv run python manage.py check` — 4a0690f
+- [x] 5.5 Migrations are complete: `uv run python manage.py makemigrations --check --dry-run` — 4a0690f
 
 #### Manual
 
-- [ ] 5.6 Empty list page reads sensibly in Polish at phone width
-- [ ] 5.7 No redirect loop for anonymous, logged-in-without-household, or logged-in-with-household
-- [ ] 5.8 `docs/learning/` entries written and indexed
-- [ ] 5.9 End-to-end run on the live URL: two accounts, one household, both members visible, list shell reachable by both
+- [x] 5.6 Empty list page reads sensibly in Polish at phone width — 4a0690f
+- [x] 5.7 No redirect loop for anonymous, logged-in-without-household, or logged-in-with-household — 4a0690f
+- [x] 5.8 `docs/learning/` entries written and indexed — 4a0690f
+- [x] 5.9 End-to-end run on the live URL: two accounts, one household, both members visible, list shell reachable by both — 4a0690f

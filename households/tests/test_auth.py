@@ -16,7 +16,7 @@ class SignupTests(TestCase):
             },
         )
 
-        self.assertRedirects(response, '/')
+        self.assertRedirects(response, '/list/')
         user = User.objects.get(username='alice@example.com')
         membership = Membership.objects.get(user=user)
         self.assertTrue(Household.objects.filter(pk=membership.household_id).exists())
@@ -81,7 +81,7 @@ class LoginLogoutTests(TestCase):
             {'username': 'Alice@Example.com', 'password': 'pass12345'},
         )
 
-        self.assertRedirects(response, '/')
+        self.assertRedirects(response, '/list/')
         self.assertIn('_auth_user_id', self.client.session)
 
     def test_logout_clears_session(self) -> None:

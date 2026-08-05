@@ -130,7 +130,7 @@ class SignupWithStaleInviteTests(TestCase):
             },
         )
 
-        self.assertRedirects(response, '/')
+        self.assertRedirects(response, '/list/')
         bob = User.objects.get(username='bob@example.com')
         membership = Membership.objects.get(user=bob)
         self.assertNotEqual(membership.household_id, household.id)
