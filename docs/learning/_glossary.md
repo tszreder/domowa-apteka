@@ -56,6 +56,15 @@ used the old one needs a look.
 | A **regression test** (written after a bug, to pin it shut) | A **data-quality check added after a bad load slipped through** — same mechanism as the checks you wrote up front, added for a different reason, and the one you trust most because you know exactly what it caught. | automated-testing-types-and-django-mechanics.md |
 | A **flaky test** | An **intermittently failing pipeline** whose failures are timing rather than logic — it trains everyone to re-run instead of investigate. | automated-testing-types-and-django-mechanics.md |
 | `manage.py test` (executes your code) | **Actually running the refresh**, as opposed to the static BPA-style audit that `check --deploy` performs (mapped above). | automated-testing-types-and-django-mechanics.md |
+| A Django model class doubling as the schema definition | Schema-as-code, closer to a **dbt model / Delta Live Tables table definition** than SSDT — the object you write *is* the deployable schema artifact, not a separate script kept in sync by hand. | orm-models-and-sql-ddl.md |
+| `OneToOneField` (FK + `UNIQUE`, enforced at insert time) | A **1:1 relationship in an Azure SQL schema** via a unique constraint on the foreign-key column — same pattern, expressed as a Python field instead of `CREATE UNIQUE INDEX`. | orm-models-and-sql-ddl.md |
+| A session (cookie holds a key, real data stored server-side) | A **Power BI Service report session** — the browser holds a small token, the real state lives server-side, looked up by that token. | sessions-and-login-persistence.md |
+| `request.session` surviving across requests | A **Databricks notebook's cluster-scoped state while the cluster stays "Running"** — a later command can read what an earlier one wrote, as long as the same session is still up. | sessions-and-login-persistence.md |
+| `request.session.pop(key, None)` — read once, then gone | A **queue message explicitly acknowledged and removed after processing**, not a value left sitting for the next unrelated run to pick up. | sessions-and-login-persistence.md |
+| `{% extends %}` / `{% block %}` template inheritance | A **Power BI report theme + shared master layout** — the shell is defined once, each page supplies only what's genuinely different. | django-templates-and-css.md |
+| `{% static %}` resolving a path via a finder, not a hardcoded URL | A **Power BI report referencing a theme file by logical name**, resolved to wherever it actually lives at render time. | django-templates-and-css.md |
+| `secrets.token_urlsafe(32)` — a cryptographically secure random token | Generating a **Power BI embed token / SAS token** — possessing the value *is* the authorization, with no separate identity check behind it. | unguessable-invite-tokens.md |
+| Revocation by regenerating a token (no denylist) | **Rotating a Key Vault secret / SAS token** — the old value stops existing anywhere that matters, instead of being tracked and blocked. | unguessable-invite-tokens.md |
 
 > **Note on "trigger".** `urls.py` is mapped to ADF triggers above (request path → view).
 > A CI deploy trigger is a different layer entirely (repository event → pipeline run).

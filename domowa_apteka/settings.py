@@ -193,8 +193,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_URL = '/login/'
 
-# Points at '/' for now: the list shell (Phase 5) does not exist yet, so
-# pointing here would send every login before then to a 404.
-LOGIN_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = '/list/'
 
 LOGOUT_REDIRECT_URL = '/'
