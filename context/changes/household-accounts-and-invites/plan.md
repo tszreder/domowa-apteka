@@ -706,17 +706,17 @@ remain but are unreferenced and harmless. There is no destructive step in this s
 
 #### Automated
 
-- [x] 3.1 Auth tests pass: `uv run python manage.py test households.tests.test_auth`
-- [x] 3.2 Full suite still passes: `uv run python manage.py test`
-- [x] 3.3 Type checking passes: `uv run mypy .`
-- [x] 3.4 System checks pass: `uv run python manage.py check`
+- [x] 3.1 Auth tests pass: `uv run python manage.py test households.tests.test_auth` — b37f7ec
+- [x] 3.2 Full suite still passes: `uv run python manage.py test` — b37f7ec
+- [x] 3.3 Type checking passes: `uv run mypy .` — b37f7ec
+- [x] 3.4 System checks pass: `uv run python manage.py check` — b37f7ec
 
 #### Manual
 
-- [ ] 3.5 Sign up on the live Railway URL from a phone and land on a signed-in page
-- [ ] 3.6 Header shows signed-in email and household name; logout returns to the landing page
-- [ ] 3.7 Polish diacritics render correctly and Django's own validation errors appear in Polish
-- [ ] 3.8 Logging in with a differently-cased email succeeds against production Postgres
+- [x] 3.5 Sign up on the live Railway URL from a phone and land on a signed-in page — b37f7ec
+- [x] 3.6 Header shows signed-in email and household name; logout returns to the landing page — b37f7ec
+- [x] 3.7 Polish diacritics render correctly and Django's own validation errors appear in Polish — b37f7ec
+- [x] 3.8 Logging in with a differently-cased email succeeds against production Postgres — b37f7ec
 
 ### Phase 4: Invite link and join flow
 
