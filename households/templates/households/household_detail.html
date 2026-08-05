@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}{{ household.name }} — Domowa Apteka{% endblock %}
+
+{% block content %}
+    <h1>{{ household.name }}</h1>
+
+    <h2>Zaproś kogoś</h2>
+    <p>Udostępnij ten link, aby dołączyć do gospodarstwa:</p>
+    <p><code>{{ invite_url }}</code></p>
+    <form method="post" action="{% url 'households:regenerate_invite' %}">
+        {% csrf_token %}
+        <button type="submit">Wygeneruj nowy link</button>
+    </form>
+
+    <h2>Członkowie</h2>
+    <ul>
+        {% for member in members %}
+            <li>{{ member.user.email }} — dołączył(a) {{ member.joined_at|date:"d.m.Y" }}</li>
+        {% endfor %}
+    </ul>
+{% endblock %}

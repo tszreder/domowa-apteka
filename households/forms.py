@@ -4,6 +4,8 @@ from django import forms
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth.models import User
 
+from .models import Household
+
 
 class SignupForm(UserCreationForm):
     email = forms.EmailField(
@@ -39,3 +41,10 @@ class EmailAuthenticationForm(AuthenticationForm):
 
     def clean_username(self) -> str:
         return self.cleaned_data['username'].lower()
+
+
+class HouseholdCreateForm(forms.ModelForm):
+    class Meta:
+        model = Household
+        fields = ('name',)
+        labels = {'name': 'Nazwa gospodarstwa domowego'}

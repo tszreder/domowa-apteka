@@ -722,10 +722,10 @@ remain but are unreferenced and harmless. There is no destructive step in this s
 
 #### Automated
 
-- [ ] 4.1 Invite tests pass: `uv run python manage.py test households.tests.test_invites`
-- [ ] 4.2 Full suite passes: `uv run python manage.py test`
-- [ ] 4.3 Type checking passes: `uv run mypy .`
-- [ ] 4.4 No stray model changes: `uv run python manage.py makemigrations --check --dry-run`
+- [x] 4.1 Invite tests pass: `uv run python manage.py test households.tests.test_invites`
+- [x] 4.2 Full suite passes: `uv run python manage.py test`
+- [x] 4.3 Type checking passes: `uv run mypy .`
+- [x] 4.4 No stray model changes: `uv run python manage.py makemigrations --check --dry-run`
 
 #### Manual
 
