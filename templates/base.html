@@ -16,7 +16,7 @@
             <ul>
                 {% if user.is_authenticated %}
                     <li>
-                        {{ user.email }}{% if user.membership %} — {{ user.membership.household.name }}{% endif %}
+                        {{ user.email }}{% if user.membership %} — <a href="{% url 'households:household_detail' %}">{{ user.membership.household.name }}</a>{% endif %}
                     </li>
                     <li>
                         <form method="post" action="{% url 'households:logout' %}">
