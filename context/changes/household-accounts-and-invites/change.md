@@ -11,7 +11,8 @@ archived_at: null
 
 <!-- Free-form notes for this change: links, ad-hoc context, decisions that don't belong in research/frame/plan. -->
 
-Phase 5's manual item 5.9 ("End-to-end run on the live URL") was verified against the local
-dev server, not the deployed Railway URL — this branch hasn't merged/deployed yet. Follow up
-with a live-URL confirmation after merge, same pattern as Phase 4's separate
-"confirm Phase 4 production deploy" commit.
+Phase 5's manual item 5.9 ("End-to-end run on the live URL") was confirmed against the
+deployed Railway URL after PR #11 merged: `/health/` returns 200, `/list/` correctly
+redirects an anonymous request (302), and the end-to-end account/household flow was
+confirmed working on the live site. Same pattern as Phase 4's separate
+"confirm Phase 4 production deploy" commit (ed25402).
