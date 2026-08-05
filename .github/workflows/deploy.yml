@@ -45,6 +45,9 @@ jobs:
       - name: Django system checks
         run: uv run python manage.py check
 
+      - name: Type checking
+        run: uv run mypy .
+
       - name: Tests
         run: uv run python manage.py test
 
