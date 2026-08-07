@@ -40,12 +40,13 @@ Post-triage gate, run locally: `uv sync --locked` in sync · `manage.py check` n
 `uv run mypy` clean (20 files) · `makemigrations --check --dry-run` no changes ·
 `manage.py test` 33 tests OK (was 32 — F4 added a double-submit test).
 
-**Carried forward:** F4 changed the *authenticated-with-no-membership* branch of `join`, and
+**Closed out:** F4 changed the *authenticated-with-no-membership* branch of `join`, and
 **no Phase 4 manual criterion covered that branch** — 4.5 is the two-browser flow, 4.6 the host
-in the link, 4.7 revocation, 4.8 the refusal page. A new **4.9** has been added to the plan
-(both the Phase 4 Manual Verification list and `## Progress`) for the confirmation page: the
-link fetch must not create a membership, the button must, and a repeat submit must show the
-already-a-member page rather than a 500. Reproducible on the dev server via `createsuperuser`.
+in the link, 4.7 revocation, 4.8 the refusal page. A new **4.9** was added to the plan (both the
+Phase 4 Manual Verification list and `## Progress`) for the confirmation page: the link fetch
+must not create a membership, the button must, and a repeat submit must show the already-a-member
+page rather than a 500. **Verified on the dev server against 6ee433d and checked off** — Phase 4
+manual is complete again at 5/5.
 
 Two corrections made during triage, both to claims in this report:
 

@@ -765,7 +765,7 @@ remain but are unreferenced and harmless. There is no destructive step in this s
 - [x] 4.6 The copied link contains the real production host — e59318c
 - [x] 4.7 Regenerated token invalidates the previously copied URL — e59318c
 - [x] 4.8 An already-in-a-household user clicking another invite sees a readable Polish message, not a stack trace — e59318c
-- [ ] 4.9 An authenticated user with **no** household clicking an invite link sees the confirmation page, no membership exists until the button is submitted, and a repeat submit shows the already-a-member page rather than a 500 — **added 2026-08-07 by `/10x-impl-review` (F4)**
+- [x] 4.9 An authenticated user with **no** household clicking an invite link sees the confirmation page, no membership exists until the button is submitted, and a repeat submit shows the already-a-member page rather than a 500 — **added 2026-08-07 by `/10x-impl-review` (F4)**; verified on the dev server against 6ee433d
 
 ### Phase 5: List shell and access-control hardening
 
