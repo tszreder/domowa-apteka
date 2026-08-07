@@ -1,9 +1,9 @@
 ---
 change_id: household-accounts-and-invites
 title: Household accounts and invites
-status: implemented
+status: impl_reviewed
 created: 2026-08-05
-updated: 2026-08-05
+updated: 2026-08-07
 archived_at: null
 ---
 

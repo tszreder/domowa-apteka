@@ -18,6 +18,17 @@ from .models import Household, Membership
 INVITE_TOKEN_SESSION_KEY = 'invite_token'
 
 
+def _household_of(user: User) -> Household:
+    """Household of a user `household_required` has already vouched for.
+
+    The reverse one-to-one is invisible to django-stubs, and the decorator has
+    already resolved (and cached) it on the instance, so this reads the cache
+    without a second query.
+    """
+    membership = cast(Membership, getattr(user, 'membership'))
+    return membership.household
+
+
 def landing(request: HttpRequest) -> HttpResponse:
     return render(request, 'households/landing.html')
 
@@ -63,11 +74,20 @@ def join(request: HttpRequest, token: str) -> HttpResponse:
     user = cast(User, request.user)
 
     if not hasattr(user, 'membership'):
-        Membership.objects.create(user=user, household=household)
-        messages.success(request, f'Dołączono do gospodarstwa „{household.name}”.')
-        return redirect('households:household_detail')
+        if request.method != 'POST':
+            return render(request, 'households/join_confirm.html', {'household': household})
+        # get_or_create absorbs the IntegrityError a concurrent insert would raise and
+        # re-gets the winner's row, so a double-submitted confirmation cannot 500.
+        membership, created = Membership.objects.get_or_create(
+            user=user, defaults={'household': household}
+        )
+        if created:
+            messages.success(request, f'Dołączono do gospodarstwa „{household.name}”.')
+            return redirect('households:household_detail')
+    else:
+        membership = user.membership
 
-    same_household = user.membership.household_id == household.id
+    same_household = membership.household_id == household.id
     return render(
         request,
         'households/join_refused.html',
@@ -75,13 +95,9 @@ def join(request: HttpRequest, token: str) -> HttpResponse:
     )
 
 
-@login_required
+@household_required
 def household_detail(request: HttpRequest) -> HttpResponse:
-    user = cast(User, request.user)
-    if not hasattr(user, 'membership'):
-        return redirect('households:household_create')
-
-    household = user.membership.household
+    household = _household_of(cast(User, request.user))
     invite_url = request.build_absolute_uri(
         reverse('households:join', kwargs={'token': household.invite_token})
     )
@@ -93,14 +109,10 @@ def household_detail(request: HttpRequest) -> HttpResponse:
     )
 
 
-@login_required
+@household_required
 @require_POST
 def regenerate_invite(request: HttpRequest) -> HttpResponse:
-    user = cast(User, request.user)
-    if not hasattr(user, 'membership'):
-        return redirect('households:household_create')
-
-    household = user.membership.household
+    household = _household_of(cast(User, request.user))
     household.regenerate_invite_token()
     messages.success(request, 'Wygenerowano nowy link zaproszenia. Poprzedni link już nie działa.')
     return redirect('households:household_detail')
@@ -126,9 +138,5 @@ def household_create(request: HttpRequest) -> HttpResponse:
 
 @household_required
 def item_list(request: HttpRequest) -> HttpResponse:
-    user = cast(User, request.user)
-    if not hasattr(user, 'membership'):
-        return redirect('households:household_create')
-
-    household = user.membership.household
+    household = _household_of(cast(User, request.user))
     return render(request, 'households/item_list.html', {'household': household})

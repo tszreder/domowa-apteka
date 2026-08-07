@@ -15,13 +15,13 @@ class CrossHouseholdIsolationTests(TestCase):
         Membership.objects.create(user=self.member_b, household=self.household_b)
 
     def test_household_detail_only_ever_resolves_own_household(self) -> None:
-        self.client.force_login(self.member_a)
+        self.client.force_login(self.member_b)
 
         response = self.client.get(reverse('households:household_detail'))
 
-        self.assertEqual(response.context['household'], self.household_a)
-        self.assertNotContains(response, self.household_b.name)
-        self.assertNotIn(self.household_b.invite_token, response.content.decode())
+        self.assertEqual(response.context['household'], self.household_b)
+        self.assertNotContains(response, self.household_a.name)
+        self.assertNotIn(self.household_a.invite_token, response.content.decode())
 
     def test_item_list_only_ever_resolves_own_household(self) -> None:
         self.client.force_login(self.member_b)

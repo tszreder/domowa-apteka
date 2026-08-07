@@ -62,10 +62,17 @@ the old URL no longer joins.
 - `migrate --noinput` runs inside `railway.json`'s `startCommand`, with
   `restartPolicyMaxRetries: 3` and `numReplicas: 1`. A failed migration is a restart loop
   and a rolled-back deploy, not a clean error.
-- The SQLite-in-CI / Postgres-in-prod split (documented in
-  `docs/learning/database-migrations-and-dev-prod-parity.md`) makes string case a live
-  hazard: `unique=True` on a username column is case-sensitive on Postgres and effectively
-  case-insensitive on SQLite. A test suite green on CI would not catch it.
+- Email case is a live hazard, but **not** because of the SQLite-in-CI / Postgres-in-prod
+  split (documented in `docs/learning/database-migrations-and-dev-prod-parity.md`).
+  *Corrected 2026-08-07 during `/10x-impl-review`:* the original claim here — that
+  `unique=True` on a username column is case-sensitive on Postgres and effectively
+  case-insensitive on SQLite — is false. Measured against Django's generated `auth_user`
+  DDL (`varchar NOT NULL UNIQUE`, default BINARY collation), SQLite is case-sensitive too:
+  an exact-match lookup for the lowercase value against a stored mixed-case row returns 0
+  rows, and inserting `alice@example.com` alongside `Alice@Example.com` succeeds. The two
+  engines agree, so CI **does** catch a missed normalization. See
+  `context/foundation/lessons.md`, "Verify a database-engine behaviour difference before
+  designing around it".
 - `APP_DIRS: True` means app templates work with no settings change; only the shared
   `base.html` and the project-level `static/` dir need `settings.py` edits.
 
@@ -107,12 +114,19 @@ Phases are ordered so migrations land exactly once, in Phase 2, and are purely a
 
 ## Critical Implementation Details
 
-**Email case must be normalized in two places, and CI cannot catch a miss.** The lowercased
-email is stored in `User.username`, whose `unique=True` is case-sensitive on Postgres and
-effectively case-insensitive on SQLite. Normalize in the signup form's `clean` **and** in
-the authentication form's `clean_username` — normalizing only at signup lets
-`Alice@x.com` fail to log in against a stored `alice@x.com` in production while every test
-passes on CI's SQLite.
+**Email case must be normalized in two places.** The lowercased email is stored in
+`User.username`, and `ModelBackend` authenticates through `get_by_natural_key` — an exact
+match. Normalize in the signup form's `clean` **and** in the authentication form's
+`clean_username`; normalizing only at signup lets `Alice@x.com` fail to log in against a
+stored `alice@x.com`.
+
+*Corrected 2026-08-07 during `/10x-impl-review`:* this detail originally read "and CI
+cannot catch a miss", on the premise that `unique=True` is case-sensitive on Postgres but
+effectively case-insensitive on SQLite. That premise is false — both engines are
+case-sensitive here (see the measurement in Key Discoveries). CI on SQLite does catch a
+missed normalization, and `households/tests/test_auth.py:78` is the test that does it. The
+two-place normalization requirement stands; only its stated rationale was wrong. Do not add
+a Postgres-only CI job to chase this.
 
 **Setting `LANGUAGE_CODE = 'pl'` changes strings the tests read.** Django's own validation
 messages ("This field is required", the password validators) become Polish. Assert against
@@ -344,7 +358,8 @@ writes it to both `username` and `email`. `EmailAuthenticationForm` subclasses
 `AuthenticationForm` and lowercases the submitted identifier in `clean_username()`.
 
 Both normalizations are required. See "Critical Implementation Details" — omitting the login
-side produces a bug that is invisible on CI's SQLite and real on production Postgres.
+side produces a real bug on both engines. (*Corrected 2026-08-07:* this originally said the
+bug was "invisible on CI's SQLite and real on production Postgres". It is visible on both.)
 
 #### 2. Views and URLs
 
@@ -446,8 +461,16 @@ The cases:
 
 - **Anonymous** — stash the token in `request.session`, redirect to `/signup/`. Phase 3's
   signup view consumes it. This is what makes the token survive the signup round-trip.
-- **Authenticated, no membership** — create the `Membership`, redirect to the list with a
-  success message. (Reachable by the pre-existing superuser, who has no household.)
+- **Authenticated, no membership** — create the `Membership`, redirect to `/household/` with
+  a success message. (Reachable by the pre-existing superuser, who has no household.)
+  *Amended 2026-08-07 during `/10x-impl-review`:* this originally said "redirect to the
+  list", written before Phase 5 created `/list/`. The implementation redirects to
+  `/household/` and that is ratified as the intended destination — a new joiner's first
+  question is who else is in the household, which the detail page answers and the (empty,
+  until S-02) list does not. The same review split this case across methods: GET renders a
+  `join_confirm.html` confirmation and writes nothing, POST creates the membership via
+  `get_or_create` (so a double-submit cannot surface an `IntegrityError` as a 500). Joining
+  is irreversible in this slice, so it does not happen on a bare link fetch.
 - **Authenticated, already a member of some household** — render a clear Polish refusal
   page. If it is the *same* household, say so plainly rather than treating it as an error.
   Never attempt to move or delete a membership; that is the account-management scope this
@@ -632,7 +655,10 @@ MVP, justified by this being the slice every later slice trusts for access contr
 1. Sign up on the live Railway URL from a phone; confirm the page is readable without zooming.
 2. Open `/household/`, copy the invite link, and confirm it carries the production host.
 3. Open the link in a private window, sign up as a second user, and confirm both accounts list both members.
-4. Log out and log back in using a differently-cased email — this exercises the Postgres case-sensitivity path that CI's SQLite cannot.
+4. Log out and log back in using a differently-cased email. (*Corrected 2026-08-07:* this
+   originally claimed to exercise "the Postgres case-sensitivity path that CI's SQLite
+   cannot". CI covers this — `test_auth.py:78`. Worth doing live as an end-to-end smoke
+   check, but it is not the only line of defence.)
 5. Regenerate the invite token and confirm the old link no longer works.
 6. As the second user, click the *first* user's regenerated link and confirm a readable refusal, not a stack trace.
 
@@ -729,7 +755,7 @@ remain but are unreferenced and harmless. There is no destructive step in this s
 
 #### Manual
 
-- [x] 4.5 Two-browser test on the live URL: both accounts show the same household with both members listed — e59318c
+- [ ] 4.5 Two-browser test on the live URL: both accounts show the same household with both members listed — ~~e59318c~~ **re-opened 2026-08-07 by `/10x-impl-review` (F4)**: originally verified against the pre-split join flow. `/join/<token>/` now renders a confirmation on GET and only creates the membership on POST, so this needs re-running on the live URL before the fix ships. 4.6–4.8 are unaffected (that branch is unchanged).
 - [x] 4.6 The copied link contains the real production host — e59318c
 - [x] 4.7 Regenerated token invalidates the previously copied URL — e59318c
 - [x] 4.8 An already-in-a-household user clicking another invite sees a readable Polish message, not a stack trace — e59318c

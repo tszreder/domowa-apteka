@@ -45,6 +45,7 @@ class JoinViewTests(TestCase):
                 'password2': 'wystarczajaco-trudne-haslo',
             },
         )
+        self.assertNotIn(INVITE_TOKEN_SESSION_KEY, self.client.session)
         self.client.post(reverse('households:logout'))
 
         self.client.post(
@@ -60,18 +61,45 @@ class JoinViewTests(TestCase):
         membership = Membership.objects.get(user=carol)
         self.assertNotEqual(membership.household_id, self.household.id)
 
-    def test_authenticated_household_less_user_joins_directly(self) -> None:
+    def test_authenticated_household_less_user_confirms_then_joins_on_post(self) -> None:
         superuser = User.objects.create_superuser(
             username='admin@example.com', email='admin@example.com', password='pass12345'
         )
         self.client.force_login(superuser)
         join_url = reverse('households:join', kwargs={'token': self.household.invite_token})
 
-        response = self.client.get(join_url)
+        confirmation = self.client.get(join_url)
+
+        self.assertEqual(confirmation.status_code, 200)
+        self.assertTemplateUsed(confirmation, 'households/join_confirm.html')
+        self.assertFalse(Membership.objects.filter(user=superuser).exists())
+
+        response = self.client.post(join_url)
 
         self.assertRedirects(response, reverse('households:household_detail'))
         membership = Membership.objects.get(user=superuser)
         self.assertEqual(membership.household_id, self.household.id)
+
+    def test_sequential_repeat_post_is_refused_not_duplicated(self) -> None:
+        """A re-POST after joining hits the already-a-member branch, not a second create.
+
+        This does *not* cover the concurrent double-submit: by the second request the
+        membership is loaded with `request.user`, so `hasattr` is True and the view never
+        reaches `get_or_create`. That race is unrepresentable in a single-threaded
+        `TestCase` — `get_or_create` is the guard, verified by reading, not by this test.
+        """
+        superuser = User.objects.create_superuser(
+            username='admin@example.com', email='admin@example.com', password='pass12345'
+        )
+        self.client.force_login(superuser)
+        join_url = reverse('households:join', kwargs={'token': self.household.invite_token})
+        self.client.post(join_url)
+
+        response = self.client.post(join_url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['same_household'], True)
+        self.assertEqual(Membership.objects.filter(user=superuser).count(), 1)
 
     def test_authenticated_user_with_other_household_is_refused_without_second_membership(self) -> None:
         other_household = Household.objects.create(name='Nowakowie')
@@ -83,6 +111,7 @@ class JoinViewTests(TestCase):
         response = self.client.get(join_url)
 
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['same_household'], False)
         self.assertEqual(Membership.objects.filter(user=other_owner).count(), 1)
         membership = Membership.objects.get(user=other_owner)
         self.assertEqual(membership.household_id, other_household.id)
@@ -94,6 +123,7 @@ class JoinViewTests(TestCase):
         response = self.client.get(join_url)
 
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['same_household'], True)
         self.assertEqual(Membership.objects.filter(user=self.owner).count(), 1)
 
     def test_bogus_token_404s(self) -> None:
