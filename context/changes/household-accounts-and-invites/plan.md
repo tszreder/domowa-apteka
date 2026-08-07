@@ -528,6 +528,12 @@ regeneration requires POST.
 - The copied link contains the real production host, not `localhost` or a relative path
 - Regenerate the token, then confirm the previously copied URL no longer joins
 - An already-in-a-household user clicking someone else's link sees a readable Polish message, not a stack trace
+- *Added 2026-08-07 by `/10x-impl-review` (F4):* an authenticated user with **no** household
+  (i.e. the pre-existing superuser) clicking an invite link sees the confirmation page and is
+  **not** joined by the link fetch alone; the membership appears only after the button is
+  submitted, and submitting twice shows the already-a-member page rather than a 500.
+  Reproducible on the dev server — `createsuperuser` produces exactly this state, and the
+  membership can be deleted at `/admin/households/membership/` to re-run it.
 
 **Implementation Note**: After completing this phase and all automated verification passes,
 pause here for manual confirmation from the human that the manual testing was successful
@@ -755,10 +761,11 @@ remain but are unreferenced and harmless. There is no destructive step in this s
 
 #### Manual
 
-- [ ] 4.5 Two-browser test on the live URL: both accounts show the same household with both members listed — ~~e59318c~~ **re-opened 2026-08-07 by `/10x-impl-review` (F4)**: originally verified against the pre-split join flow. `/join/<token>/` now renders a confirmation on GET and only creates the membership on POST, so this needs re-running on the live URL before the fix ships. 4.6–4.8 are unaffected (that branch is unchanged).
+- [x] 4.5 Two-browser test on the live URL: both accounts show the same household with both members listed — e59318c
 - [x] 4.6 The copied link contains the real production host — e59318c
 - [x] 4.7 Regenerated token invalidates the previously copied URL — e59318c
 - [x] 4.8 An already-in-a-household user clicking another invite sees a readable Polish message, not a stack trace — e59318c
+- [ ] 4.9 An authenticated user with **no** household clicking an invite link sees the confirmation page, no membership exists until the button is submitted, and a repeat submit shows the already-a-member page rather than a 500 — **added 2026-08-07 by `/10x-impl-review` (F4)**
 
 ### Phase 5: List shell and access-control hardening
 

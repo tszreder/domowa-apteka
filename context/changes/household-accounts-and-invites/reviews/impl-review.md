@@ -40,13 +40,21 @@ Post-triage gate, run locally: `uv sync --locked` in sync · `manage.py check` n
 `uv run mypy` clean (20 files) · `makemigrations --check --dry-run` no changes ·
 `manage.py test` 33 tests OK (was 32 — F4 added a double-submit test).
 
-**Carried forward:** Phase 4 manual item **4.5** (two-browser live-URL join test) was verified
-against the pre-split join flow and has been **re-opened to `[ ]`** in the plan's `## Progress`
-section — it must be re-run on the live URL before this ships. 4.6–4.8 are unaffected: they
-exercise the refusal and token-revocation branches, which F4 did not change.
+**Carried forward:** F4 changed the *authenticated-with-no-membership* branch of `join`, and
+**no Phase 4 manual criterion covered that branch** — 4.5 is the two-browser flow, 4.6 the host
+in the link, 4.7 revocation, 4.8 the refusal page. A new **4.9** has been added to the plan
+(both the Phase 4 Manual Verification list and `## Progress`) for the confirmation page: the
+link fetch must not create a membership, the button must, and a repeat submit must show the
+already-a-member page rather than a 500. Reproducible on the dev server via `createsuperuser`.
 
-Also corrected during triage: the F4 decision note originally claimed the new test covered the
-double-submit race. Mutation-checked and withdrawn — see the note under F4.
+Two corrections made during triage, both to claims in this report:
+
+1. **4.5 was briefly re-opened to `[ ]` and has been restored to `[x]`.** The premise was wrong:
+   the two-browser flow has the second user arrive *anonymously*, which hits `join`'s anonymous
+   branch (stash token → redirect to `/signup/`) and creates the membership inside `signup`.
+   F4 did not touch that path. 4.5–4.8 all remain validly verified by `e59318c`.
+2. **The F4 decision note originally claimed the new test covered the double-submit race.**
+   Mutation-checked and withdrawn — see the note under F4.
 
 ## Automated verification (re-run 2026-08-07)
 
@@ -143,7 +151,7 @@ Manual checkboxes 1.7–5.9 are all `[x]`. They are live-URL checks that leave n
 
   **What is and isn't test-covered here** (checked by mutation, same method as F2/F3): reverting `get_or_create` to a bare `create` leaves all 11 invite tests green. The sequential re-POST test does *not* exercise the race — by the second request the membership is loaded with `request.user`, `hasattr` is True, and the view takes the already-a-member branch without reaching `get_or_create` at all. The `created=False` fall-through is unreachable from a single-threaded `TestCase`; it is the same "unrepresentable against this design" situation as F3. The guard is real and verified by reading, not by a test. The GET-does-not-mutate half of the fix *is* covered.
 
-  **Follow-up:** Phase 4's manual criteria were verified against the pre-split flow and need re-checking on the live URL after this ships.
+  **Follow-up:** the changed branch has no manual criterion in Phase 4 — a new 4.9 was added for it. See "Triage outcome" above.
 
 ### F5 — The plan's SQLite/Postgres case-sensitivity premise is factually wrong
 
