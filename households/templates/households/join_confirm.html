@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Dołącz do gospodarstwa — Domowa Apteka{% endblock %}
+
+{% block content %}
+    <h1>Dołączyć do gospodarstwa „{{ household.name }}”?</h1>
+    <p>
+        Po dołączeniu zobaczysz apteczkę tego gospodarstwa i jego pozostałych członków.
+        Możesz należeć tylko do jednego gospodarstwa.
+    </p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">Dołącz</button>
+    </form>
+{% endblock %}
