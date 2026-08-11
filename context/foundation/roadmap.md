@@ -3,7 +3,7 @@ project: domowa-apteka
 version: 1
 status: draft
 created: 2026-08-03
-updated: 2026-08-04
+updated: 2026-08-07
 prd_version: 1
 main_goal: speed
 top_blocker: decisions
@@ -43,7 +43,7 @@ reality, and every other slice is downstream of it.
 | ---- | ---------------------------------- | ------------------------------------------------------------------------------------------- | ------------- | ---------------------------- | -------- |
 | F-01 | `registry-substance-data`          | (foundation) product → active-substance records from the official registry are queryable locally, each traceable to its source row | —             | FR-001, FR-002, NFR (verified sources) | ready    |
 | F-02 | `registry-freshness-refresh`       | (foundation) registry data refreshes on a schedule and the app knows when it last succeeded | F-01          | NFR (registry freshness)     | proposed |
-| S-01 | `household-accounts-and-invites`   | sign in, create a household, invite another adult by link/code, and have them join with full symmetric access | —             | FR-005, US-02, Access Control | ready    |
+| S-01 | `household-accounts-and-invites`   | sign in, create a household, invite another adult by link/code, and have them join with full symmetric access | —             | FR-005, US-02, Access Control | done     |
 | S-02 | `add-drug-with-substance-resolution` | add a pharmaceutical by name with registry-backed autocomplete, see its resolved active substance(s) — or a clear lookup-failure message — and have the item appear on the shared household list | F-01, S-01    | FR-001, FR-002, US-01        | proposed |
 | S-03 | `duplicate-flagging-on-list`       | see household list items flagged as full duplicates (identical substance sets) and partial duplicates (overlapping but not identical) | S-02          | FR-003, US-03                | proposed |
 | S-04 | `expiration-date-per-item`         | optionally record an expiration date when adding or editing an item                         | S-02          | FR-004                       | proposed |
@@ -123,7 +123,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
   - Email/password or passwordless? (PRD Open Question 1) — Owner: user. Block: no. `django.contrib.auth` is already wired and the admin login works, so email/password is the zero-cost default; passwordless would be a deliberate deviation.
   - Do invite links expire, and can they be revoked? The PRD specifies no pending/partial-member state but says nothing about invite lifetime. — Owner: user. Block: no.
 - **Risk:** Sequenced first among slices despite not being the north star, because it has no prerequisites at all and the north star cannot publish an item to a "shared household list" that does not exist. The minimal user-facing login surface is folded into this slice rather than split into its own foundation — the baseline shows auth is half-wired already, and a standalone auth item would trace to no PRD user story. Main hazard is the invite flow quietly growing into account management the PRD never asked for.
-- **Status:** ready
+- **Status:** done
 
 ### S-02: Add a drug and see its active substance(s) resolved
 
@@ -194,3 +194,5 @@ Foundations below assume these are present and do NOT re-scaffold them.
 
 (Empty on first generation. `/10x-archive` appends entries here when a change whose
 `Change ID` matches a roadmap item is archived.)
+
+- **S-01: an adult can sign in, create a household, generate a shareable invite link or code, and the invited adult can join through it and immediately see the household's shared list with full symmetric access.** — Archived 2026-08-07 → `context/archive/2026-08-05-household-accounts-and-invites/`. Lesson: —.
