@@ -41,7 +41,7 @@ reality, and every other slice is downstream of it.
 
 | ID   | Change ID                          | Outcome (user can …)                                                                        | Prerequisites | PRD refs                     | Status   |
 | ---- | ---------------------------------- | ------------------------------------------------------------------------------------------- | ------------- | ---------------------------- | -------- |
-| F-01 | `registry-substance-data`          | (foundation) product → active-substance records from the official registry are queryable locally, each traceable to its source row | —             | FR-001, FR-002, NFR (verified sources) | ready    |
+| F-01 | `registry-substance-data`          | (foundation) product → active-substance records from the official registry are queryable locally, each traceable to its source row | —             | FR-001, FR-002, NFR (verified sources) | in-progress |
 | F-02 | `registry-freshness-refresh`       | (foundation) registry data refreshes on a schedule and the app knows when it last succeeded | F-01          | NFR (registry freshness)     | proposed |
 | S-01 | `household-accounts-and-invites`   | sign in, create a household, invite another adult by link/code, and have them join with full symmetric access | —             | FR-005, US-02, Access Control | done     |
 | S-02 | `add-drug-with-substance-resolution` | add a pharmaceutical by name with registry-backed autocomplete, see its resolved active substance(s) — or a clear lookup-failure message — and have the item appear on the shared household list | F-01, S-01    | FR-001, FR-002, US-01        | proposed |
@@ -93,7 +93,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
   - What is the concrete ingestion approach for the registry — bulk file, API, scrape? What update cadence does the registry itself publish on? (PRD Open Question 3) — Owner: user. Block: no. The PRD marks this non-blocking; answering it is the first act of planning this item, not a precondition for planning it.
   - How messy are the source substance fields in practice, and what normalization is permitted without inventing an identity the source does not state? — Owner: user. Block: no.
 - **Risk:** Scoped deliberately to a one-shot load, not a pipeline — enough to prove resolution works, nothing more. The real hazard is scope creep into "ingest and normalize the entire registry cleanly", which would consume the whole MVP budget before a single user-visible screen exists. The NFR's ban on guessing means normalization has a hard edge: reformatting a value is allowed, inferring one is not.
-- **Status:** ready
+- **Status:** in-progress
 
 ### F-02: Scheduled registry refresh with a trustworthy freshness signal
 
