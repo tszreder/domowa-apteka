@@ -804,12 +804,22 @@ work (options.md §11). The parse dominates by roughly 20×, so the database tim
 measured on in-memory SQLite and certain to be slower on networked Postgres — do not change
 the shape.
 
-Peak Python memory has **two components that must not be conflated**. The streaming pass stays
-in the single-digit MB range and depends entirely on `elem.clear()`; total peak additionally
-carries the fully materialized `ParseResult` (~20,187 product records plus ~29,064 link records)
-and is expected in the tens of MB. options.md §1's 7 MB figure measured a pass that discarded
-each record after counting it, so it describes neither number for this design. Phase 2 measures
-both and this paragraph records the real figures.
+Peak Python memory has **two components that must not be conflated**. Measured in Phase 2 with
+`tracemalloc` over the real 73.9 MB export (`stanNaDzien=2026-08-12`, 22,885 products, 20,245
+human-use), parsed in 6.3 s:
+
+| Figure | Measured |
+| --- | --- |
+| Total peak | **30.1 MB** |
+| Retained immediately after the call | 27.7 MB — the fully materialized `ParseResult` |
+| Transient headroom (peak − retained) | **2.5 MB** — everything the streaming pass costs above the records it is accumulating |
+
+The 2.5 MB is what confirms `elem.clear()` is doing its job: without it the retained element
+tree alone would run to roughly 1 GB. The parser returns a materialized result, so the
+streaming pass's own peak cannot be isolated from the records accumulating alongside it without
+instrumenting the parser — this decomposition is the closest honest substitute, and it is
+discriminating for the thing that matters. options.md §1's 7 MB figure measured a pass that
+discarded each record after counting it, so it describes neither number for this design.
 
 No caching, no indexing beyond the model-level `db_index` flags, and no query optimization is
 in scope; S-02 owns autocomplete performance and the NFR's one-second acknowledgement.
@@ -842,31 +852,31 @@ new-table cost of well under an hour each, with no data loss in the interim.
 
 #### Automated
 
-- [x] 1.1 `makemigrations --check --dry-run` reports no missing migrations
-- [x] 1.2 `manage.py migrate` applies cleanly
-- [x] 1.3 `mypy` passes with `registry` in scope
-- [x] 1.4 `manage.py check` passes
-- [x] 1.5 `manage.py test` passes with nothing regressed
+- [x] 1.1 `makemigrations --check --dry-run` reports no missing migrations — f9d370b
+- [x] 1.2 `manage.py migrate` applies cleanly — f9d370b
+- [x] 1.3 `mypy` passes with `registry` in scope — f9d370b
+- [x] 1.4 `manage.py check` passes — f9d370b
+- [x] 1.5 `manage.py test` passes with nothing regressed — f9d370b
 
 #### Manual
 
-- [x] 1.6 Both registry admin pages load and show empty lists
-- [x] 1.7 No Add button, and no Save or Delete on any detail view
+- [x] 1.6 Both registry admin pages load and show empty lists — f9d370b
+- [x] 1.7 No Add button, and no Save or Delete on any detail view — f9d370b
 
 ### Phase 2: Parser
 
 #### Automated
 
-- [ ] 2.1 `manage.py test registry.tests.test_parser` passes
-- [ ] 2.2 `mypy` passes with no `type: ignore` added to `registry/parser.py`
-- [ ] 2.3 Denylist and `source_field` tests fail when their rule is deliberately inverted
-- [ ] 2.4 `git log --follow` on the fixture shows a move, not a delete-plus-add
+- [x] 2.1 `manage.py test registry.tests.test_parser` passes
+- [x] 2.2 `mypy` passes with no `type: ignore` added to `registry/parser.py`
+- [x] 2.3 Denylist and `source_field` tests fail when their rule is deliberately inverted
+- [x] 2.4 `git log --follow` on the fixture shows a move, not a delete-plus-add
 
 #### Manual
 
-- [ ] 2.5 Hand-fetched real `overall.xml` parses to ~20,187 human-use products, ≥95% resolved
-- [ ] 2.6 Streaming-pass peak memory during the real parse stays in single-digit MB
-- [ ] 2.7 Total peak with the materialized `ParseResult` measured and written into the plan
+- [x] 2.5 Hand-fetched real `overall.xml` parses to ~20,187 human-use products, ≥95% resolved
+- [x] 2.6 Streaming-pass peak memory during the real parse stays in single-digit MB
+- [x] 2.7 Total peak with the materialized `ParseResult` measured and written into the plan
 
 ### Phase 3: Loader and management command
 

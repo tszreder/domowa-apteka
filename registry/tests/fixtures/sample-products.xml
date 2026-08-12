@@ -370,4 +370,184 @@
             <dlaMedyka />
         </materialyEdukacyjne>
     </produktLeczniczy>
+    <produktLeczniczy nazwaProduktu="Beto 25 ZK" rodzajPreparatu="ludzki" nazwaPowszechnieStosowana="Metoprololi succinas" nazwaPoprzedniaProduktu="brak" moc="23,75 mg" nazwaPostaciFarmaceutycznej="Tabletki o przedłużonym uwalnianiu" podmiotOdpowiedzialny="Pharmapoint SA" typProcedury="IR" numerPozwolenia="57/20" waznoscPozwolenia="2025-02-26" zakazStosowaniaUZwierzat="" id="100432015">
+        <kodyATC>
+            <kodATC>C07AB02</kodATC>
+        </kodyATC>
+        <drogiPodania>
+            <drogaPodania drogaPodaniaNazwa="doustna"/>
+        </drogiPodania>
+        <substancjeCzynne>
+            <substancjaCzynna nazwaSubstancji="Metoprololi succinas" iloscSubstancji="23,75" jednostkaMiaryIlosciSubstancji="mg" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci=""/>
+        </substancjeCzynne>
+        <opakowania>
+            <opakowanie kodGTIN="05909991424343" kategoriaDostepnosci="Rp" skasowane="NIE" numerEu="" dystrybutorRownolegly="" id="135467">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="" rodzajOpakowania="" pojemnosc="30" jednostkaPojemnosci="tabl." informacjeDodatkowe=""/>
+                </jednostkiOpakowania>
+                <zgodyPrezesa/>
+            </opakowanie>
+        </opakowania>
+        <daneOWytworcy>
+            <wytworcy podmiotOdpowiedzialnywKrajuEksportu="Hexal AG" krajEksportu="Niemcy"/>
+        </daneOWytworcy>
+        <materialyEdukacyjne>
+            <dlaPacjenta/>
+            <dlaMedyka/>
+        </materialyEdukacyjne>
+    </produktLeczniczy>
+    <produktLeczniczy nazwaProduktu="Cyclo 3 Fort" rodzajPreparatu="ludzki" nazwaPowszechnieStosowana="Produkt złożony" nazwaPoprzedniaProduktu="brak" moc="150 mg + 150 mg + 100 mg" nazwaPostaciFarmaceutycznej="Kapsułki twarde" podmiotOdpowiedzialny="Delfarma Sp. z o.o." typProcedury="IR" numerPozwolenia="348/18" waznoscPozwolenia="2023-12-11" zakazStosowaniaUZwierzat="" id="100413510">
+        <kodyATC/>
+        <drogiPodania>
+            <drogaPodania drogaPodaniaNazwa="doustna"/>
+        </drogiPodania>
+        <substancjeCzynne>
+            <substancjaCzynna nazwaSubstancji="Produkt złożony" iloscSubstancji="" jednostkaMiaryIlosciSubstancji="" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci="150 mg + 150 mg + 100 mg"/>
+        </substancjeCzynne>
+        <opakowania>
+            <opakowanie kodGTIN="05909991388539" kategoriaDostepnosci="OTC" skasowane="NIE" numerEu="" dystrybutorRownolegly="" id="130469">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="" rodzajOpakowania="" pojemnosc="30" jednostkaPojemnosci="kaps." informacjeDodatkowe=""/>
+                </jednostkiOpakowania>
+                <zgodyPrezesa/>
+            </opakowanie>
+        </opakowania>
+        <daneOWytworcy>
+            <wytworcy podmiotOdpowiedzialnywKrajuEksportu="Pierre Fabre Medicament" krajEksportu="Rumunia"/>
+        </daneOWytworcy>
+        <materialyEdukacyjne>
+            <dlaPacjenta/>
+            <dlaMedyka/>
+        </materialyEdukacyjne>
+    </produktLeczniczy>
+    <produktLeczniczy nazwaProduktu="Moviprep" rodzajPreparatu="ludzki" nazwaPowszechnieStosowana="Produkt złożony" nazwaPoprzedniaProduktu="brak" moc="-" nazwaPostaciFarmaceutycznej="Proszek do sporządzania roztworu doustnego" podmiotOdpowiedzialny="Delfarma Sp. z o.o." typProcedury="IR" numerPozwolenia="83/21" waznoscPozwolenia="2026-03-16" zakazStosowaniaUZwierzat="" id="100449211">
+        <kodyATC>
+            <kodATC>A06AD</kodATC>
+        </kodyATC>
+        <drogiPodania>
+            <drogaPodania drogaPodaniaNazwa="doustna"/>
+        </drogiPodania>
+        <substancjeCzynne/>
+        <opakowania>
+            <opakowanie kodGTIN="05909991449988" kategoriaDostepnosci="Rp" skasowane="NIE" numerEu="" dystrybutorRownolegly="" id="139579">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="1" rodzajOpakowania="zestaw" pojemnosc="" jednostkaPojemnosci="" informacjeDodatkowe=""/>
+                </jednostkiOpakowania>
+                <zgodyPrezesa/>
+            </opakowanie>
+        </opakowania>
+        <daneOWytworcy>
+            <wytworcy podmiotOdpowiedzialnywKrajuEksportu="Norgine BV" krajEksportu="Litwa"/>
+        </daneOWytworcy>
+        <materialyEdukacyjne>
+            <dlaPacjenta/>
+            <dlaMedyka/>
+        </materialyEdukacyjne>
+    </produktLeczniczy>
+    <produktLeczniczy nazwaProduktu="Staloral 300" rodzajPreparatu="ludzki" nazwaPowszechnieStosowana="Wyciągi alergenowe roztoczy kurzu domowego" nazwaPoprzedniaProduktu="brak" moc="(10 IR lub 300 IR) nie więcej niż 40 mg" nazwaPostaciFarmaceutycznej="Roztwór do stosowania podjęzykowego" podmiotOdpowiedzialny="Stallergenes" typProcedury="NAR" numerPozwolenia="10613" waznoscPozwolenia="2025-12-22" podstawaPrawna="art. 10 ust. 1 i 2" zakazStosowaniaUZwierzat="" ulotka="https://rejestry.ezdrowie.gov.pl/api/rpl/medicinal-products/12327/leaflet" charakterystyka="https://rejestry.ezdrowie.gov.pl/api/rpl/medicinal-products/12327/characteristic" id="100123277">
+        <kodyATC>
+            <kodATC>V01AA</kodATC>
+        </kodyATC>
+        <drogiPodania>
+            <drogaPodania drogaPodaniaNazwa="podjęzykowa"/>
+        </drogiPodania>
+        <substancjeCzynne>
+            <substancjaCzynna nazwaSubstancji="Wyciągi alergenowe roztoczy kurzu domowego" iloscSubstancji="" jednostkaMiaryIlosciSubstancji="" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci="(10 IR lub 300 IR) nie więcej niż 40 mg"/>
+        </substancjeCzynne>
+        <opakowania>
+            <opakowanie kodGTIN="05909991061319" kategoriaDostepnosci="Rp" skasowane="NIE" numerEu="" dystrybutorRownolegly="" id="23212">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="3" rodzajOpakowania="fiol." pojemnosc="10" jednostkaPojemnosci="ml" informacjeDodatkowe="+ 3 pompki dozujące - zestaw do leczenia podstawowego"/>
+                </jednostkiOpakowania>
+                <zgodyPrezesa/>
+            </opakowanie>
+            <opakowanie kodGTIN="05909991061326" kategoriaDostepnosci="Rp" skasowane="NIE" numerEu="" dystrybutorRownolegly="" id="23213">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="2" rodzajOpakowania="fiol." pojemnosc="10" jednostkaPojemnosci="ml" informacjeDodatkowe="+ 2 pompki dozujące - zestaw do leczenia podtrzymującego"/>
+                </jednostkiOpakowania>
+                <zgodyPrezesa/>
+            </opakowanie>
+        </opakowania>
+        <daneOWytworcy>
+            <wytworcy nazwaWytworcyImportera="Stallergenes" krajWytworcyImportera="Francja"/>
+        </daneOWytworcy>
+        <materialyEdukacyjne>
+            <dlaPacjenta/>
+            <dlaMedyka/>
+        </materialyEdukacyjne>
+    </produktLeczniczy>
+    <produktLeczniczy nazwaProduktu="Addamel N" rodzajPreparatu="ludzki" nazwaPowszechnieStosowana="Roztwór pierwiastków śladowych" nazwaPoprzedniaProduktu="brak" moc="-" nazwaPostaciFarmaceutycznej="Koncentrat do sporządzania roztworu do infuzji" podmiotOdpowiedzialny="Fresenius Kabi AB" typProcedury="NAR" numerPozwolenia="02718" waznoscPozwolenia="2024-10-10" podstawaPrawna="art. 10 ust. 1 i 2" zakazStosowaniaUZwierzat="" ulotka="https://rejestry.ezdrowie.gov.pl/api/rpl/medicinal-products/279/leaflet" charakterystyka="https://rejestry.ezdrowie.gov.pl/api/rpl/medicinal-products/279/characteristic" id="100002792">
+        <kodyATC>
+            <kodATC>B05XA31</kodATC>
+        </kodyATC>
+        <drogiPodania>
+            <drogaPodania drogaPodaniaNazwa="dożylna"/>
+        </drogiPodania>
+        <substancjeCzynne>
+            <substancjaCzynna nazwaSubstancji="Chromium trichloridum hexahydricum" iloscSubstancji="5,33" jednostkaMiaryIlosciSubstancji="mcg" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci=""/>
+            <substancjaCzynna nazwaSubstancji="Cuprii chloridum dihydricum" iloscSubstancji="0,34" jednostkaMiaryIlosciSubstancji="mg" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci=""/>
+            <substancjaCzynna nazwaSubstancji="Ferri chloridum hexaahydricum" iloscSubstancji="0,54" jednostkaMiaryIlosciSubstancji="mg" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci=""/>
+            <substancjaCzynna nazwaSubstancji="Manganii chloridum tetrahydricum" iloscSubstancji="99" jednostkaMiaryIlosciSubstancji="mcg" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci=""/>
+            <substancjaCzynna nazwaSubstancji="Kalii iodidum" iloscSubstancji="16,6" jednostkaMiaryIlosciSubstancji="mcg" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci=""/>
+            <substancjaCzynna nazwaSubstancji="Sodu fluorek" iloscSubstancji="0,21" jednostkaMiaryIlosciSubstancji="mg" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci=""/>
+            <substancjaCzynna nazwaSubstancji="Natrii molybdas" iloscSubstancji="4,85" jednostkaMiaryIlosciSubstancji="mcg" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci=""/>
+            <substancjaCzynna nazwaSubstancji="Natrii selenis" iloscSubstancji="6,9" jednostkaMiaryIlosciSubstancji="mcg" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci=""/>
+            <substancjaCzynna nazwaSubstancji="Zinci chloridum (II)" iloscSubstancji="1,36" jednostkaMiaryIlosciSubstancji="mg" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci=""/>
+        </substancjeCzynne>
+        <opakowania>
+            <opakowanie kategoriaDostepnosci="Lz" skasowane="TAK" numerEu="" dystrybutorRownolegly="" id="461">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="10" rodzajOpakowania="amp." pojemnosc="10" jednostkaPojemnosci="ml" informacjeDodatkowe=""/>
+                </jednostkiOpakowania>
+                <zgodyPrezesa/>
+            </opakowanie>
+            <opakowanie kodGTIN="05909990271818" kategoriaDostepnosci="Lz" skasowane="NIE" numerEu="" dystrybutorRownolegly="" id="14457">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="20" rodzajOpakowania="amp." pojemnosc="10" jednostkaPojemnosci="ml" informacjeDodatkowe=""/>
+                </jednostkiOpakowania>
+                <zgodyPrezesa/>
+            </opakowanie>
+        </opakowania>
+        <daneOWytworcy>
+            <wytworcy nazwaWytworcyImportera="Fresenius Kabi Norge  AS" krajWytworcyImportera="Norwegia"/>
+        </daneOWytworcy>
+        <materialyEdukacyjne>
+            <dlaPacjenta/>
+            <dlaMedyka/>
+        </materialyEdukacyjne>
+    </produktLeczniczy>
+    <produktLeczniczy nazwaProduktu="Addamel N" rodzajPreparatu="ludzki" nazwaPowszechnieStosowana="Roztwór pierwiastków śladowych" nazwaPoprzedniaProduktu="brak" moc="-" nazwaPostaciFarmaceutycznej="Koncentrat do sporządzania roztworu do infuzji" podmiotOdpowiedzialny="Delfarma Sp. z o.o." typProcedury="IR" numerPozwolenia="27/16" waznoscPozwolenia="2026-01-20" zakazStosowaniaUZwierzat="" id="100362527">
+        <kodyATC>
+            <kodATC>B05XA31</kodATC>
+        </kodyATC>
+        <drogiPodania>
+            <drogaPodania drogaPodaniaNazwa="dożylna"/>
+        </drogiPodania>
+        <substancjeCzynne>
+            <substancjaCzynna nazwaSubstancji="Chromium trichloridum hexahydricum" iloscSubstancji="5,33" jednostkaMiaryIlosciSubstancji="mcg" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci=""/>
+            <substancjaCzynna nazwaSubstancji="Cuprii chloridum dihydricum" iloscSubstancji="0,34" jednostkaMiaryIlosciSubstancji="mcg" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci=""/>
+            <substancjaCzynna nazwaSubstancji="Ferri chloridum hexaahydricum" iloscSubstancji="" jednostkaMiaryIlosciSubstancji="" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci=""/>
+            <substancjaCzynna nazwaSubstancji="Manganii chloridum tetrahydricum" iloscSubstancji="" jednostkaMiaryIlosciSubstancji="" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci=""/>
+            <substancjaCzynna nazwaSubstancji="Kalii iodidum" iloscSubstancji="" jednostkaMiaryIlosciSubstancji="" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci=""/>
+            <substancjaCzynna nazwaSubstancji="sodu fluorek" iloscSubstancji="" jednostkaMiaryIlosciSubstancji="" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci=""/>
+            <substancjaCzynna nazwaSubstancji="Natrii molybdas" iloscSubstancji="" jednostkaMiaryIlosciSubstancji="" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci=""/>
+            <substancjaCzynna nazwaSubstancji="Natrii selenis" iloscSubstancji="" jednostkaMiaryIlosciSubstancji="" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci=""/>
+            <substancjaCzynna nazwaSubstancji="Zinci chloridum (II)" iloscSubstancji="" jednostkaMiaryIlosciSubstancji="" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci=""/>
+        </substancjeCzynne>
+        <opakowania>
+            <opakowanie kodGTIN="05909991257415" kategoriaDostepnosci="Lz" skasowane="NIE" numerEu="" dystrybutorRownolegly="" id="113723">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="20" rodzajOpakowania="amp." pojemnosc="10" jednostkaPojemnosci="ml" informacjeDodatkowe=""/>
+                </jednostkiOpakowania>
+                <zgodyPrezesa/>
+            </opakowanie>
+        </opakowania>
+        <daneOWytworcy>
+            <wytworcy podmiotOdpowiedzialnywKrajuEksportu="Fresenius Kabi Hellas S.A." krajEksportu="Grecja"/>
+        </daneOWytworcy>
+        <materialyEdukacyjne>
+            <dlaPacjenta/>
+            <dlaMedyka/>
+        </materialyEdukacyjne>
+    </produktLeczniczy>
 </produktyLecznicze>

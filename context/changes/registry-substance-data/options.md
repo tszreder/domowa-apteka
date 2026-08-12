@@ -482,3 +482,21 @@ Railway either way.
   `nazwaPostaciFarmaceutycznej` (form), both present on every product.
 - **PRD Open Question 3 is resolved:** bulk XML file, published daily, no API,
   no incremental feed by publisher decision.
+
+---
+
+## 15. Correction — the export URL (recorded 2026-08-13, Phase 2)
+
+§2 and §6 write the endpoint elided as `…/public-pl-report/6.0.0/overall.xml`.
+The elision swallowed a path segment. Measured again while implementing Phase 2:
+
+| URL | Result |
+| --- | --- |
+| `https://rejestry.ezdrowie.gov.pl/api/rpl/public-pl-report/6.0.0/overall.xml` | **404** `RESOURCE_NOT_FOUND` |
+| `https://rejestry.ezdrowie.gov.pl/api/rpl/medicinal-products/public-pl-report/6.0.0/overall.xml` | **200**, 73,860,366 B, `stanNaDzien="2026-08-12"` |
+
+The working URL carries `/medicinal-products/` before `/public-pl-report/`. It
+matters because Phase 3 ships this string as the in-code default for
+`REGISTRY_OVERALL_URL`; the elided form would ship a 404. It does not change
+`namespace_for_url()`, which lifts the one dotted version triple out of the path
+either way.
