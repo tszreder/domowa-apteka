@@ -882,18 +882,18 @@ new-table cost of well under an hour each, with no data loss in the interim.
 
 #### Automated
 
-- [x] 3.1 `manage.py test registry` passes
-- [x] 3.2 `manage.py test` passes across the whole suite
-- [x] 3.3 `mypy` passes
-- [x] 3.4 `manage.py check` passes
-- [x] 3.5 `uv sync --locked` succeeds
-- [x] 3.6 Running `import_registry --file <fixture>` twice produces identical row counts
+- [x] 3.1 `manage.py test registry` passes — baef9a7
+- [x] 3.2 `manage.py test` passes across the whole suite — baef9a7
+- [x] 3.3 `mypy` passes — baef9a7
+- [x] 3.4 `manage.py check` passes — baef9a7
+- [x] 3.5 `uv sync --locked` succeeds — baef9a7
+- [x] 3.6 Running `import_registry --file <fixture>` twice produces identical row counts — baef9a7
 
 #### Manual
 
-- [x] 3.7 Live-URL run completes in the same order as the measured ~13 s
-- [x] 3.8 Three brands spot-checked in admin, one per resolution path, `source_field` correct
-- [x] 3.9 Temp file removed after a successful run
+- [x] 3.7 Live-URL run completes in the same order as the measured ~13 s — baef9a7
+- [x] 3.8 Three brands spot-checked in admin, one per resolution path, `source_field` correct — baef9a7
+- [x] 3.9 Temp file removed after a successful run — baef9a7
 
 ### Phase 4: Production load
 
