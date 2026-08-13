@@ -68,6 +68,19 @@ CSRF_TRUSTED_ORIGINS = _csv_env('CSRF_TRUSTED_ORIGINS')
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
 
+# Where `manage.py import_registry` downloads the daily snapshot from. Public
+# government data, not a credential — so an in-code default is safe and keeps
+# CI's `manage.py check` green without a .env. The variable exists because the
+# publisher version-pins the path segment and retires old versions on a
+# published schedule (5.0.0 went that way), so a version bump must be a
+# variable change, not a code deploy. The expected XML namespace is DERIVED
+# from this URL by registry.parser.namespace_for_url() — never pin it
+# separately, or changing this URL would just fail at the namespace assert.
+REGISTRY_OVERALL_URL = os.environ.get(
+    'REGISTRY_OVERALL_URL',
+    'https://rejestry.ezdrowie.gov.pl/api/rpl/medicinal-products/public-pl-report/6.0.0/overall.xml',
+)
+
 
 # Application definition
 

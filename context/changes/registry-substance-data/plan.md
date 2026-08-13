@@ -867,33 +867,33 @@ new-table cost of well under an hour each, with no data loss in the interim.
 
 #### Automated
 
-- [x] 2.1 `manage.py test registry.tests.test_parser` passes
-- [x] 2.2 `mypy` passes with no `type: ignore` added to `registry/parser.py`
-- [x] 2.3 Denylist and `source_field` tests fail when their rule is deliberately inverted
-- [x] 2.4 `git log --follow` on the fixture shows a move, not a delete-plus-add
+- [x] 2.1 `manage.py test registry.tests.test_parser` passes — ad4edf7
+- [x] 2.2 `mypy` passes with no `type: ignore` added to `registry/parser.py` — ad4edf7
+- [x] 2.3 Denylist and `source_field` tests fail when their rule is deliberately inverted — ad4edf7
+- [x] 2.4 `git log --follow` on the fixture shows a move, not a delete-plus-add — ad4edf7
 
 #### Manual
 
-- [x] 2.5 Hand-fetched real `overall.xml` parses to ~20,187 human-use products, ≥95% resolved
-- [x] 2.6 Streaming-pass peak memory during the real parse stays in single-digit MB
-- [x] 2.7 Total peak with the materialized `ParseResult` measured and written into the plan
+- [x] 2.5 Hand-fetched real `overall.xml` parses to ~20,187 human-use products, ≥95% resolved — ad4edf7
+- [x] 2.6 Streaming-pass peak memory during the real parse stays in single-digit MB — ad4edf7
+- [x] 2.7 Total peak with the materialized `ParseResult` measured and written into the plan — ad4edf7
 
 ### Phase 3: Loader and management command
 
 #### Automated
 
-- [ ] 3.1 `manage.py test registry` passes
-- [ ] 3.2 `manage.py test` passes across the whole suite
-- [ ] 3.3 `mypy` passes
-- [ ] 3.4 `manage.py check` passes
-- [ ] 3.5 `uv sync --locked` succeeds
-- [ ] 3.6 Running `import_registry --file <fixture>` twice produces identical row counts
+- [x] 3.1 `manage.py test registry` passes
+- [x] 3.2 `manage.py test` passes across the whole suite
+- [x] 3.3 `mypy` passes
+- [x] 3.4 `manage.py check` passes
+- [x] 3.5 `uv sync --locked` succeeds
+- [x] 3.6 Running `import_registry --file <fixture>` twice produces identical row counts
 
 #### Manual
 
-- [ ] 3.7 Live-URL run completes in the same order as the measured ~13 s
-- [ ] 3.8 Three brands spot-checked in admin, one per resolution path, `source_field` correct
-- [ ] 3.9 Temp file removed after a successful run
+- [x] 3.7 Live-URL run completes in the same order as the measured ~13 s
+- [x] 3.8 Three brands spot-checked in admin, one per resolution path, `source_field` correct
+- [x] 3.9 Temp file removed after a successful run
 
 ### Phase 4: Production load
 
