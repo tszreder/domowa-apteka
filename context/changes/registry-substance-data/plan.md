@@ -395,6 +395,19 @@ first time one file holds a case-collision pair — the real registry has 5 — 
 verbatim spelling survives falls out of whatever order the loader happened to produce, silently
 defeating the pinned tiebreak.
 
+**Corrected during Phase 2 (impl-review F6).** As first written, the paragraph above contradicted
+the denylist: it said `substances` carries *the* vocabulary, while the loader inserts a
+`Substance` row for every key on it, insert-only forever — so `Produkt złożony` would become a
+permanent `Substance` row with zero links, which is exactly what `denylist.py` exists to prevent.
+The implemented contract is therefore narrower and is the one to build against: **`substances`
+carries only the names an emitted link points at**, still `name_key`-deduplicated and still in
+whole-file first-seen order. The wider membership set stays internal to the parser — the E1
+fallback is still tested against every `nazwaSubstancji` in the file, veterinary included, and
+the first-seen tiebreak is still computed over the whole file rather than over the emitted links,
+so a case-collision pair straddling a veterinary product still resolves to the spelling the
+registry stated first. A fallback-only name still appears, because resolving the fallback marks
+it as referenced before the sequence is built.
+
 Behaviour:
 - `xml.etree.ElementTree.iterparse` with `events=('start', 'end')`, calling `elem.clear()` on
   every `produktLeczniczy` `end` event — including filtered-out ones.

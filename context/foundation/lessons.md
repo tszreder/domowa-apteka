@@ -41,3 +41,28 @@
   fits the planning budget, mark the claim as unverified rather than stating it
   as fact.
 - **Applies to**: all
+
+## A plan can contradict itself; resolve it in code *and* write the resolution back
+
+- **Context**: `/10x-implement` output — `registry/parser.py:206-210`
+  (`ParseResult.substances`) against
+  `context/changes/registry-substance-data/plan.md` Phase 2 § 2 and Phase 3 § 3
+  step 1.
+- **Problem**: The plan specified `ParseResult.substances` as "the substance
+  vocabulary" in one place and, in another, had the loader insert a `Substance`
+  row for every key on it, insert-only forever. Read literally, the two together
+  made `Produkt złożony` a permanent `Substance` row with zero links — defeating
+  `denylist.py`, whose entire purpose is keeping those placeholders out of the
+  data. The implementation resolved this correctly by narrowing `substances` to
+  referenced names, and disclosed it in the commit body and a module docstring.
+  But the plan itself was left stating the contradiction, and the plan is what
+  `/10x-impl-review` and the next implementer read as ground truth — so the next
+  reader "fixes" the code back to the broken reading, and the review flags a
+  correct implementation as drift.
+- **Rule**: When implementation finds that two parts of a plan cannot both hold,
+  resolving it in code is only half the work. Edit the plan section that is now
+  wrong in the same change, marking it as corrected and saying why — a commit
+  message and a docstring do not reach the next reader of the plan. If the
+  correct resolution is genuinely uncertain, stop and raise it rather than
+  picking one silently.
+- **Applies to**: all

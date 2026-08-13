@@ -7,6 +7,7 @@ in an identical state.
 
 import tempfile
 import time
+from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -14,8 +15,10 @@ import requests
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError, CommandParser
 from django.db import transaction
+from django.db.models import Max
 
 from registry.loader import LoadStats, load_parse_result
+from registry.models import Product
 from registry.parser import RegistryParseError, namespace_for_url, parse_registry
 
 # Comfortably below the 20,187 human-use products measured on 2026-08-07, and
@@ -59,6 +62,13 @@ class Command(BaseCommand):
             action='store_true',
             help='Leave the downloaded snapshot on disk instead of deleting it.',
         )
+        parser.add_argument(
+            '--allow-older',
+            action='store_true',
+            help='Load a snapshot older than the newest already imported. Off by '
+            'default: an older snapshot rewinds last_seen_as_of on every shared '
+            'product and deactivates the ones it predates.',
+        )
 
     def handle(self, *args: Any, **options: Any) -> None:
         started = time.monotonic()
@@ -88,7 +98,12 @@ class Command(BaseCommand):
         try:
             if downloaded is not None:
                 self._download(url, downloaded)
-            stats = self._import(path, expected_namespace, options['min_products'])
+            stats = self._import(
+                path,
+                expected_namespace,
+                options['min_products'],
+                options['allow_older'],
+            )
         finally:
             if downloaded is not None:
                 if options['keep_download']:
@@ -102,6 +117,10 @@ class Command(BaseCommand):
         """Stream the snapshot to disk, never parsing off the live response.
 
         A mid-parse network blip would otherwise leave a half-applied load.
+
+        `OSError` is caught alongside the network errors because the write side
+        of this loop is just as much a boundary as the read side: a full disk
+        would otherwise surface as a traceback rather than a refusal.
         """
         self.stdout.write(f'Downloading {url}')
         try:
@@ -110,29 +129,63 @@ class Command(BaseCommand):
             with destination.open('wb') as handle:
                 for chunk in response.iter_content(chunk_size=CHUNK_SIZE):
                     handle.write(chunk)
-        except requests.RequestException as exc:
+        except (requests.RequestException, OSError) as exc:
             raise CommandError(f'Could not download {url}: {exc}') from exc
 
-    def _import(self, path: Path, expected_namespace: str, min_products: int) -> LoadStats:
+    def _import(
+        self,
+        path: Path,
+        expected_namespace: str,
+        min_products: int,
+        allow_older: bool,
+    ) -> LoadStats:
         try:
             result = parse_registry(path, expected_namespace)
         except RegistryParseError as exc:
             raise CommandError(str(exc)) from exc
 
         with transaction.atomic():
+            if not allow_older:
+                self._reject_older_snapshot(result.source_as_of, path)
             stats = load_parse_result(result)
             # Inside the transaction, so a snapshot that fails the guard leaves
             # nothing behind — not even the substances written first.
             if stats.products_loaded < min_products:
                 raise CommandError(
                     f'Only {stats.products_loaded} human-use products in {path} '
-                    f'(expected at least {min_products}). Refusing to load what '
-                    'looks like a truncated snapshot; nothing was written.'
+                    f'(expected at least {min_products}), out of '
+                    f'{stats.products_in_file} products in the file. Refusing to '
+                    'load it; nothing was written. A low count with a full file '
+                    'means the human-use filter stopped matching, not a truncated '
+                    'download.'
                 )
         return stats
 
+    def _reject_older_snapshot(self, source_as_of: date, path: Path) -> None:
+        """Refuse to rewind freshness.
+
+        `last_seen_as_of` is stamped unconditionally and the deactivation sweep
+        selects on it, so an older snapshot both rewinds the column F-02 reads
+        as freshness and flags every product it predates as withdrawn — while
+        reporting success. This is reachable through the documented path rather
+        than only by operator error: REGISTRY_OVERALL_URL exists so the export
+        version can be repointed, and 5.0.0 is still served.
+
+        Lives here rather than in the loader: which snapshots are acceptable is
+        a policy decision, and the loader is deliberately dumb about policy.
+        """
+        newest = Product.objects.aggregate(newest=Max('last_seen_as_of'))['newest']
+        if newest is not None and source_as_of < newest:
+            raise CommandError(
+                f'{path} is dated {source_as_of}, older than the {newest} already '
+                'loaded. Loading it would rewind last_seen_as_of on every shared '
+                'product and deactivate the ones absent from it. Pass --allow-older '
+                'to do it anyway.'
+            )
+
     def _report(self, stats: LoadStats, elapsed: float) -> None:
         self.stdout.write(f'Registry snapshot {stats.source_as_of}')
+        self.stdout.write(f'  products in file:   {stats.products_in_file} (all kinds)')
         self.stdout.write(
             f'  products loaded:    {stats.products_loaded} '
             f'({stats.products_created} new)'
@@ -144,4 +197,12 @@ class Command(BaseCommand):
         self.stdout.write(f'  links:              {stats.links_created}')
         for source_field, count in stats.links_by_source_field.items():
             self.stdout.write(f'    {source_field}: {count}')
+        # The plan's criterion 2.5 is "≥95% of human-use products resolve to at
+        # least one substance". Printing it means the number is recorded by any
+        # ordinary run instead of having to be reconstructed afterwards.
+        resolved = stats.products_loaded - stats.products_without_links
+        share = resolved / stats.products_loaded * 100 if stats.products_loaded else 0.0
+        self.stdout.write(
+            f'  resolved:           {resolved} of {stats.products_loaded} ({share:.1f}%)'
+        )
         self.stdout.write(self.style.SUCCESS(f'  elapsed:            {elapsed:.1f} s'))

@@ -107,7 +107,8 @@ class ParseResult:
     # (name, name_key) pairs, deduplicated on name_key, in first-seen order.
     substances: tuple[tuple[str, str], ...]
     # Every product in the file, veterinary included — the denominator behind
-    # the human-use share, and the honest input to a plausibility guard.
+    # the human-use share. Carried into LoadStats and reported, so the guard's
+    # refusal can say whether the file was short or the filter stopped matching.
     products_in_file: int
     substance_row_links: int
     common_name_links: int
@@ -137,7 +138,7 @@ def parse_registry(path: Path, expected_namespace: str) -> ParseResult:
     `expected_namespace` comes from `namespace_for_url()` at the call site, so
     this stays a pure function of its arguments — it reads no Django settings.
     """
-    events = ET.iterparse(path, events=('start', 'end'))
+    events = _stream_events(path)
     source_as_of = _read_root(events, expected_namespace)
 
     product_tag = f'{{{expected_namespace}}}produktLeczniczy'
@@ -213,6 +214,21 @@ def parse_registry(path: Path, expected_namespace: str) -> ParseResult:
         common_name_links=common_name_links,
         products_without_links=sum(1 for product in products if not product.links),
     )
+
+
+def _stream_events(path: Path) -> Iterator[tuple[str, Element]]:
+    """Stream parse events, re-raising ElementTree's own error as ours.
+
+    `ET.ParseError` subclasses `SyntaxError`, not `ValueError`, so it slips
+    past every `except RegistryParseError` at the call sites. That matters here
+    specifically: a truncated download is malformed XML far more often than it
+    is a short-but-valid file, so without this the unhandled path is the very
+    one the command's plausibility guard was written to cover.
+    """
+    try:
+        yield from ET.iterparse(path, events=('start', 'end'))
+    except ET.ParseError as exc:
+        raise RegistryParseError(f'{path} is not well-formed XML: {exc}') from exc
 
 
 def _read_root(events: Iterator[tuple[str, Any]], expected_namespace: str) -> date:
