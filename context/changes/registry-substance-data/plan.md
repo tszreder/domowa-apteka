@@ -899,13 +899,13 @@ new-table cost of well under an hour each, with no data loss in the interim.
 
 #### Automated
 
-- [x] 4.1 GitHub Actions `check` job passes on the PR
-- [x] 4.2 `deploy` job completes and the Railway healthcheck stays green
+- [x] 4.1 GitHub Actions `check` job passes on the PR — 69c7e8f
+- [x] 4.2 `deploy` job completes and the Railway healthcheck stays green — 69c7e8f
 
 #### Manual
 
-- [x] 4.3 `import_registry` completes on production with a product count in the local range
-- [x] 4.4 Production `/admin/registry/product/` returns loaded rows
-- [x] 4.5 A brand searched in production admin shows the same substances as locally
-- [x] 4.6 A second production run reports identical counts — idempotency confirmed on Postgres
-- [ ] 4.7 `railway.json` reverted and redeployed; a restart's logs show no import running
+- [x] 4.3 `import_registry` completes on production with a product count in the local range — 69c7e8f
+- [x] 4.4 Production `/admin/registry/product/` returns loaded rows — 69c7e8f
+- [x] 4.5 A brand searched in production admin shows the same substances as locally — 69c7e8f
+- [x] 4.6 A second production run reports identical counts — idempotency confirmed on Postgres — 69c7e8f
+- [x] 4.7 `railway.json` reverted and redeployed; a restart's logs show no import running — 69c7e8f
