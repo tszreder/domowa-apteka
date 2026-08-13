@@ -1,9 +1,9 @@
 {
   "$schema": "https://railway.com/railway.schema.json",
   "deploy": {
-    "startCommand": "python manage.py migrate --noinput && python manage.py collectstatic --noinput && gunicorn domowa_apteka.wsgi --bind 0.0.0.0:$PORT",
+    "startCommand": "python manage.py migrate --noinput && (python manage.py import_registry || true) && python manage.py collectstatic --noinput && gunicorn domowa_apteka.wsgi --bind 0.0.0.0:$PORT",
     "healthcheckPath": "/health/",
-    "healthcheckTimeout": 300,
+    "healthcheckTimeout": 600,
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 3,
     "numReplicas": 1,
