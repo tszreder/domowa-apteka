@@ -1,0 +1,553 @@
+<?xml version='1.0' encoding='utf-8'?>
+<produktyLecznicze xmlns="http://rejestry.ezdrowie.gov.pl/rpl/eksport-danych-v6.0.0" stanNaDzien="2026-08-07">
+    <produktLeczniczy nazwaProduktu="Nalgesin" rodzajPreparatu="ludzki" nazwaPowszechnieStosowana="Naproxenum natricum" nazwaPoprzedniaProduktu="brak" moc="275 mg" nazwaPostaciFarmaceutycznej="Tabletki powlekane" podmiotOdpowiedzialny="Krka, d.d., Novo mesto" typProcedury="DCP" numerPozwolenia="20696" waznoscPozwolenia="Bezterminowe" podstawaPrawna="art. 16 ust. 1" zakazStosowaniaUZwierzat="" ulotka="https://rejestry.ezdrowie.gov.pl/api/rpl/medicinal-products/3/leaflet" charakterystyka="https://rejestry.ezdrowie.gov.pl/api/rpl/medicinal-products/3/characteristic" id="100000037">
+        <kodyATC>
+            <kodATC>M01AE02</kodATC>
+        </kodyATC>
+        <drogiPodania>
+            <drogaPodania drogaPodaniaNazwa="doustna" />
+        </drogiPodania>
+        <substancjeCzynne>
+            <substancjaCzynna nazwaSubstancji="Naproxenum natricum" iloscSubstancji="275" jednostkaMiaryIlosciSubstancji="mg" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci="" />
+        </substancjeCzynne>
+        <opakowania>
+            <opakowanie kodGTIN="05909991023744" kategoriaDostepnosci="Rp" skasowane="NIE" numerEu="" dystrybutorRownolegly="" id="8">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="" rodzajOpakowania="" pojemnosc="10" jednostkaPojemnosci="tabl." informacjeDodatkowe="" />
+                </jednostkiOpakowania>
+                <zgodyPrezesa />
+            </opakowanie>
+            <opakowanie kodGTIN="05909991023751" kategoriaDostepnosci="Rp" skasowane="NIE" numerEu="" dystrybutorRownolegly="" id="9">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="" rodzajOpakowania="" pojemnosc="20" jednostkaPojemnosci="tabl." informacjeDodatkowe="" />
+                </jednostkiOpakowania>
+                <zgodyPrezesa />
+            </opakowanie>
+            <opakowanie kodGTIN="05909991023768" kategoriaDostepnosci="Rp" skasowane="NIE" numerEu="" dystrybutorRownolegly="" id="10">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="" rodzajOpakowania="" pojemnosc="30" jednostkaPojemnosci="tabl." informacjeDodatkowe="" />
+                </jednostkiOpakowania>
+                <zgodyPrezesa />
+            </opakowanie>
+            <opakowanie kodGTIN="05909991023775" kategoriaDostepnosci="Rp" skasowane="NIE" numerEu="" dystrybutorRownolegly="" id="11">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="" rodzajOpakowania="" pojemnosc="60" jednostkaPojemnosci="tabl." informacjeDodatkowe="" />
+                </jednostkiOpakowania>
+                <zgodyPrezesa />
+            </opakowanie>
+            <opakowanie kodGTIN="05909991066178" kategoriaDostepnosci="Rp" skasowane="NIE" numerEu="" dystrybutorRownolegly="" id="84656">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="" rodzajOpakowania="" pojemnosc="40" jednostkaPojemnosci="tabl." informacjeDodatkowe="" />
+                </jednostkiOpakowania>
+                <zgodyPrezesa />
+            </opakowanie>
+        </opakowania>
+        <daneOWytworcy>
+            <wytworcy nazwaWytworcyImportera="Krka, d.d., Novo mesto" krajWytworcyImportera="Słowenia" />
+        </daneOWytworcy>
+        <materialyEdukacyjne>
+            <dlaPacjenta />
+            <dlaMedyka />
+        </materialyEdukacyjne>
+    </produktLeczniczy>
+    <produktLeczniczy nazwaProduktu="Altacet" rodzajPreparatu="ludzki" nazwaPowszechnieStosowana="Aluminii acetotartras" nazwaPoprzedniaProduktu="brak" moc="1000 mg" nazwaPostaciFarmaceutycznej="Tabletki" podmiotOdpowiedzialny="Sandoz GmbH" typProcedury="NAR" numerPozwolenia="00521" waznoscPozwolenia="2023-10-26" podstawaPrawna="art. 16 ust. 1" zakazStosowaniaUZwierzat="" ulotka="https://rejestry.ezdrowie.gov.pl/api/rpl/medicinal-products/425/leaflet" charakterystyka="https://rejestry.ezdrowie.gov.pl/api/rpl/medicinal-products/425/characteristic" id="100004259">
+        <kodyATC />
+        <drogiPodania>
+            <drogaPodania drogaPodaniaNazwa="doustna" />
+        </drogiPodania>
+        <substancjeCzynne>
+            <substancjaCzynna nazwaSubstancji="Aluminii acetotartras" iloscSubstancji="1000" jednostkaMiaryIlosciSubstancji="mg" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci="" />
+            <substancjaCzynna nazwaSubstancji="Aluminii acetotartras" iloscSubstancji="100" jednostkaMiaryIlosciSubstancji="mg" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci="" />
+        </substancjeCzynne>
+        <opakowania>
+            <opakowanie kodGTIN="05909990052110" kategoriaDostepnosci="OTC" skasowane="NIE" numerEu="" dystrybutorRownolegly="" id="674">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="" rodzajOpakowania="" pojemnosc="6" jednostkaPojemnosci="tabl." informacjeDodatkowe="" />
+                </jednostkiOpakowania>
+                <zgodyPrezesa />
+            </opakowanie>
+        </opakowania>
+        <daneOWytworcy>
+            <wytworcy nazwaWytworcyImportera="LEK S.A." krajWytworcyImportera="Polska" />
+            <wytworcy nazwaWytworcyImportera="LEK S.A." krajWytworcyImportera="Polska" />
+        </daneOWytworcy>
+        <materialyEdukacyjne>
+            <dlaPacjenta />
+            <dlaMedyka />
+        </materialyEdukacyjne>
+    </produktLeczniczy>
+    <produktLeczniczy nazwaProduktu="Peditrace" rodzajPreparatu="ludzki" nazwaPowszechnieStosowana="Preparat złożony" nazwaPoprzedniaProduktu="brak" moc="-" nazwaPostaciFarmaceutycznej="Koncentrat do sporządzania roztworu do infuzji" podmiotOdpowiedzialny="Fresenius Kabi AB" typProcedury="NAR" numerPozwolenia="07375" waznoscPozwolenia="Bezterminowe" podstawaPrawna="art. 10 ust. 1 i 2" zakazStosowaniaUZwierzat="" ulotka="https://rejestry.ezdrowie.gov.pl/api/rpl/medicinal-products/7816/leaflet" charakterystyka="https://rejestry.ezdrowie.gov.pl/api/rpl/medicinal-products/7816/characteristic" id="100078163">
+        <kodyATC>
+            <kodATC>B05X</kodATC>
+        </kodyATC>
+        <drogiPodania>
+            <drogaPodania drogaPodaniaNazwa="dożylna" />
+        </drogiPodania>
+        <substancjeCzynne>
+            <substancjaCzynna nazwaSubstancji="Zinci chloridum" iloscSubstancji="" jednostkaMiaryIlosciSubstancji="" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci="521,00 mcg" />
+            <substancjaCzynna nazwaSubstancji="Cuprii chloridum dihydricum" iloscSubstancji="" jednostkaMiaryIlosciSubstancji="" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci="53,70 mcg" />
+            <substancjaCzynna nazwaSubstancji="Natrii selenis pentahydricus" iloscSubstancji="" jednostkaMiaryIlosciSubstancji="" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci="6,66 mcg" />
+            <substancjaCzynna nazwaSubstancji="Natrii fluoridum" iloscSubstancji="" jednostkaMiaryIlosciSubstancji="" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci="126,00 mcg" />
+            <substancjaCzynna nazwaSubstancji="Zinci chloridum" iloscSubstancji="" jednostkaMiaryIlosciSubstancji="" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci="1,31 mcg" />
+            <substancjaCzynna nazwaSubstancji="Chlorek manganu czterowodny" iloscSubstancji="" jednostkaMiaryIlosciSubstancji="" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci="3,60 mcg" />
+            <substancjaCzynna nazwaSubstancji="Kalii iodidum" iloscSubstancji="" jednostkaMiaryIlosciSubstancji="" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci="1,31 mcg" />
+        </substancjeCzynne>
+        <opakowania>
+            <opakowanie kodGTIN="05909990737512" kategoriaDostepnosci="Lz" skasowane="NIE" numerEu="" dystrybutorRownolegly="" id="11790">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="10" rodzajOpakowania="fiol." pojemnosc="10" jednostkaPojemnosci="ml" informacjeDodatkowe="" />
+                </jednostkiOpakowania>
+                <zgodyPrezesa />
+            </opakowanie>
+        </opakowania>
+        <daneOWytworcy>
+            <wytworcy nazwaWytworcyImportera="HP Halden Pharma AS" krajWytworcyImportera="Norwegia" />
+        </daneOWytworcy>
+        <materialyEdukacyjne>
+            <dlaPacjenta />
+            <dlaMedyka />
+        </materialyEdukacyjne>
+    </produktLeczniczy>
+    <produktLeczniczy nazwaProduktu="Vaminolact" rodzajPreparatu="ludzki" nazwaPowszechnieStosowana="Preparat złożony" nazwaPoprzedniaProduktu="brak" moc="-" nazwaPostaciFarmaceutycznej="Roztwór do infuzji" podmiotOdpowiedzialny="Fresenius Kabi AB" typProcedury="NAR" numerPozwolenia="06553" waznoscPozwolenia="2026-04-09" podstawaPrawna="art. 16 ust. 1" zakazStosowaniaUZwierzat="" ulotka="https://rejestry.ezdrowie.gov.pl/api/rpl/medicinal-products/259/leaflet" charakterystyka="https://rejestry.ezdrowie.gov.pl/api/rpl/medicinal-products/259/characteristic" id="100002591">
+        <kodyATC>
+            <kodATC>B05BA01</kodATC>
+        </kodyATC>
+        <drogiPodania>
+            <drogaPodania drogaPodaniaNazwa="dożylna" />
+        </drogiPodania>
+        <substancjeCzynne>
+            <substancjaCzynna nazwaSubstancji="Glicyna" iloscSubstancji="2,1" jednostkaMiaryIlosciSubstancji="g" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci="" />
+            <substancjaCzynna nazwaSubstancji="L-Alanine" iloscSubstancji="6,3" jednostkaMiaryIlosciSubstancji="g" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci="" />
+            <substancjaCzynna nazwaSubstancji="L-Argininum" iloscSubstancji="4,1" jednostkaMiaryIlosciSubstancji="g" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci="" />
+            <substancjaCzynna nazwaSubstancji="L-asparaginowy kwas" iloscSubstancji="4,1" jednostkaMiaryIlosciSubstancji="g" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci="" />
+            <substancjaCzynna nazwaSubstancji="L-cysteina (+ L-cystyna)" iloscSubstancji="1" jednostkaMiaryIlosciSubstancji="g" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci="" />
+            <substancjaCzynna nazwaSubstancji="L-Glutaminum" iloscSubstancji="7,1" jednostkaMiaryIlosciSubstancji="g" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci="" />
+            <substancjaCzynna nazwaSubstancji="L-Histydyna" iloscSubstancji="2,1" jednostkaMiaryIlosciSubstancji="g" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci="" />
+            <substancjaCzynna nazwaSubstancji="L-izoleucyna" iloscSubstancji="3,1" jednostkaMiaryIlosciSubstancji="g" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci="" />
+            <substancjaCzynna nazwaSubstancji="L-Leucinum" iloscSubstancji="7" jednostkaMiaryIlosciSubstancji="g" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci="" />
+            <substancjaCzynna nazwaSubstancji="L-Lizyna" iloscSubstancji="5,6" jednostkaMiaryIlosciSubstancji="g" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci="" />
+            <substancjaCzynna nazwaSubstancji="L-metionina" iloscSubstancji="3,1" jednostkaMiaryIlosciSubstancji="g" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci="" />
+            <substancjaCzynna nazwaSubstancji="L-fenyloalanina" iloscSubstancji="2,7" jednostkaMiaryIlosciSubstancji="g" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci="" />
+            <substancjaCzynna nazwaSubstancji="L-Prolinum" iloscSubstancji="5,6" jednostkaMiaryIlosciSubstancji="g" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci="" />
+            <substancjaCzynna nazwaSubstancji="L-Serinum" iloscSubstancji="3,8" jednostkaMiaryIlosciSubstancji="g" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci="" />
+            <substancjaCzynna nazwaSubstancji="Tauryna" iloscSubstancji="300" jednostkaMiaryIlosciSubstancji="mg" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci="" />
+            <substancjaCzynna nazwaSubstancji="L-treonina" iloscSubstancji="3,6" jednostkaMiaryIlosciSubstancji="g" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci="" />
+            <substancjaCzynna nazwaSubstancji="L-Tryptophanum" iloscSubstancji="1,4" jednostkaMiaryIlosciSubstancji="g" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci="" />
+            <substancjaCzynna nazwaSubstancji="L-tyrozyna" iloscSubstancji="500" jednostkaMiaryIlosciSubstancji="mg" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci="" />
+            <substancjaCzynna nazwaSubstancji="L-walina" iloscSubstancji="3,6" jednostkaMiaryIlosciSubstancji="g" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci="" />
+        </substancjeCzynne>
+        <opakowania>
+            <opakowanie kodGTIN="05909990655311" kategoriaDostepnosci="Lz" skasowane="NIE" numerEu="" dystrybutorRownolegly="" id="10488">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="1" rodzajOpakowania="butelka" pojemnosc="100" jednostkaPojemnosci="ml" informacjeDodatkowe="" />
+                </jednostkiOpakowania>
+                <zgodyPrezesa />
+            </opakowanie>
+            <opakowanie kodGTIN="05909990655328" kategoriaDostepnosci="Lz" skasowane="NIE" numerEu="" dystrybutorRownolegly="" id="10489">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="1" rodzajOpakowania="butelka" pojemnosc="500" jednostkaPojemnosci="ml" informacjeDodatkowe="" />
+                </jednostkiOpakowania>
+                <zgodyPrezesa />
+            </opakowanie>
+        </opakowania>
+        <daneOWytworcy>
+            <wytworcy nazwaWytworcyImportera="Fresenius Kabi AB" krajWytworcyImportera="Szwecja" />
+            <wytworcy nazwaWytworcyImportera="Fresenius Kabi AB" krajWytworcyImportera="Szwecja" />
+            <wytworcy nazwaWytworcyImportera="Fresenius Kabi Austria GmbH" krajWytworcyImportera="Austria" />
+        </daneOWytworcy>
+        <materialyEdukacyjne>
+            <dlaPacjenta />
+            <dlaMedyka />
+        </materialyEdukacyjne>
+    </produktLeczniczy>
+    <produktLeczniczy nazwaProduktu="Parvoerysin" rodzajPreparatu="weterynaryjny" nazwaPowszechnieStosowana="Szczepionka przeciw parwowirozie i różycy świń, inaktywowana" nazwaPoprzedniaProduktu="brak" moc="Każda dawka szczepionki (2 ml) zawiera: Inaktywowany parwowirus świński CAPM V198, szczep S-27 nie mniej niż 4 log2 HI *) Inaktywowany szczep 2-64 Erysipelothrix rhusiopathiae, serotyp 2a nie mniej niż 1 RP**) Inaktywowany szczep 2-5 Erysipelothrix rhusiopathiae, serotyp 2a nie mniej niż 1 RP**) Inaktywowany szczep 1-203 Erysipelothrix rhusiopathiae, serotyp 1a nie mniej niż 1 RP**) Inaktywowany szczep 2-II Erysipelothrix rhusiopathiae, serotyp 2a nie mniej niż 1 RP**) *) Miano przeciwciał HI w surowicy krwi kawii domowej po zastosowaniu 1/4 dawki szczepionki **) RP miano względem standardu stosowanego w badaniach skuteczności szczepionki na docelowych gatunkach zwierząt zgodnie z wymaganiami określonymi w monografii Farmakopei Europejskiej" nazwaPostaciFarmaceutycznej="Emulsja do wstrzykiwań" podmiotOdpowiedzialny="Grabikowski-Grabikowska Przedsiębiorstwo Produkcyjno-Handlowo-Usługowe „INEX” Spółka Jawna" typProcedury="NAR" numerPozwolenia="2237" waznoscPozwolenia="Bezterminowe" podstawaPrawna="art. 10 ust. 2a" zakazStosowaniaUZwierzat="" ulotka="https://rejestry.ezdrowie.gov.pl/api/rpl/medicinal-products/570/leaflet" charakterystyka="https://rejestry.ezdrowie.gov.pl/api/rpl/medicinal-products/570/characteristic" id="100005709">
+        <kodyATC>
+            <kodATC>QI09AL01</kodATC>
+        </kodyATC>
+        <drogiPodania>
+            <drogaPodania drogaPodaniaNazwa="Podanie domięśniowe">
+                <gatunki>
+                    <gatunek nazwaGatunku="świnia">
+                        <okresyKarencji>
+                            <okresKarencji nazwaTkanki="tkanki jadalne" wartoscMiary="0.0" jednostkaMiary="dni" />
+                        </okresyKarencji>
+                    </gatunek>
+                </gatunki>
+            </drogaPodania>
+        </drogiPodania>
+        <substancjeCzynne>
+            <substancjaCzynna nazwaSubstancji="Inaktywowany szczep 1-203 Erysipelothrix rhusiopathiae, serotyp 1a" iloscSubstancji="" jednostkaMiaryIlosciSubstancji="" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci="nie mniej niż 1 RP** **) RP miano względem standardu stosowanego w badaniach skuteczności szczepionki na docelowych gatunkach zwierząt zgodnie z wymaganiami określonymi w monografii Farmakopei Europejskiej" />
+            <substancjaCzynna nazwaSubstancji="Inaktywowany szczep 2-II Erysipelothrix rhusiopathiae, serotyp 2a" iloscSubstancji="" jednostkaMiaryIlosciSubstancji="" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci="Każda dawka szczepionki (2 ml) zawiera: nie mniej niż 1 RP**) **) RP miano względem standardu stosowanego w badaniach skuteczności szczepionki na docelowych gatunkach zwierząt zgodnie z wymaganiami określonymi w monografii Farmakopei Europejskiej" />
+            <substancjaCzynna nazwaSubstancji="Inaktywowany szczep 2-64 Erysipelothrix rhusiopathiae, serotyp 2a" iloscSubstancji="" jednostkaMiaryIlosciSubstancji="" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci="Każda dawka szczepionki (2 ml) zawiera: nie mniej niż 1 RP**) **) RP miano względem standardu stosowanego w badaniach skuteczności szczepionki na docelowych gatunkach zwierząt zgodnie z wymaganiami określonymi w monografii Farmakopei Europejskiej" />
+            <substancjaCzynna nazwaSubstancji="Inaktywowany parwowirus świński CAPM V198, szczep S-27" iloscSubstancji="" jednostkaMiaryIlosciSubstancji="" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci="Każda dawka szczepionki (2 ml) zawiera: nie mniej niż 4 log2 HI *) *) Miano przeciwciał HI w surowicy krwi kawii domowej po zastosowaniu 1/4 dawki szczepionki" />
+            <substancjaCzynna nazwaSubstancji="Inaktywowany szczep 2-5 Erysipelothrix rhusiopathiae, serotyp 2a" iloscSubstancji="" jednostkaMiaryIlosciSubstancji="" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci="Każda dawka szczepionki (2 ml) zawiera: nie mniej niż 1 RP**) **) RP miano względem standardu stosowanego w badaniach skuteczności szczepionki na docelowych gatunkach zwierząt zgodnie z wymaganiami określonymi w monografii Farmakopei Europejskiej" />
+        </substancjeCzynne>
+        <opakowania>
+            <opakowanie kodGTIN="5909991029876" kategoriaDostepnosci="Rp" skasowane="NIE" numerEu="" dystrybutorRownolegly="" id="52184">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="1" rodzajOpakowania="fiol." pojemnosc="10" jednostkaPojemnosci="ml" informacjeDodatkowe="" />
+                </jednostkiOpakowania>
+                <zgodyPrezesa />
+            </opakowanie>
+            <opakowanie kodGTIN="5909991029883" kategoriaDostepnosci="Rp" skasowane="NIE" numerEu="" dystrybutorRownolegly="" id="52861">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="1" rodzajOpakowania="fiol." pojemnosc="50" jednostkaPojemnosci="ml" informacjeDodatkowe="" />
+                </jednostkiOpakowania>
+                <zgodyPrezesa />
+            </opakowanie>
+            <opakowanie kodGTIN="5909991029890" kategoriaDostepnosci="Rp" skasowane="NIE" numerEu="" dystrybutorRownolegly="" id="53454">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="1" rodzajOpakowania="fiol." pojemnosc="100" jednostkaPojemnosci="ml" informacjeDodatkowe="" />
+                </jednostkiOpakowania>
+                <zgodyPrezesa />
+            </opakowanie>
+            <opakowanie kodGTIN="5909991029906" kategoriaDostepnosci="Rp" skasowane="NIE" numerEu="" dystrybutorRownolegly="" id="57500">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="5" rodzajOpakowania="fiol." pojemnosc="20" jednostkaPojemnosci="ml" informacjeDodatkowe="" />
+                </jednostkiOpakowania>
+                <zgodyPrezesa />
+            </opakowanie>
+            <opakowanie kodGTIN="5909991029937" kategoriaDostepnosci="Rp" skasowane="NIE" numerEu="" dystrybutorRownolegly="" id="57583">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="10" rodzajOpakowania="fiol." pojemnosc="10" jednostkaPojemnosci="ml" informacjeDodatkowe="" />
+                </jednostkiOpakowania>
+                <zgodyPrezesa />
+            </opakowanie>
+        </opakowania>
+        <daneOWytworcy>
+            <wytworcy nazwaWytworcyImportera="Bioveta, a.s." krajWytworcyImportera="Czechy" />
+        </daneOWytworcy>
+        <materialyEdukacyjne>
+            <dlaPacjenta />
+            <dlaMedyka />
+        </materialyEdukacyjne>
+    </produktLeczniczy>
+    <produktLeczniczy nazwaProduktu="Beto 200 ZK" rodzajPreparatu="ludzki" nazwaPowszechnieStosowana="Metoprololi succinas" nazwaPoprzedniaProduktu="brak" moc="190 mg" nazwaPostaciFarmaceutycznej="Tabletki o przedłużonym uwalnianiu" podmiotOdpowiedzialny="Delfarma Sp. z o.o." typProcedury="IR" numerPozwolenia="708/12" waznoscPozwolenia="2027-11-15" zakazStosowaniaUZwierzat="" ulotkaImportRownolegly="https://rejestry.ezdrowie.gov.pl/api/rpl/medicinal-products/519/parallel-import-files/LEAFLET/public" oznaczenieOpakowanImportRownolegly="https://rejestry.ezdrowie.gov.pl/api/rpl/medicinal-products/519/parallel-import-files/PACKAGE_MARKING/public" id="100005193">
+        <kodyATC>
+            <kodATC>C07AB02</kodATC>
+        </kodyATC>
+        <drogiPodania>
+            <drogaPodania drogaPodaniaNazwa="doustna" />
+        </drogiPodania>
+        <substancjeCzynne />
+        <opakowania>
+            <opakowanie kodGTIN="05909997215945" kategoriaDostepnosci="Rp" skasowane="NIE" numerEu="" dystrybutorRownolegly="" id="20">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="" rodzajOpakowania="" pojemnosc="28" jednostkaPojemnosci="tabl." informacjeDodatkowe="" />
+                </jednostkiOpakowania>
+                <zgodyPrezesa />
+            </opakowanie>
+            <opakowanie kodGTIN="05909997215952" kategoriaDostepnosci="Rp" skasowane="NIE" numerEu="" dystrybutorRownolegly="" id="92">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="" rodzajOpakowania="" pojemnosc="30" jednostkaPojemnosci="tabl." informacjeDodatkowe="" />
+                </jednostkiOpakowania>
+                <zgodyPrezesa />
+            </opakowanie>
+            <opakowanie kodGTIN="05909997215969" kategoriaDostepnosci="Rp" skasowane="NIE" numerEu="" dystrybutorRownolegly="" id="127">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="" rodzajOpakowania="" pojemnosc="60" jednostkaPojemnosci="tabl." informacjeDodatkowe="" />
+                </jednostkiOpakowania>
+                <zgodyPrezesa />
+            </opakowanie>
+        </opakowania>
+        <daneOWytworcy>
+            <wytworcy podmiotOdpowiedzialnywKrajuEksportu="Sandoz B.V." krajEksportu="Holandia" />
+        </daneOWytworcy>
+        <materialyEdukacyjne>
+            <dlaPacjenta />
+            <dlaMedyka />
+        </materialyEdukacyjne>
+    </produktLeczniczy>
+    <produktLeczniczy nazwaProduktu="ZmienićDIVENCE" rodzajPreparatu="weterynaryjny" nazwaPowszechnieStosowana="" nazwaPoprzedniaProduktu="brak" nazwaPostaciFarmaceutycznej="Liofilizat i rozpuszczalnik do sporządzania emulsji do wstrzykiwań" podmiotOdpowiedzialny="" typProcedury="CEN" numerPozwolenia="EU/2/24/307" waznoscPozwolenia="Bezterminowe" zakazStosowaniaUZwierzat="" id="100495800">
+        <kodyATC>
+            <kodATC>QI02AH</kodATC>
+        </kodyATC>
+        <drogiPodania>
+            <drogaPodania drogaPodaniaNazwa="Podanie domięśniowe">
+                <gatunki>
+                    <gatunek nazwaGatunku="bydło">
+                        <okresyKarencji>
+                            <okresKarencji nazwaTkanki="tkanki jadalne" wartoscMiary="0.0" jednostkaMiary="dni" />
+                        </okresyKarencji>
+                    </gatunek>
+                </gatunki>
+            </drogaPodania>
+        </drogiPodania>
+        <substancjeCzynne />
+        <opakowania>
+            <opakowanie kategoriaDostepnosci="Rp" skasowane="NIE" numerEu="EU/2/24/307/002" dystrybutorRownolegly="" id="154165">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="1" rodzajOpakowania="fiol." pojemnosc="10" jednostkaPojemnosci="dawek" informacjeDodatkowe="" />
+                </jednostkiOpakowania>
+                <zgodyPrezesa />
+            </opakowanie>
+            <opakowanie kategoriaDostepnosci="Rp" skasowane="NIE" numerEu="EU/2/24/307/003" dystrybutorRownolegly="" id="154166">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="1" rodzajOpakowania="fiol." pojemnosc="20" jednostkaPojemnosci="dawek" informacjeDodatkowe="" />
+                </jednostkiOpakowania>
+                <zgodyPrezesa />
+            </opakowanie>
+            <opakowanie kategoriaDostepnosci="Rp" skasowane="NIE" numerEu="EU/2/24/307/001" dystrybutorRownolegly="" id="154167">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="1" rodzajOpakowania="fiol." pojemnosc="5" jednostkaPojemnosci="dawek" informacjeDodatkowe="" />
+                </jednostkiOpakowania>
+                <zgodyPrezesa />
+            </opakowanie>
+        </opakowania>
+        <daneOWytworcy />
+        <materialyEdukacyjne>
+            <dlaPacjenta />
+            <dlaMedyka />
+        </materialyEdukacyjne>
+    </produktLeczniczy>
+    <produktLeczniczy nazwaProduktu="Xanax" rodzajPreparatu="ludzki" nazwaPowszechnieStosowana="Alprazolamum" nazwaPoprzedniaProduktu="brak" moc="2 mg" nazwaPostaciFarmaceutycznej="Tabletki" podmiotOdpowiedzialny="Viatris Healthcare Limited" typProcedury="NAR" numerPozwolenia="00367" waznoscPozwolenia="Bezterminowe" podstawaPrawna="art. 10 ust. 1 i 2" zakazStosowaniaUZwierzat="" ulotka="https://rejestry.ezdrowie.gov.pl/api/rpl/medicinal-products/7199/leaflet" charakterystyka="https://rejestry.ezdrowie.gov.pl/api/rpl/medicinal-products/7199/characteristic" id="100071994">
+        <kodyATC>
+            <kodATC>N05BA12</kodATC>
+        </kodyATC>
+        <drogiPodania>
+            <drogaPodania drogaPodaniaNazwa="doustna" />
+        </drogiPodania>
+        <substancjeCzynne>
+            <substancjaCzynna nazwaSubstancji="Alprazolamum" iloscSubstancji="2" jednostkaMiaryIlosciSubstancji="mg" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci="" />
+        </substancjeCzynne>
+        <opakowania>
+            <opakowanie kodGTIN="05909990036714" kategoriaDostepnosci="Rp" skasowane="TAK" numerEu="" dystrybutorRownolegly="" id="10853">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="" rodzajOpakowania="" pojemnosc="30" jednostkaPojemnosci="tabl." informacjeDodatkowe="w blistrach" />
+                </jednostkiOpakowania>
+                <zgodyPrezesa />
+            </opakowanie>
+            <opakowanie kodGTIN="05909990036721" kategoriaDostepnosci="Rp" skasowane="TAK" numerEu="" dystrybutorRownolegly="" id="10854">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="" rodzajOpakowania="" pojemnosc="50" jednostkaPojemnosci="tabl." informacjeDodatkowe="w blistrach" />
+                </jednostkiOpakowania>
+                <zgodyPrezesa />
+            </opakowanie>
+            <opakowanie kodGTIN="05909990036738" kategoriaDostepnosci="Rp" skasowane="TAK" numerEu="" dystrybutorRownolegly="" id="10855">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="" rodzajOpakowania="" pojemnosc="100" jednostkaPojemnosci="tabl." informacjeDodatkowe="w blistrach" />
+                </jednostkiOpakowania>
+                <zgodyPrezesa />
+            </opakowanie>
+            <opakowanie kategoriaDostepnosci="Rp" skasowane="TAK" numerEu="" dystrybutorRownolegly="" id="10856">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="" rodzajOpakowania="" pojemnosc="10" jednostkaPojemnosci="tabl." informacjeDodatkowe="" />
+                </jednostkiOpakowania>
+                <zgodyPrezesa />
+            </opakowanie>
+            <opakowanie kategoriaDostepnosci="Rp" skasowane="TAK" numerEu="" dystrybutorRownolegly="" id="10857">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="" rodzajOpakowania="" pojemnosc="20" jednostkaPojemnosci="tabl." informacjeDodatkowe="" />
+                </jednostkiOpakowania>
+                <zgodyPrezesa />
+            </opakowanie>
+            <opakowanie kodGTIN="05909990036745" kategoriaDostepnosci="Rp" skasowane="NIE" numerEu="" dystrybutorRownolegly="" id="17785">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="" rodzajOpakowania="" pojemnosc="30" jednostkaPojemnosci="tabl." informacjeDodatkowe="" />
+                </jednostkiOpakowania>
+                <zgodyPrezesa />
+            </opakowanie>
+            <opakowanie kodGTIN="05909990036752" kategoriaDostepnosci="Rp" skasowane="NIE" numerEu="" dystrybutorRownolegly="" id="17786">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="" rodzajOpakowania="" pojemnosc="50" jednostkaPojemnosci="tabl." informacjeDodatkowe="" />
+                </jednostkiOpakowania>
+                <zgodyPrezesa />
+            </opakowanie>
+            <opakowanie kodGTIN="05909990036769" kategoriaDostepnosci="Rp" skasowane="NIE" numerEu="" dystrybutorRownolegly="" id="17787">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="" rodzajOpakowania="" pojemnosc="100" jednostkaPojemnosci="tabl." informacjeDodatkowe="" />
+                </jednostkiOpakowania>
+                <zgodyPrezesa />
+            </opakowanie>
+        </opakowania>
+        <daneOWytworcy>
+            <wytworcy nazwaWytworcyImportera="Fine Foods &amp; Pharmaceuticals N.T.M. S.p.A" krajWytworcyImportera="Włochy" />
+            <wytworcy nazwaWytworcyImportera="Mylan Hungary Kft./Mylan Hungary Ltd" krajWytworcyImportera="Węgry" />
+            <wytworcy nazwaWytworcyImportera="Pfizer Italia S.r.l." krajWytworcyImportera="Włochy" />
+        </daneOWytworcy>
+        <materialyEdukacyjne>
+            <dlaPacjenta />
+            <dlaMedyka />
+        </materialyEdukacyjne>
+    </produktLeczniczy>
+    <produktLeczniczy nazwaProduktu="Beto 25 ZK" rodzajPreparatu="ludzki" nazwaPowszechnieStosowana="Metoprololi succinas" nazwaPoprzedniaProduktu="brak" moc="23,75 mg" nazwaPostaciFarmaceutycznej="Tabletki o przedłużonym uwalnianiu" podmiotOdpowiedzialny="Pharmapoint SA" typProcedury="IR" numerPozwolenia="57/20" waznoscPozwolenia="2025-02-26" zakazStosowaniaUZwierzat="" id="100432015">
+        <kodyATC>
+            <kodATC>C07AB02</kodATC>
+        </kodyATC>
+        <drogiPodania>
+            <drogaPodania drogaPodaniaNazwa="doustna"/>
+        </drogiPodania>
+        <substancjeCzynne>
+            <substancjaCzynna nazwaSubstancji="Metoprololi succinas" iloscSubstancji="23,75" jednostkaMiaryIlosciSubstancji="mg" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci=""/>
+        </substancjeCzynne>
+        <opakowania>
+            <opakowanie kodGTIN="05909991424343" kategoriaDostepnosci="Rp" skasowane="NIE" numerEu="" dystrybutorRownolegly="" id="135467">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="" rodzajOpakowania="" pojemnosc="30" jednostkaPojemnosci="tabl." informacjeDodatkowe=""/>
+                </jednostkiOpakowania>
+                <zgodyPrezesa/>
+            </opakowanie>
+        </opakowania>
+        <daneOWytworcy>
+            <wytworcy podmiotOdpowiedzialnywKrajuEksportu="Hexal AG" krajEksportu="Niemcy"/>
+        </daneOWytworcy>
+        <materialyEdukacyjne>
+            <dlaPacjenta/>
+            <dlaMedyka/>
+        </materialyEdukacyjne>
+    </produktLeczniczy>
+    <produktLeczniczy nazwaProduktu="Cyclo 3 Fort" rodzajPreparatu="ludzki" nazwaPowszechnieStosowana="Produkt złożony" nazwaPoprzedniaProduktu="brak" moc="150 mg + 150 mg + 100 mg" nazwaPostaciFarmaceutycznej="Kapsułki twarde" podmiotOdpowiedzialny="Delfarma Sp. z o.o." typProcedury="IR" numerPozwolenia="348/18" waznoscPozwolenia="2023-12-11" zakazStosowaniaUZwierzat="" id="100413510">
+        <kodyATC/>
+        <drogiPodania>
+            <drogaPodania drogaPodaniaNazwa="doustna"/>
+        </drogiPodania>
+        <substancjeCzynne>
+            <substancjaCzynna nazwaSubstancji="Produkt złożony" iloscSubstancji="" jednostkaMiaryIlosciSubstancji="" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci="150 mg + 150 mg + 100 mg"/>
+        </substancjeCzynne>
+        <opakowania>
+            <opakowanie kodGTIN="05909991388539" kategoriaDostepnosci="OTC" skasowane="NIE" numerEu="" dystrybutorRownolegly="" id="130469">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="" rodzajOpakowania="" pojemnosc="30" jednostkaPojemnosci="kaps." informacjeDodatkowe=""/>
+                </jednostkiOpakowania>
+                <zgodyPrezesa/>
+            </opakowanie>
+        </opakowania>
+        <daneOWytworcy>
+            <wytworcy podmiotOdpowiedzialnywKrajuEksportu="Pierre Fabre Medicament" krajEksportu="Rumunia"/>
+        </daneOWytworcy>
+        <materialyEdukacyjne>
+            <dlaPacjenta/>
+            <dlaMedyka/>
+        </materialyEdukacyjne>
+    </produktLeczniczy>
+    <produktLeczniczy nazwaProduktu="Moviprep" rodzajPreparatu="ludzki" nazwaPowszechnieStosowana="Produkt złożony" nazwaPoprzedniaProduktu="brak" moc="-" nazwaPostaciFarmaceutycznej="Proszek do sporządzania roztworu doustnego" podmiotOdpowiedzialny="Delfarma Sp. z o.o." typProcedury="IR" numerPozwolenia="83/21" waznoscPozwolenia="2026-03-16" zakazStosowaniaUZwierzat="" id="100449211">
+        <kodyATC>
+            <kodATC>A06AD</kodATC>
+        </kodyATC>
+        <drogiPodania>
+            <drogaPodania drogaPodaniaNazwa="doustna"/>
+        </drogiPodania>
+        <substancjeCzynne/>
+        <opakowania>
+            <opakowanie kodGTIN="05909991449988" kategoriaDostepnosci="Rp" skasowane="NIE" numerEu="" dystrybutorRownolegly="" id="139579">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="1" rodzajOpakowania="zestaw" pojemnosc="" jednostkaPojemnosci="" informacjeDodatkowe=""/>
+                </jednostkiOpakowania>
+                <zgodyPrezesa/>
+            </opakowanie>
+        </opakowania>
+        <daneOWytworcy>
+            <wytworcy podmiotOdpowiedzialnywKrajuEksportu="Norgine BV" krajEksportu="Litwa"/>
+        </daneOWytworcy>
+        <materialyEdukacyjne>
+            <dlaPacjenta/>
+            <dlaMedyka/>
+        </materialyEdukacyjne>
+    </produktLeczniczy>
+    <produktLeczniczy nazwaProduktu="Staloral 300" rodzajPreparatu="ludzki" nazwaPowszechnieStosowana="Wyciągi alergenowe roztoczy kurzu domowego" nazwaPoprzedniaProduktu="brak" moc="(10 IR lub 300 IR) nie więcej niż 40 mg" nazwaPostaciFarmaceutycznej="Roztwór do stosowania podjęzykowego" podmiotOdpowiedzialny="Stallergenes" typProcedury="NAR" numerPozwolenia="10613" waznoscPozwolenia="2025-12-22" podstawaPrawna="art. 10 ust. 1 i 2" zakazStosowaniaUZwierzat="" ulotka="https://rejestry.ezdrowie.gov.pl/api/rpl/medicinal-products/12327/leaflet" charakterystyka="https://rejestry.ezdrowie.gov.pl/api/rpl/medicinal-products/12327/characteristic" id="100123277">
+        <kodyATC>
+            <kodATC>V01AA</kodATC>
+        </kodyATC>
+        <drogiPodania>
+            <drogaPodania drogaPodaniaNazwa="podjęzykowa"/>
+        </drogiPodania>
+        <substancjeCzynne>
+            <substancjaCzynna nazwaSubstancji="Wyciągi alergenowe roztoczy kurzu domowego" iloscSubstancji="" jednostkaMiaryIlosciSubstancji="" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci="(10 IR lub 300 IR) nie więcej niż 40 mg"/>
+        </substancjeCzynne>
+        <opakowania>
+            <opakowanie kodGTIN="05909991061319" kategoriaDostepnosci="Rp" skasowane="NIE" numerEu="" dystrybutorRownolegly="" id="23212">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="3" rodzajOpakowania="fiol." pojemnosc="10" jednostkaPojemnosci="ml" informacjeDodatkowe="+ 3 pompki dozujące - zestaw do leczenia podstawowego"/>
+                </jednostkiOpakowania>
+                <zgodyPrezesa/>
+            </opakowanie>
+            <opakowanie kodGTIN="05909991061326" kategoriaDostepnosci="Rp" skasowane="NIE" numerEu="" dystrybutorRownolegly="" id="23213">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="2" rodzajOpakowania="fiol." pojemnosc="10" jednostkaPojemnosci="ml" informacjeDodatkowe="+ 2 pompki dozujące - zestaw do leczenia podtrzymującego"/>
+                </jednostkiOpakowania>
+                <zgodyPrezesa/>
+            </opakowanie>
+        </opakowania>
+        <daneOWytworcy>
+            <wytworcy nazwaWytworcyImportera="Stallergenes" krajWytworcyImportera="Francja"/>
+        </daneOWytworcy>
+        <materialyEdukacyjne>
+            <dlaPacjenta/>
+            <dlaMedyka/>
+        </materialyEdukacyjne>
+    </produktLeczniczy>
+    <produktLeczniczy nazwaProduktu="Addamel N" rodzajPreparatu="ludzki" nazwaPowszechnieStosowana="Roztwór pierwiastków śladowych" nazwaPoprzedniaProduktu="brak" moc="-" nazwaPostaciFarmaceutycznej="Koncentrat do sporządzania roztworu do infuzji" podmiotOdpowiedzialny="Fresenius Kabi AB" typProcedury="NAR" numerPozwolenia="02718" waznoscPozwolenia="2024-10-10" podstawaPrawna="art. 10 ust. 1 i 2" zakazStosowaniaUZwierzat="" ulotka="https://rejestry.ezdrowie.gov.pl/api/rpl/medicinal-products/279/leaflet" charakterystyka="https://rejestry.ezdrowie.gov.pl/api/rpl/medicinal-products/279/characteristic" id="100002792">
+        <kodyATC>
+            <kodATC>B05XA31</kodATC>
+        </kodyATC>
+        <drogiPodania>
+            <drogaPodania drogaPodaniaNazwa="dożylna"/>
+        </drogiPodania>
+        <substancjeCzynne>
+            <substancjaCzynna nazwaSubstancji="Chromium trichloridum hexahydricum" iloscSubstancji="5,33" jednostkaMiaryIlosciSubstancji="mcg" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci=""/>
+            <substancjaCzynna nazwaSubstancji="Cuprii chloridum dihydricum" iloscSubstancji="0,34" jednostkaMiaryIlosciSubstancji="mg" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci=""/>
+            <substancjaCzynna nazwaSubstancji="Ferri chloridum hexaahydricum" iloscSubstancji="0,54" jednostkaMiaryIlosciSubstancji="mg" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci=""/>
+            <substancjaCzynna nazwaSubstancji="Manganii chloridum tetrahydricum" iloscSubstancji="99" jednostkaMiaryIlosciSubstancji="mcg" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci=""/>
+            <substancjaCzynna nazwaSubstancji="Kalii iodidum" iloscSubstancji="16,6" jednostkaMiaryIlosciSubstancji="mcg" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci=""/>
+            <substancjaCzynna nazwaSubstancji="Sodu fluorek" iloscSubstancji="0,21" jednostkaMiaryIlosciSubstancji="mg" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci=""/>
+            <substancjaCzynna nazwaSubstancji="Natrii molybdas" iloscSubstancji="4,85" jednostkaMiaryIlosciSubstancji="mcg" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci=""/>
+            <substancjaCzynna nazwaSubstancji="Natrii selenis" iloscSubstancji="6,9" jednostkaMiaryIlosciSubstancji="mcg" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci=""/>
+            <substancjaCzynna nazwaSubstancji="Zinci chloridum (II)" iloscSubstancji="1,36" jednostkaMiaryIlosciSubstancji="mg" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci=""/>
+        </substancjeCzynne>
+        <opakowania>
+            <opakowanie kategoriaDostepnosci="Lz" skasowane="TAK" numerEu="" dystrybutorRownolegly="" id="461">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="10" rodzajOpakowania="amp." pojemnosc="10" jednostkaPojemnosci="ml" informacjeDodatkowe=""/>
+                </jednostkiOpakowania>
+                <zgodyPrezesa/>
+            </opakowanie>
+            <opakowanie kodGTIN="05909990271818" kategoriaDostepnosci="Lz" skasowane="NIE" numerEu="" dystrybutorRownolegly="" id="14457">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="20" rodzajOpakowania="amp." pojemnosc="10" jednostkaPojemnosci="ml" informacjeDodatkowe=""/>
+                </jednostkiOpakowania>
+                <zgodyPrezesa/>
+            </opakowanie>
+        </opakowania>
+        <daneOWytworcy>
+            <wytworcy nazwaWytworcyImportera="Fresenius Kabi Norge  AS" krajWytworcyImportera="Norwegia"/>
+        </daneOWytworcy>
+        <materialyEdukacyjne>
+            <dlaPacjenta/>
+            <dlaMedyka/>
+        </materialyEdukacyjne>
+    </produktLeczniczy>
+    <produktLeczniczy nazwaProduktu="Addamel N" rodzajPreparatu="ludzki" nazwaPowszechnieStosowana="Roztwór pierwiastków śladowych" nazwaPoprzedniaProduktu="brak" moc="-" nazwaPostaciFarmaceutycznej="Koncentrat do sporządzania roztworu do infuzji" podmiotOdpowiedzialny="Delfarma Sp. z o.o." typProcedury="IR" numerPozwolenia="27/16" waznoscPozwolenia="2026-01-20" zakazStosowaniaUZwierzat="" id="100362527">
+        <kodyATC>
+            <kodATC>B05XA31</kodATC>
+        </kodyATC>
+        <drogiPodania>
+            <drogaPodania drogaPodaniaNazwa="dożylna"/>
+        </drogiPodania>
+        <substancjeCzynne>
+            <substancjaCzynna nazwaSubstancji="Chromium trichloridum hexahydricum" iloscSubstancji="5,33" jednostkaMiaryIlosciSubstancji="mcg" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci=""/>
+            <substancjaCzynna nazwaSubstancji="Cuprii chloridum dihydricum" iloscSubstancji="0,34" jednostkaMiaryIlosciSubstancji="mcg" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci=""/>
+            <substancjaCzynna nazwaSubstancji="Ferri chloridum hexaahydricum" iloscSubstancji="" jednostkaMiaryIlosciSubstancji="" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci=""/>
+            <substancjaCzynna nazwaSubstancji="Manganii chloridum tetrahydricum" iloscSubstancji="" jednostkaMiaryIlosciSubstancji="" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci=""/>
+            <substancjaCzynna nazwaSubstancji="Kalii iodidum" iloscSubstancji="" jednostkaMiaryIlosciSubstancji="" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci=""/>
+            <substancjaCzynna nazwaSubstancji="sodu fluorek" iloscSubstancji="" jednostkaMiaryIlosciSubstancji="" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci=""/>
+            <substancjaCzynna nazwaSubstancji="Natrii molybdas" iloscSubstancji="" jednostkaMiaryIlosciSubstancji="" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci=""/>
+            <substancjaCzynna nazwaSubstancji="Natrii selenis" iloscSubstancji="" jednostkaMiaryIlosciSubstancji="" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci=""/>
+            <substancjaCzynna nazwaSubstancji="Zinci chloridum (II)" iloscSubstancji="" jednostkaMiaryIlosciSubstancji="" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci=""/>
+        </substancjeCzynne>
+        <opakowania>
+            <opakowanie kodGTIN="05909991257415" kategoriaDostepnosci="Lz" skasowane="NIE" numerEu="" dystrybutorRownolegly="" id="113723">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="20" rodzajOpakowania="amp." pojemnosc="10" jednostkaPojemnosci="ml" informacjeDodatkowe=""/>
+                </jednostkiOpakowania>
+                <zgodyPrezesa/>
+            </opakowanie>
+        </opakowania>
+        <daneOWytworcy>
+            <wytworcy podmiotOdpowiedzialnywKrajuEksportu="Fresenius Kabi Hellas S.A." krajEksportu="Grecja"/>
+        </daneOWytworcy>
+        <materialyEdukacyjne>
+            <dlaPacjenta/>
+            <dlaMedyka/>
+        </materialyEdukacyjne>
+    </produktLeczniczy>
+</produktyLecznicze>
