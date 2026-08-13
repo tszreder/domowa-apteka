@@ -1,9 +1,9 @@
 ---
 change_id: registry-substance-data
 title: Registry-backed product and active-substance data
-status: implemented
+status: impl_reviewed
 created: 2026-08-07
-updated: 2026-08-13
+updated: 2026-08-14
 archived_at: null
 ---
 

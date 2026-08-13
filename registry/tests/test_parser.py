@@ -174,6 +174,64 @@ class WholeFileVocabularyTests(TestCase):
         self.assertEqual(result.substances, (('Tylosinum', 'tylosinum'),))
 
 
+class DroppedRowNumberingTests(TestCase):
+    """`source_order` counts emitted links, not source elements.
+
+    The fixture cannot prove this: its only denylisted-row product ends with
+    zero links, so no product mixes a dropped row with kept ones. Without this
+    test, `enumerate(kept)` can be rewritten to number source positions —
+    reintroducing exactly the hole `SubstanceLinkRecord.source_order`'s comment
+    forbids — with every other test still green. Inline rather than in the
+    fixture, so the fixture's documented contract stays as it is.
+    """
+
+    def parse_inline(self, rows: str, name: str) -> tuple:
+        xml = f"""<?xml version='1.0' encoding='utf-8'?>
+<produktyLecznicze xmlns="{NAMESPACE}" stanNaDzien="2026-08-07">
+    <produktLeczniczy nazwaProduktu="Testowy" rodzajPreparatu="ludzki" nazwaPowszechnieStosowana="" id="900000010">
+        <substancjeCzynne>
+{rows}
+        </substancjeCzynne>
+    </produktLeczniczy>
+</produktyLecznicze>
+"""
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / name
+            path.write_text(xml, encoding='utf-8')
+            result = parse_registry(path, NAMESPACE)
+
+        (product,) = result.products
+        return product.links
+
+    def row(self, name: str) -> str:
+        return (
+            f'            <substancjaCzynna nazwaSubstancji="{name}" iloscSubstancji="1" '
+            'jednostkaMiaryIlosciSubstancji="mg" iloscPreparatu="" '
+            'jednostkaMiaryIlosciPreparatu="" innyOpisIlosci="" />'
+        )
+
+    def test_a_denylisted_row_between_two_kept_rows_closes_the_gap(self) -> None:
+        links = self.parse_inline(
+            '\n'.join(
+                [self.row('Acidum ascorbicum'), self.row('Produkt złożony'), self.row('Thiaminum')]
+            ),
+            'denylisted-in-the-middle.xml',
+        )
+
+        self.assertEqual([link.name for link in links], ['Acidum ascorbicum', 'Thiaminum'])
+        # 1, not 2: the dropped row leaves no hole.
+        self.assertEqual([link.source_order for link in links], [0, 1])
+
+    def test_a_blank_substance_name_is_skipped_and_closes_the_gap(self) -> None:
+        links = self.parse_inline(
+            '\n'.join([self.row(''), self.row('Thiaminum')]),
+            'blank-name.xml',
+        )
+
+        self.assertEqual([link.name for link in links], ['Thiaminum'])
+        self.assertEqual([link.source_order for link in links], [0])
+
+
 class DenylistTests(ParserTestCase):
     def test_denylisted_substance_row_yields_no_link(self) -> None:
         # Cyclo 3 Fort states `Produkt złożony` in an ordinary substance row.

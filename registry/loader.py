@@ -35,8 +35,9 @@ from django.db import transaction
 from .models import Product, ProductSubstance, SourceField, Substance
 from .parser import ParseResult
 
-# Well under SQLite's 32,766-variable ceiling for the widest row here
-# (ProductSubstance, 10 columns → 10,000 parameters per batch).
+# Well under SQLite's 32,766-variable ceiling for the widest row here: the
+# Product upsert binds 12 columns (registry_id + the 11 update fields) → 12,000
+# parameters per batch. ProductSubstance, at 9 columns, is the narrower one.
 BATCH_SIZE = 1000
 
 # Every mutable Product column. `registry_id` is deliberately absent: it is the
@@ -63,6 +64,11 @@ class LoadStats:
     """What one load did, for the command's summary line."""
 
     source_as_of: date
+    # Every product in the file, veterinary included. Carried through so the
+    # summary shows the denominator behind products_loaded: without it, a
+    # snapshot whose `rodzajPreparatu` vocabulary changed looks identical to a
+    # truncated one, and the plausibility guard names the wrong cause.
+    products_in_file: int
     products_loaded: int
     products_created: int
     # Products absent from this snapshot, now flagged inactive. Cumulative, not
@@ -72,6 +78,10 @@ class LoadStats:
     substances_created: int
     links_created: int
     links_by_source_field: dict[str, int]
+    # Human-use products this snapshot left with no substance at all. The
+    # complement is the resolution rate the plan's criterion 2.5 turns on, so
+    # reporting it makes that number fall out of an ordinary run.
+    products_without_links: int
 
 
 def load_parse_result(result: ParseResult) -> LoadStats:
@@ -94,12 +104,14 @@ def load_parse_result(result: ParseResult) -> LoadStats:
 
     return LoadStats(
         source_as_of=result.source_as_of,
+        products_in_file=result.products_in_file,
         products_loaded=len(result.products),
         products_created=products_created,
         products_inactive=products_inactive,
         substances_created=substances_created,
         links_created=sum(links_by_source_field.values()),
         links_by_source_field=links_by_source_field,
+        products_without_links=result.products_without_links,
     )
 
 

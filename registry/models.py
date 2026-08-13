@@ -92,8 +92,10 @@ class ProductSubstance(models.Model):
     preparation_unit = models.CharField(max_length=64, blank=True)
     amount_description = models.TextField(blank=True)
     source_field = models.CharField(max_length=32, choices=SourceField.choices)
-    # 0-based position of the source element within its product, so repeated
-    # substances keep their source order.
+    # 0-based position among this product's *emitted* links, so repeated
+    # substances keep their relative source order. Not the source element's
+    # index: the parser drops blank and denylisted rows and closes the gap, so
+    # the fallback's single link can share the same numbering.
     source_order = models.PositiveSmallIntegerField()
 
     class Meta:

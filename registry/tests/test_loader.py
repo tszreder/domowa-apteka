@@ -16,8 +16,9 @@ import tempfile
 from datetime import date
 from io import StringIO
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
+import requests
 from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.test import TestCase, override_settings
@@ -89,16 +90,17 @@ def with_addamel_order_swapped(text: str) -> str:
 class LoaderTestCase(TestCase):
     """Shared plumbing: run the command offline against a snapshot."""
 
-    def run_import(self, path: Path = FIXTURE, min_products: str = '1') -> str:
+    def run_import(
+        self,
+        path: Path = FIXTURE,
+        min_products: str = '1',
+        allow_older: bool = False,
+    ) -> str:
         output = StringIO()
-        call_command(
-            'import_registry',
-            '--file',
-            str(path),
-            '--min-products',
-            min_products,
-            stdout=output,
-        )
+        args = ['--file', str(path), '--min-products', min_products]
+        if allow_older:
+            args.append('--allow-older')
+        call_command('import_registry', *args, stdout=output)
         return output.getvalue()
 
     def write_variant(self, text: str, name: str) -> Path:
@@ -277,10 +279,114 @@ class PlausibilityGuardTests(LoaderTestCase):
         self.assertEqual(Substance.objects.count(), 0)
         self.assertEqual(ProductSubstance.objects.count(), 0)
 
+    def test_refusal_names_the_full_file_count_so_the_cause_is_diagnosable(self) -> None:
+        # A short human-use count with a full file means the filter stopped
+        # matching, not a truncated download. Without products_in_file in the
+        # message the two are indistinguishable to whoever reads the log.
+        with self.assertRaises(CommandError) as raised:
+            self.run_import(min_products='999')
+
+        self.assertIn('14 products in the file', str(raised.exception))
+
     def test_floor_does_not_reject_a_snapshot_that_meets_it(self) -> None:
         self.run_import(min_products='12')
 
         self.assertEqual(Product.objects.count(), 12)
+
+
+class SummaryOutputTests(LoaderTestCase):
+    def test_summary_reports_the_resolution_share(self) -> None:
+        # Criterion 2.5 ("≥95% of human-use products resolve") had to be
+        # reconstructed after the fact because no run ever printed it. It now
+        # falls out of the summary. Counts are fixtures/README.md's: 14 products,
+        # 12 human-use, 2 with no links (the denylisted row and the denylisted
+        # common name), so 10 resolve.
+        output = self.run_import()
+
+        self.assertIn('products in file:   14 (all kinds)', output)
+        self.assertIn('resolved:           10 of 12 (83.3%)', output)
+
+
+class SnapshotOrderTests(LoaderTestCase):
+    """An older snapshot must not rewind freshness or withdraw live products.
+
+    `last_seen_as_of` is stamped unconditionally and the deactivation sweep
+    selects on it, so without a guard a stale file silently rolls the column
+    F-02 reads backwards and flags every product it predates as withdrawn.
+    """
+
+    def setUp(self) -> None:
+        later = self.write_variant(with_as_of(fixture_text(), LATER), 'later.xml')
+        self.run_import(later)
+
+    def test_older_snapshot_is_refused_and_changes_nothing(self) -> None:
+        # The fixture's own AS_OF is older than the LATER snapshot just loaded.
+        with self.assertRaises(CommandError):
+            self.run_import()
+
+        for product in Product.objects.all():
+            self.assertEqual(product.last_seen_as_of, LATER)
+        self.assertEqual(Product.objects.filter(is_active=False).count(), 0)
+
+    def test_allow_older_overrides_the_refusal(self) -> None:
+        # The escape hatch has to actually work: reloading an archived snapshot
+        # on purpose is legitimate, it just must not happen by accident.
+        self.run_import(allow_older=True)
+
+        self.assertEqual(Product.objects.filter(last_seen_as_of=AS_OF).count(), 12)
+
+    def test_reimporting_the_same_date_is_not_treated_as_older(self) -> None:
+        later = self.write_variant(with_as_of(fixture_text(), LATER), 'later-again.xml')
+
+        self.run_import(later)
+
+        self.assertEqual(Product.objects.filter(last_seen_as_of=LATER).count(), 12)
+
+
+class DownloadPathTests(LoaderTestCase):
+    """The download boundary — the one path `--file` deliberately never touches.
+
+    Both failure modes have to arrive as a `CommandError`: the read side
+    (network) and the write side (disk). A traceback here is indistinguishable
+    to an operator from a crash in the load itself.
+    """
+
+    REQUESTS_GET = 'registry.management.commands.import_registry.requests.get'
+
+    def leftover_downloads(self) -> set[Path]:
+        return set(Path(tempfile.gettempdir()).glob('registry-*.xml'))
+
+    def run_download(self) -> None:
+        # No --file, so the command takes the URL path and creates a temp file.
+        call_command('import_registry', '--min-products', '1', stdout=StringIO())
+
+    def test_network_failure_becomes_a_command_error(self) -> None:
+        with patch(self.REQUESTS_GET, side_effect=requests.ConnectionError('no route')):
+            with self.assertRaises(CommandError):
+                self.run_download()
+
+        self.assertEqual(Product.objects.count(), 0)
+
+    def test_disk_failure_becomes_a_command_error(self) -> None:
+        # Without OSError in the except clause this escapes as a traceback: the
+        # write side of the download loop is a boundary just like the read side.
+        response = MagicMock()
+        response.iter_content.return_value = [b'<xml/>']
+        with patch(self.REQUESTS_GET, return_value=response):
+            with patch.object(Path, 'open', side_effect=OSError('No space left')):
+                with self.assertRaises(CommandError):
+                    self.run_download()
+
+        self.assertEqual(Product.objects.count(), 0)
+
+    def test_temp_file_is_removed_after_a_failed_download(self) -> None:
+        before = self.leftover_downloads()
+
+        with patch(self.REQUESTS_GET, side_effect=requests.ConnectionError('no route')):
+            with self.assertRaises(CommandError):
+                self.run_download()
+
+        self.assertEqual(self.leftover_downloads() - before, set())
 
 
 class OfflinePathTests(LoaderTestCase):
@@ -297,6 +403,19 @@ class OfflinePathTests(LoaderTestCase):
             self.run_import(FIXTURE.parent / 'does-not-exist.xml')
 
         self.assertEqual(Product.objects.count(), 0)
+
+    def test_truncated_snapshot_fails_as_a_command_error(self) -> None:
+        # A truncated download is malformed XML far more often than it is a
+        # short-but-valid file, so this — not --min-products — is the path a
+        # real truncation takes. ET.ParseError subclasses SyntaxError, so
+        # without the parser's re-raise it escapes as a traceback instead.
+        truncated = self.write_variant(fixture_text()[:20_000], 'truncated.xml')
+
+        with self.assertRaises(CommandError):
+            self.run_import(truncated)
+
+        self.assertEqual(Product.objects.count(), 0)
+        self.assertEqual(Substance.objects.count(), 0)
 
     def test_url_without_a_version_segment_fails_loudly(self) -> None:
         # The namespace is derived from the URL, so an unparseable one has to
