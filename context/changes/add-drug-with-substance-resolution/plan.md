@@ -933,20 +933,20 @@ Recorded here rather than left for S-03 to rediscover:
 
 #### Automated
 
-- [x] 4.1 Full test suite passes: `uv run manage.py test`
-- [x] 4.2 Type checking passes: `uv run mypy`
-- [x] 4.3 `uv run manage.py check --deploy` reports nothing new beyond the two parked items
-- [x] 4.4 No unmigrated model changes: `uv run manage.py makemigrations --check --dry-run`
+- [x] 4.1 Full test suite passes: `uv run manage.py test` — bff834e
+- [x] 4.2 Type checking passes: `uv run mypy` — bff834e
+- [x] 4.3 `uv run manage.py check --deploy` reports nothing new beyond the two parked items — bff834e
+- [x] 4.4 No unmigrated model changes: `uv run manage.py makemigrations --check --dry-run` — bff834e
 
 #### Manual
 
-- [x] 4.5 North star: `Apap`, `Gripex`, and `Ibuprom` each resolve to a recognisable substance set
-- [x] 4.6 `Xanax` offers distinct strengths rather than dozens of identical rows
-- [x] 4.7 `Concor Cor 2,5` reveals the producer field, picking a producer records and displays it, and leaving it blank displays no producer
-- [x] 4.8 A product with no substance links saves, warns, and displays as unresolved
-- [x] 4.9 Member B of household A sees member A's item on their next page load
-- [x] 4.10 A member of household B never sees household A's items, including via a direct delete POST
-- [x] 4.11 Delete removes the item and the list reflects it immediately
+- [x] 4.5 North star: `Apap`, `Gripex`, and `Ibuprom` each resolve to a recognisable substance set — bff834e
+- [x] 4.6 `Xanax` offers distinct strengths rather than dozens of identical rows — bff834e
+- [x] 4.7 `Concor Cor 2,5` reveals the producer field, picking a producer records and displays it, and leaving it blank displays no producer — bff834e
+- [x] 4.8 A product with no substance links saves, warns, and displays as unresolved — bff834e
+- [x] 4.9 Member B of household A sees member A's item on their next page load — bff834e
+- [x] 4.10 A member of household B never sees household A's items, including via a direct delete POST — bff834e
+- [x] 4.11 Delete removes the item and the list reflects it immediately — bff834e
 - [ ] 4.12 The whole flow works at phone width — NOT independently confirmed, same tooling limitation as 3.11 (`resize_window` did not change `window.innerWidth` in this environment). See measurements.md.
-- [x] 4.13 Save acknowledgement arrives within one second
-- [x] 4.14 Resolved substance sets for the tried names recorded in the change folder
+- [x] 4.13 Save acknowledgement arrives within one second — bff834e
+- [x] 4.14 Resolved substance sets for the tried names recorded in the change folder — bff834e

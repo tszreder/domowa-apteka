@@ -1,7 +1,7 @@
 ---
 change_id: add-drug-with-substance-resolution
 title: Add a drug and see its active substance(s) resolved
-status: implementing
+status: implemented
 created: 2026-08-14
 updated: 2026-08-14
 archived_at: null
