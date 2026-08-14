@@ -23,6 +23,11 @@
                             {{ link.substance.name }}{% if not forloop.last %}, {% endif %}
                         {% endfor %}
                     {% endif %}
+                    <br>
+                    <form method="post" action="{% url 'pharmacy:item_delete' item.pk %}">
+                        {% csrf_token %}
+                        <button type="submit">Usuń</button>
+                    </form>
                 </li>
             {% endfor %}
         </ul>

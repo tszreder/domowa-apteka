@@ -3,8 +3,9 @@ from typing import cast
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.http import HttpRequest, HttpResponse, JsonResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.views.decorators.http import require_POST
 
 from households.decorators import household_required
 from households.models import Household, Membership
@@ -78,3 +79,15 @@ def item_add(request: HttpRequest) -> HttpResponse:
     else:
         form = ItemAddForm()
     return render(request, 'pharmacy/item_form.html', {'form': form})
+
+
+@household_required
+@require_POST
+def item_delete(request: HttpRequest, pk: int) -> HttpResponse:
+    household = _household_of(cast(User, request.user))
+    # Filtered by household before lookup: an item belonging to another
+    # household is a 404, not a 403 — the endpoint never confirms the id exists.
+    item = get_object_or_404(Item, pk=pk, household=household)
+    item.delete()
+    messages.success(request, f'Usunięto {item.product.name}.')
+    return redirect(reverse('pharmacy:item_list'))

@@ -38,3 +38,33 @@ matches).
   250 mcg / 500 mcg / SR variants), not 59 near-identical rows.
 - `concor cor 2,5` — collapses to **one** presentation with **28** producer rows across
   several distinct holders (Allpharm, Delfarma, Forfarm, InPharm, ...).
+
+## Phase 4: North-star resolution, tried live against the real database
+
+Added through the real UI (autocomplete → pick → save) as a logged-in household member,
+against the real 20,245-product local database:
+
+| Typed | Picked | Resolved substance(s) |
+| --- | --- | --- |
+| `apap` | APAP — 500 mg — Tabletki | Paracetamolum |
+| `gripex` | Gripex — 325 mg + 30 mg + 10 mg — Tabletki powlekane | Paracetamolum, Pseudoephedrini hydrochloridum, Dextromethorphani hydrobromidum |
+| `ibuprom` | Ibuprom — 200 mg — Tabletki powlekane | Ibuprofenum |
+| `grip` | Gripblocker — 500 mg — Tabletki | Acidum acetylsalicylicum |
+| `concor cor 2,5` | Concor Cor 2,5 — 2,5 mg — Tabletki powlekane (Forfarm Sp. z o.o.) | Bisoprololi fumaras |
+| `moviprep` | Moviprep — Proszek do sporządzania roztworu doustnego | *(none — unresolved, warned and displayed distinctly)* |
+
+Each substance set is one a household member would recognise from the box (`Paracetamolum`
+= paracetamol, `Ibuprofenum` = ibuprofen, `Bisoprololi fumaras` = bisoprolol), and Gripex's
+multi-substance result matches the "more than one substance" expectation for a combination
+cold remedy — confirming the north star.
+
+Also confirmed live: a second member of the same household (`manual-a2@example.com`) saw
+all of the above items on first page load, no refresh or re-login; a member of a different
+household (`manual-b@example.com`) saw none of them and got a 404 on a direct delete POST
+against a known item id; deleting an item removed it from the list immediately with a
+confirmation message.
+
+**Not independently confirmed in this environment:** the phone-width layout check (3.11 /
+4.12) — the browser automation's `resize_window` reported success but
+`window.innerWidth` never changed from the desktop size, so no real narrow-viewport
+screenshot was taken. Flagged for the user to eyeball directly.

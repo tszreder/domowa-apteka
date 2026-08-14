@@ -913,40 +913,40 @@ Recorded here rather than left for S-03 to rediscover:
 
 #### Automated
 
-- [x] 3.1 Full test suite passes: `uv run manage.py test`
-- [x] 3.2 Type checking passes: `uv run mypy`
-- [x] 3.3 `uv run manage.py collectstatic --dry-run --noinput` sees `autocomplete.js`
-- [x] 3.4 The unresolved-save test fails if the view is changed to reject unresolved products
+- [x] 3.1 Full test suite passes: `uv run manage.py test` — 2ffeed6
+- [x] 3.2 Type checking passes: `uv run mypy` — 2ffeed6
+- [x] 3.3 `uv run manage.py collectstatic --dry-run --noinput` sees `autocomplete.js` — 2ffeed6
+- [x] 3.4 The unresolved-save test fails if the view is changed to reject unresolved products — 2ffeed6
 
 #### Manual
 
-- [x] 3.5 Typing `grip` shows suggestions promptly; picking one and saving puts the item on the list with its substances
-- [x] 3.6 `Concor Cor 2,5` reveals the producer field, typing narrows it, and saving records that specific row and shows it on the list
-- [x] 3.7 The same product saved with the producer field blank shows no producer on the list — not the tiebreak default
-- [x] 3.8 A single-producer product shows its producer without the field being touched
-- [x] 3.9 Picking a product with no substances saves, warns, and appears as unresolved on the list
-- [x] 3.10 Editing the search text after a pick prevents submission rather than saving the stale product
+- [x] 3.5 Typing `grip` shows suggestions promptly; picking one and saving puts the item on the list with its substances — 2ffeed6
+- [x] 3.6 `Concor Cor 2,5` reveals the producer field, typing narrows it, and saving records that specific row and shows it on the list — 2ffeed6
+- [x] 3.7 The same product saved with the producer field blank shows no producer on the list — not the tiebreak default — 2ffeed6
+- [x] 3.8 A single-producer product shows its producer without the field being touched — 2ffeed6
+- [x] 3.9 Picking a product with no substances saves, warns, and appears as unresolved on the list — 2ffeed6
+- [x] 3.10 Editing the search text after a pick prevents submission rather than saving the stale product — 2ffeed6
 - [ ] 3.11 The flow is usable on a phone-width viewport — NOT independently confirmed: the browser automation's resize_window call reported success but window.innerWidth stayed at 2342px in this environment, so no real narrow-viewport screenshot was obtained. Code-level signals are favorable (Pico.css is fluid/mobile-first by default, base.html has a correct `width=device-width` viewport meta tag, and the form has no fixed-width or multi-column elements) but this is inference, not measurement — flagged for the user to eyeball on an actual phone or browser devtools.
-- [x] 3.12 Save acknowledgement arrives within one second
+- [x] 3.12 Save acknowledgement arrives within one second — 2ffeed6
 
 ### Phase 4: Delete, and end-to-end verification
 
 #### Automated
 
-- [ ] 4.1 Full test suite passes: `uv run manage.py test`
-- [ ] 4.2 Type checking passes: `uv run mypy`
-- [ ] 4.3 `uv run manage.py check --deploy` reports nothing new beyond the two parked items
-- [ ] 4.4 No unmigrated model changes: `uv run manage.py makemigrations --check --dry-run`
+- [x] 4.1 Full test suite passes: `uv run manage.py test`
+- [x] 4.2 Type checking passes: `uv run mypy`
+- [x] 4.3 `uv run manage.py check --deploy` reports nothing new beyond the two parked items
+- [x] 4.4 No unmigrated model changes: `uv run manage.py makemigrations --check --dry-run`
 
 #### Manual
 
-- [ ] 4.5 North star: `Apap`, `Gripex`, and `Ibuprom` each resolve to a recognisable substance set
-- [ ] 4.6 `Xanax` offers distinct strengths rather than dozens of identical rows
-- [ ] 4.7 `Concor Cor 2,5` reveals the producer field, picking a producer records and displays it, and leaving it blank displays no producer
-- [ ] 4.8 A product with no substance links saves, warns, and displays as unresolved
-- [ ] 4.9 Member B of household A sees member A's item on their next page load
-- [ ] 4.10 A member of household B never sees household A's items, including via a direct delete POST
-- [ ] 4.11 Delete removes the item and the list reflects it immediately
-- [ ] 4.12 The whole flow works at phone width
-- [ ] 4.13 Save acknowledgement arrives within one second
-- [ ] 4.14 Resolved substance sets for the tried names recorded in the change folder
+- [x] 4.5 North star: `Apap`, `Gripex`, and `Ibuprom` each resolve to a recognisable substance set
+- [x] 4.6 `Xanax` offers distinct strengths rather than dozens of identical rows
+- [x] 4.7 `Concor Cor 2,5` reveals the producer field, picking a producer records and displays it, and leaving it blank displays no producer
+- [x] 4.8 A product with no substance links saves, warns, and displays as unresolved
+- [x] 4.9 Member B of household A sees member A's item on their next page load
+- [x] 4.10 A member of household B never sees household A's items, including via a direct delete POST
+- [x] 4.11 Delete removes the item and the list reflects it immediately
+- [ ] 4.12 The whole flow works at phone width — NOT independently confirmed, same tooling limitation as 3.11 (`resize_window` did not change `window.innerWidth` in this environment). See measurements.md.
+- [x] 4.13 Save acknowledgement arrives within one second
+- [x] 4.14 Resolved substance sets for the tried names recorded in the change folder
