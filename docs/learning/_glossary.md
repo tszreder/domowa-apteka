@@ -65,6 +65,12 @@ used the old one needs a look.
 | `{% static %}` resolving a path via a finder, not a hardcoded URL | A **Power BI report referencing a theme file by logical name**, resolved to wherever it actually lives at render time. | django-templates-and-css.md |
 | `secrets.token_urlsafe(32)` — a cryptographically secure random token | Generating a **Power BI embed token / SAS token** — possessing the value *is* the authorization, with no separate identity check behind it. | unguessable-invite-tokens.md |
 | Revocation by regenerating a token (no denylist) | **Rotating a Key Vault secret / SAS token** — the old value stops existing anywhere that matters, instead of being tracked and blocked. | unguessable-invite-tokens.md |
+| The git commit history / `.git` object store | A **Delta Lake transaction log** — immutable, append-only ordered versions; nothing is ever edited in place. | branches-worktrees-and-parallel-work.md |
+| A **branch** (movable pointer to one commit) | A **Delta table alias/tag pointing at a version** — a label, cheap to create, not a copy of the data. | branches-worktrees-and-parallel-work.md |
+| The **working tree** (the files on disk) and `git switch` | **Materializing one `VERSION AS OF` into a dataframe** — one version realized at a time from one location; switching re-reads at a different version into that same location rather than opening a second view. | branches-worktrees-and-parallel-work.md |
+| `git worktree` (a second folder sharing one `.git`) | **Two Databricks clusters attached to the same metastore** — separate compute and local scratch, one shared underlying storage. | branches-worktrees-and-parallel-work.md |
+| **Squash merge** (branch commits collapsed into one on `main`) | **Collapsing a run's incremental steps into a single published change** — same result, lineage not preserved, so lineage-based checks (`git branch --merged`) answer wrongly. | branches-worktrees-and-parallel-work.md |
+| A **merge conflict** | **Two people editing the same section of the same PBIX** — different sections merge cleanly; the same lines need a human. | branches-worktrees-and-parallel-work.md |
 
 > **Note on "trigger".** `urls.py` is mapped to ADF triggers above (request path → view).
 > A CI deploy trigger is a different layer entirely (repository event → pipeline run).
