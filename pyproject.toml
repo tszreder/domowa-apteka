@@ -21,7 +21,7 @@ dev = [
 
 [tool.mypy]
 plugins = ["mypy_django_plugin.main"]
-files = ["households", "registry", "domowa_apteka"]
+files = ["households", "registry", "pharmacy", "domowa_apteka"]
 
 [tool.django-stubs]
 django_settings_module = "domowa_apteka.settings"

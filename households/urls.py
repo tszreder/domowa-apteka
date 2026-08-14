@@ -18,7 +18,6 @@ urlpatterns = [
         name='login',
     ),
     path('logout/', LogoutView.as_view(), name='logout'),
-    path('list/', views.item_list, name='item_list'),
     path('join/<str:token>/', views.join, name='join'),
     path('household/', views.household_detail, name='household_detail'),
     path('household/create/', views.household_create, name='household_create'),

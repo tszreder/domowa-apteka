@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Lista — Domowa Apteka{% endblock %}
+
+{% block content %}
+    <h1>{{ household.name }}</h1>
+    {% if items %}
+        <ul class="item-list">
+            {% for item in items %}
+                <li{% if item.unresolved %} class="unresolved"{% endif %}>
+                    <strong>{{ item.product.name }}</strong>
+                    {% if item.product.strength %}— {{ item.product.strength }}{% endif %}
+                    {% if item.product.pharmaceutical_form %}— {{ item.product.pharmaceutical_form }}{% endif %}
+                    {% if item.producer_confirmed %}
+                        <br><small>{{ item.product.marketing_holder }}</small>
+                    {% endif %}
+                    {% if item.unresolved %}
+                        <br><mark>Nie udało się ustalić substancji czynnej.</mark>
+                    {% else %}
+                        <br>
+                        {% for link in item.product.substance_links.all %}
+                            {{ link.substance.name }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>W tym gospodarstwie nie dodano jeszcze żadnych leków.</p>
+    {% endif %}
+{% endblock %}

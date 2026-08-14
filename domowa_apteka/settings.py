@@ -93,6 +93,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'households',
     'registry',
+    'pharmacy',
 ]
 
 MIDDLEWARE = [

@@ -26,7 +26,7 @@ class CrossHouseholdIsolationTests(TestCase):
     def test_item_list_only_ever_resolves_own_household(self) -> None:
         self.client.force_login(self.member_b)
 
-        response = self.client.get(reverse('households:item_list'))
+        response = self.client.get(reverse('pharmacy:item_list'))
 
         self.assertEqual(response.context['household'], self.household_b)
         self.assertNotContains(response, self.household_a.name)
@@ -52,7 +52,7 @@ class ProtectedUrlsRedirectAnonymousUsersTests(TestCase):
         self._assert_redirects_to_login(reverse('households:regenerate_invite'))
 
     def test_item_list_redirects_anonymous_to_login(self) -> None:
-        self._assert_redirects_to_login(reverse('households:item_list'))
+        self._assert_redirects_to_login(reverse('pharmacy:item_list'))
 
 
 class HouseholdRequiredDecoratorTests(TestCase):
@@ -67,14 +67,14 @@ class HouseholdRequiredDecoratorTests(TestCase):
     def test_household_less_user_redirected_to_household_create(self) -> None:
         self.client.force_login(self.household_less)
 
-        response = self.client.get(reverse('households:item_list'))
+        response = self.client.get(reverse('pharmacy:item_list'))
 
         self.assertRedirects(response, reverse('households:household_create'))
 
     def test_household_less_redirect_does_not_loop(self) -> None:
         self.client.force_login(self.household_less)
 
-        response = self.client.get(reverse('households:item_list'), follow=True)
+        response = self.client.get(reverse('pharmacy:item_list'), follow=True)
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'households/household_create.html')
@@ -82,13 +82,13 @@ class HouseholdRequiredDecoratorTests(TestCase):
     def test_household_holding_user_reaches_list_directly(self) -> None:
         self.client.force_login(self.member)
 
-        response = self.client.get(reverse('households:item_list'))
+        response = self.client.get(reverse('pharmacy:item_list'))
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['household'], self.household)
 
     def test_anonymous_user_redirect_does_not_loop(self) -> None:
-        response = self.client.get(reverse('households:item_list'), follow=True)
+        response = self.client.get(reverse('pharmacy:item_list'), follow=True)
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'households/login.html')
