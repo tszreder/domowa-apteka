@@ -4,6 +4,7 @@
 
 {% block content %}
     <h1>{{ household.name }}</h1>
+    <p><a href="{% url 'pharmacy:item_add' %}" role="button">Dodaj lek</a></p>
     {% if items %}
         <ul class="item-list">
             {% for item in items %}

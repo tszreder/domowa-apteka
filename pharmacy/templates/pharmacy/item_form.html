@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Dodaj lek — Domowa Apteka{% endblock %}
+
+{% block content %}
+    <h1>Dodaj lek</h1>
+
+    {% if form.product.errors %}
+        <p class="form-error">{{ form.product.errors|join:" " }}</p>
+    {% endif %}
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+        <label for="product-search">Nazwa leku</label>
+        <input type="text" id="product-search" autocomplete="off"
+               placeholder="np. Apap, Xanax, Concor..." aria-describedby="suggestions">
+        <ul id="suggestions" class="suggestions" role="listbox" hidden></ul>
+
+        <div id="producer-field" hidden>
+            <label for="producer-search">Producent (opcjonalnie)</label>
+            <input type="text" id="producer-search" autocomplete="off"
+                   placeholder="Zacznij pisać nazwę producenta...">
+            <ul id="producer-suggestions" class="suggestions" role="listbox" hidden></ul>
+        </div>
+
+        {{ form.product }}
+        {{ form.producer_confirmed }}
+
+        <button type="submit">Dodaj</button>
+    </form>
+
+    <script src="{% static 'pharmacy/js/autocomplete.js' %}" defer></script>
+{% endblock %}

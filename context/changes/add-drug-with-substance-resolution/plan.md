@@ -897,37 +897,37 @@ Recorded here rather than left for S-03 to rediscover:
 
 #### Automated
 
-- [x] 2.1 Full test suite passes: `uv run manage.py test`
-- [x] 2.2 Type checking passes: `uv run mypy`
-- [x] 2.3 The tiebreak test fails when the "prefer a row with substances" preference is removed
+- [x] 2.1 Full test suite passes: `uv run manage.py test` — e6fc383
+- [x] 2.2 Type checking passes: `uv run mypy` — e6fc383
+- [x] 2.3 The tiebreak test fails when the "prefer a row with substances" preference is removed — e6fc383
 
 #### Manual
 
-- [x] 2.4 `search_presentations` measured against the real 20k-row database with a worst-case 2-char query, number recorded
-- [x] 2.5 The endpoint returns sensible presentations for `grip`, `apap`, `xanax`, `concor` against the real 20k-row local database
-- [x] 2.6 `xanax` returns distinct strengths, not 59 near-identical rows
-- [x] 2.7 `concor cor 2,5` returns one entry carrying multiple producers
-- [x] 2.8 Response feels instantaneous by hand
+- [x] 2.4 `search_presentations` measured against the real 20k-row database with a worst-case 2-char query, number recorded — e6fc383
+- [x] 2.5 The endpoint returns sensible presentations for `grip`, `apap`, `xanax`, `concor` against the real 20k-row local database — e6fc383
+- [x] 2.6 `xanax` returns distinct strengths, not 59 near-identical rows — e6fc383
+- [x] 2.7 `concor cor 2,5` returns one entry carrying multiple producers — e6fc383
+- [x] 2.8 Response feels instantaneous by hand — e6fc383
 
 ### Phase 3: The add flow
 
 #### Automated
 
-- [ ] 3.1 Full test suite passes: `uv run manage.py test`
-- [ ] 3.2 Type checking passes: `uv run mypy`
-- [ ] 3.3 `uv run manage.py collectstatic --dry-run --noinput` sees `autocomplete.js`
-- [ ] 3.4 The unresolved-save test fails if the view is changed to reject unresolved products
+- [x] 3.1 Full test suite passes: `uv run manage.py test`
+- [x] 3.2 Type checking passes: `uv run mypy`
+- [x] 3.3 `uv run manage.py collectstatic --dry-run --noinput` sees `autocomplete.js`
+- [x] 3.4 The unresolved-save test fails if the view is changed to reject unresolved products
 
 #### Manual
 
-- [ ] 3.5 Typing `grip` shows suggestions promptly; picking one and saving puts the item on the list with its substances
-- [ ] 3.6 `Concor Cor 2,5` reveals the producer field, typing narrows it, and saving records that specific row and shows it on the list
-- [ ] 3.7 The same product saved with the producer field blank shows no producer on the list — not the tiebreak default
-- [ ] 3.8 A single-producer product shows its producer without the field being touched
-- [ ] 3.9 Picking a product with no substances saves, warns, and appears as unresolved on the list
-- [ ] 3.10 Editing the search text after a pick prevents submission rather than saving the stale product
-- [ ] 3.11 The flow is usable on a phone-width viewport
-- [ ] 3.12 Save acknowledgement arrives within one second
+- [x] 3.5 Typing `grip` shows suggestions promptly; picking one and saving puts the item on the list with its substances
+- [x] 3.6 `Concor Cor 2,5` reveals the producer field, typing narrows it, and saving records that specific row and shows it on the list
+- [x] 3.7 The same product saved with the producer field blank shows no producer on the list — not the tiebreak default
+- [x] 3.8 A single-producer product shows its producer without the field being touched
+- [x] 3.9 Picking a product with no substances saves, warns, and appears as unresolved on the list
+- [x] 3.10 Editing the search text after a pick prevents submission rather than saving the stale product
+- [ ] 3.11 The flow is usable on a phone-width viewport — NOT independently confirmed: the browser automation's resize_window call reported success but window.innerWidth stayed at 2342px in this environment, so no real narrow-viewport screenshot was obtained. Code-level signals are favorable (Pico.css is fluid/mobile-first by default, base.html has a correct `width=device-width` viewport meta tag, and the form has no fixed-width or multi-column elements) but this is inference, not measurement — flagged for the user to eyeball on an actual phone or browser devtools.
+- [x] 3.12 Save acknowledgement arrives within one second
 
 ### Phase 4: Delete, and end-to-end verification
 

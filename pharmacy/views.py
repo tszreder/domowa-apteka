@@ -1,13 +1,16 @@
 from typing import cast
 
+from django.contrib import messages
 from django.contrib.auth.models import User
 from django.http import HttpRequest, HttpResponse, JsonResponse
-from django.shortcuts import render
+from django.shortcuts import redirect, render
+from django.urls import reverse
 
 from households.decorators import household_required
 from households.models import Household, Membership
 from registry.suggestions import search_presentations
 
+from .forms import ItemAddForm
 from .models import Item
 
 
@@ -45,3 +48,33 @@ def product_suggestions(request: HttpRequest) -> HttpResponse:
         for presentation in presentations
     ]
     return JsonResponse({'results': results})
+
+
+@household_required
+def item_add(request: HttpRequest) -> HttpResponse:
+    household = _household_of(cast(User, request.user))
+    if request.method == 'POST':
+        form = ItemAddForm(request.POST)
+        if form.is_valid():
+            item = form.save(commit=False)
+            item.household = household
+            item.added_by = request.user
+            item.save()
+            substances = [
+                link.substance.name for link in item.product.substance_links.all()
+            ]
+            if substances:
+                messages.success(
+                    request,
+                    f'Dodano {item.product.name}. Substancje czynne: {", ".join(substances)}.',
+                )
+            else:
+                messages.warning(
+                    request,
+                    f'Dodano {item.product.name}, ale nie udało się ustalić jego '
+                    'substancji czynnej na podstawie rejestru.',
+                )
+            return redirect(reverse('pharmacy:item_list'))
+    else:
+        form = ItemAddForm()
+    return render(request, 'pharmacy/item_form.html', {'form': form})
