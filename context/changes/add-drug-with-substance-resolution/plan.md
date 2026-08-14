@@ -879,35 +879,35 @@ Recorded here rather than left for S-03 to rediscover:
 
 #### Automated
 
-- [x] 1.1 Migration applies cleanly: `uv run manage.py migrate`
-- [x] 1.2 No model changes left unmigrated: `uv run manage.py makemigrations --check --dry-run`
-- [x] 1.3 Full test suite passes: `uv run manage.py test`
-- [x] 1.4 Type checking passes: `uv run mypy`
-- [x] 1.5 Django system checks pass: `uv run manage.py check`
-- [x] 1.6 The six retargeted access-control tests pass against `pharmacy:item_list`
+- [x] 1.1 Migration applies cleanly: `uv run manage.py migrate` — 8bc8e0e
+- [x] 1.2 No model changes left unmigrated: `uv run manage.py makemigrations --check --dry-run` — 8bc8e0e
+- [x] 1.3 Full test suite passes: `uv run manage.py test` — 8bc8e0e
+- [x] 1.4 Type checking passes: `uv run mypy` — 8bc8e0e
+- [x] 1.5 Django system checks pass: `uv run manage.py check` — 8bc8e0e
+- [x] 1.6 The six retargeted access-control tests pass against `pharmacy:item_list` — 8bc8e0e
 
 #### Manual
 
-- [x] 1.7 Logging in still lands on `/list/` with no 404 and no redirect loop
-- [x] 1.8 An item created in the shell appears on the list with its substance names
-- [x] 1.9 An item whose product has no substance links is visibly distinct on the list
-- [x] 1.10 An item with `producer_confirmed=True` shows its producer; one with `False` does not
+- [x] 1.7 Logging in still lands on `/list/` with no 404 and no redirect loop — 8bc8e0e
+- [x] 1.8 An item created in the shell appears on the list with its substance names — 8bc8e0e
+- [x] 1.9 An item whose product has no substance links is visibly distinct on the list — 8bc8e0e
+- [x] 1.10 An item with `producer_confirmed=True` shows its producer; one with `False` does not — 8bc8e0e
 
 ### Phase 2: Presentation search and the suggestion endpoint
 
 #### Automated
 
-- [ ] 2.1 Full test suite passes: `uv run manage.py test`
-- [ ] 2.2 Type checking passes: `uv run mypy`
-- [ ] 2.3 The tiebreak test fails when the "prefer a row with substances" preference is removed
+- [x] 2.1 Full test suite passes: `uv run manage.py test`
+- [x] 2.2 Type checking passes: `uv run mypy`
+- [x] 2.3 The tiebreak test fails when the "prefer a row with substances" preference is removed
 
 #### Manual
 
-- [ ] 2.4 `search_presentations` measured against the real 20k-row database with a worst-case 2-char query, number recorded
-- [ ] 2.5 The endpoint returns sensible presentations for `grip`, `apap`, `xanax`, `concor` against the real 20k-row local database
-- [ ] 2.6 `xanax` returns distinct strengths, not 59 near-identical rows
-- [ ] 2.7 `concor cor 2,5` returns one entry carrying multiple producers
-- [ ] 2.8 Response feels instantaneous by hand
+- [x] 2.4 `search_presentations` measured against the real 20k-row database with a worst-case 2-char query, number recorded
+- [x] 2.5 The endpoint returns sensible presentations for `grip`, `apap`, `xanax`, `concor` against the real 20k-row local database
+- [x] 2.6 `xanax` returns distinct strengths, not 59 near-identical rows
+- [x] 2.7 `concor cor 2,5` returns one entry carrying multiple producers
+- [x] 2.8 Response feels instantaneous by hand
 
 ### Phase 3: The add flow
 
