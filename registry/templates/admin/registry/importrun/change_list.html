@@ -1,0 +1,25 @@
+{% extends "admin/change_list.html" %}
+{# The verdict is injected as `freshness` by ImportRunAdmin.changelist_view's
+   extra_context, so this template and manage.py registry_status always read
+   the same registry.freshness.get_verdict() call and cannot disagree. #}
+
+{% block content_title %}
+  {{ block.super }}
+  <ul class="messagelist">
+    {% if freshness.is_stale %}
+      <li class="error">
+        Stale.
+        {% if freshness.last_success_at %}
+          Last successful import was {{ freshness.last_success_at }} ({{ freshness.age }} ago).
+        {% else %}
+          No successful import has ever run.
+        {% endif %}
+      </li>
+    {% else %}
+      <li class="success">
+        Fresh. Last successful import was {{ freshness.last_success_at }}
+        ({{ freshness.age }} ago), holding snapshot dated {{ freshness.source_as_of }}.
+      </li>
+    {% endif %}
+  </ul>
+{% endblock %}

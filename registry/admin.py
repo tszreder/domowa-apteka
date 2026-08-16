@@ -4,11 +4,14 @@ Structurally incapable of modifying the data: an edit here could not survive
 the next import, and would break source traceability until then.
 """
 
+from typing import Any
+
 from django.contrib import admin
 from django.db.models import QuerySet
-from django.http import HttpRequest
+from django.http import HttpRequest, HttpResponse
 
-from .models import Product, ProductSubstance, Substance
+from .freshness import get_verdict
+from .models import ImportRun, Product, ProductSubstance, Substance
 
 
 class ProductSubstanceInline(admin.TabularInline):
@@ -74,3 +77,41 @@ class SubstanceAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request: HttpRequest, obj: Substance | None = None) -> bool:
         return False
+
+
+@admin.register(ImportRun)
+class ImportRunAdmin(admin.ModelAdmin):
+    """Run history and the freshness verdict, read-only.
+
+    Same shape as ProductAdmin/SubstanceAdmin, for the same reason: an edit
+    here would misrepresent what actually happened during an import attempt.
+    """
+
+    list_display = (
+        'status',
+        'started_at',
+        'finished_at',
+        'trigger',
+        'source_as_of',
+        'products_loaded',
+        'substances_created',
+        'links_created',
+    )
+    list_filter = ('status', 'trigger')
+
+    # has_view_permission is deliberately NOT overridden — see ProductAdmin.
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        return False
+
+    def has_change_permission(self, request: HttpRequest, obj: ImportRun | None = None) -> bool:
+        return False
+
+    def has_delete_permission(self, request: HttpRequest, obj: ImportRun | None = None) -> bool:
+        return False
+
+    def changelist_view(
+        self, request: HttpRequest, extra_context: dict[str, Any] | None = None
+    ) -> HttpResponse:
+        extra_context = extra_context or {}
+        extra_context['freshness'] = get_verdict()
+        return super().changelist_view(request, extra_context=extra_context)
