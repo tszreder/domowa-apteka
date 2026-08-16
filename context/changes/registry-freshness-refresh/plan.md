@@ -610,17 +610,17 @@ Rollback is a table drop; nothing else in the app reads `ImportRun`.
 
 #### Automated
 
-- [ ] 1.1 Migration applies cleanly: `uv run python manage.py migrate`
-- [ ] 1.2 Migration state is complete: `uv run python manage.py makemigrations --check --dry-run`
-- [ ] 1.3 The failure-path test proves a `failed` row survives the guard's rollback
-- [ ] 1.4 Full suite passes: `uv run python manage.py test`
-- [ ] 1.5 Type checking passes: `uv run mypy`
-- [ ] 1.6 Django system checks pass: `uv run python manage.py check`
+- [x] 1.1 Migration applies cleanly: `uv run python manage.py migrate` — 679264a
+- [x] 1.2 Migration state is complete: `uv run python manage.py makemigrations --check --dry-run` — 679264a
+- [x] 1.3 The failure-path test proves a `failed` row survives the guard's rollback — 679264a
+- [x] 1.4 Full suite passes: `uv run python manage.py test` — 679264a
+- [x] 1.5 Type checking passes: `uv run mypy` — 679264a
+- [x] 1.6 Django system checks pass: `uv run python manage.py check` — 679264a
 
 #### Manual
 
-- [ ] 1.7 A local `import_registry --file <fixture> --min-products 1` run creates one `success` row with counters matching the printed summary
-- [ ] 1.8 A deliberately bad `--url` produces a `failed` row carrying a readable error message
+- [x] 1.7 A local `import_registry --file <fixture> --min-products 1` run creates one `success` row with counters matching the printed summary — 679264a
+- [x] 1.8 A deliberately bad `--url` produces a `failed` row carrying a readable error message — 679264a
 
 ### Phase 2: Freshness verdict and its two surfaces
 
