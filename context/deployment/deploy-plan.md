@@ -346,7 +346,12 @@ moot.
   import_registry --trigger scheduled`, `deploy.cronSchedule` is `17 3 * * *`
   (03:17 UTC — after the publisher's daily refresh, deliberately off the
   `@daily`/midnight mark where platform contention is worst), and
-  `deploy.restartPolicyType` is `NEVER`. No `healthcheckPath`, no
+  `deploy.restartPolicyType` is `NEVER`. `deploy.region` is pinned to
+  `europe-west4-drams3a`, same as `web`'s pin and for the same reason (see
+  "Deploy configuration" above) — unpinned, a later `railway up` could
+  reassert the workspace default, and a split-region cron would pay
+  transatlantic RTT downloading ~74 MB and writing to
+  `postgres.railway.internal` on every run. No `healthcheckPath`, no
   `numReplicas` — both are `web`-only concerns. Validated against the live
   `https://railway.com/railway.schema.json` with `jsonschema` (`uv add --dev
   jsonschema`).
@@ -375,7 +380,7 @@ first — `registry-import-cron` does not, so it only needs what
 | `SECRET_KEY` | same value as `web` (`settings.py` imports at module load regardless of command) |
 | `DEBUG` | `False` |
 | `ALLOWED_HOSTS` | same as `web` |
-| `REGISTRY_OVERALL_URL` | unset — falls back to the in-code default, same as `web` |
+| `REGISTRY_OVERALL_URL` | unset today — falls back to the in-code default, same as `web`. **If this is ever set on `web`** (to bump the export version), **set it identically on the cron service in the same change.** `settings.py`'s own comment says the variable exists so a version bump is "a variable change, not a code deploy" — a cron service left behind would keep importing the old version while `web`'s config claims otherwise, silently reintroducing the drift the variable exists to prevent. |
 
 No new setting is introduced by this change, so `.env.example` is unchanged.
 

@@ -3,6 +3,7 @@
   "deploy": {
     "startCommand": "python manage.py import_registry --trigger scheduled",
     "cronSchedule": "17 3 * * *",
-    "restartPolicyType": "NEVER"
+    "restartPolicyType": "NEVER",
+    "region": "europe-west4-drams3a"
   }
 }

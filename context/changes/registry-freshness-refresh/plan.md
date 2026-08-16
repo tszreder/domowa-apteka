@@ -643,7 +643,7 @@ Rollback is a table drop; nothing else in the app reads `ImportRun`.
 #### Automated
 
 - [x] 3.1 `railway.cron.json` validates against the live schema via `jsonschema` — 164e91c
-- [x] 3.2 CI `check` job stays green on the PR: `uv sync --locked`, `manage.py check`, `mypy`, `manage.py test` — 164e91c
+- [x] 3.2 CI `check` job stays green on the PR: `uv sync --locked`, `manage.py check`, `mypy`, `manage.py test` — 164e91c. **Caveat:** verified as the identical local commands, not an actual PR run (no PR was opened this session); the branch was never pushed. Push + open a PR to close this against the letter of the criterion.
 
 #### Manual
 
