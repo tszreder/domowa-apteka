@@ -16,9 +16,10 @@ from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError, CommandParser
 from django.db import transaction
 from django.db.models import Max
+from django.utils import timezone
 
 from registry.loader import LoadStats, load_parse_result
-from registry.models import Product
+from registry.models import ImportRun, Product, RunStatus, RunTrigger
 from registry.parser import RegistryParseError, namespace_for_url, parse_registry
 
 # Comfortably below the 20,187 human-use products measured on 2026-08-07, and
@@ -33,9 +34,31 @@ MIN_EXPECTED_PRODUCTS = 10_000
 DOWNLOAD_TIMEOUT = (10, 60)
 CHUNK_SIZE = 1024 * 1024
 
+# A bounded retry for a transient network blip on a ~74 MB transfer. Sized so
+# the worst case (DOWNLOAD_MAX_ATTEMPTS attempts, each possibly stalling for
+# the full per-chunk DOWNLOAD_TIMEOUT read timeout, plus the backoff sleeps
+# between them) stays orders of magnitude below the 24 h schedule interval.
+DOWNLOAD_MAX_ATTEMPTS = 3
+DOWNLOAD_RETRY_BACKOFF = (5, 15)  # seconds, between attempts 1→2 and 2→3
+# Gates retry ATTEMPTS, not total wall clock — checked before each retry, not
+# during a transfer. A single hung transfer is bounded by DOWNLOAD_TIMEOUT's
+# per-chunk read timeout, not by this constant. The two are easy to confuse.
+RUN_DEADLINE_SECONDS = 600
+
+# Patched by tests to skip the real wait: a backoff short enough not to slow
+# down `manage.py test` would be too short to help a real transfer, so the
+# constants stay realistic and the sleep itself becomes the seam instead.
+_sleep = time.sleep
+
 
 class Command(BaseCommand):
     help = 'Import products and active substances from the national registry snapshot.'
+
+    # Number of download attempts made this run, including a --file run
+    # (which makes none). Set on the instance rather than threaded through
+    # return values so handle()'s except clause can read it after _run_import
+    # raises partway through.
+    _attempts: int = 0
 
     def add_arguments(self, parser: CommandParser) -> None:
         parser.add_argument(
@@ -69,10 +92,57 @@ class Command(BaseCommand):
             'default: an older snapshot rewinds last_seen_as_of on every shared '
             'product and deactivates the ones it predates.',
         )
+        parser.add_argument(
+            '--trigger',
+            choices=[RunTrigger.MANUAL.value, RunTrigger.SCHEDULED.value],
+            default=RunTrigger.MANUAL.value,
+            help='Who started this run, recorded on the ImportRun row (default: '
+            'manual). The cron service passes --trigger scheduled.',
+        )
 
     def handle(self, *args: Any, **options: Any) -> None:
         started = time.monotonic()
 
+        # Created before any work — including URL/namespace validation — so
+        # even the earliest failure leaves a row behind. Updated after this
+        # try block exits, never inside it, so it cannot share a transaction
+        # with anything import-related.
+        run = ImportRun.objects.create(
+            started_at=timezone.now(),
+            trigger=options['trigger'],
+        )
+        self._attempts = 0
+        try:
+            stats = self._run_import(options)
+        except Exception as exc:
+            run.finished_at = timezone.now()
+            run.status = RunStatus.FAILED
+            run.attempts = self._attempts
+            run.error = str(exc)
+            run.save()
+            raise
+
+        run.finished_at = timezone.now()
+        run.status = RunStatus.SUCCESS
+        run.attempts = self._attempts
+        run.source_as_of = stats.source_as_of
+        run.products_loaded = stats.products_loaded
+        run.products_created = stats.products_created
+        run.products_inactive = stats.products_inactive
+        run.substances_created = stats.substances_created
+        run.links_created = stats.links_created
+        run.products_without_links = stats.products_without_links
+        run.save()
+
+        self._report(stats, time.monotonic() - started)
+
+    def _run_import(self, options: dict[str, Any]) -> LoadStats:
+        """The download/parse/load path, unchanged from before the run record.
+
+        Split out from `handle()` so run-record bookkeeping can wrap it in one
+        `try/except` without disturbing the existing `try/finally` that owns
+        temp-file cleanup.
+        """
         # Whichever URL is in play decides the namespace, so the two cannot
         # drift apart. See registry/parser.py::namespace_for_url.
         url: str = options['url'] or settings.REGISTRY_OVERALL_URL
@@ -111,26 +181,47 @@ class Command(BaseCommand):
                 else:
                     downloaded.unlink(missing_ok=True)
 
-        self._report(stats, time.monotonic() - started)
+        return stats
 
     def _download(self, url: str, destination: Path) -> None:
         """Stream the snapshot to disk, never parsing off the live response.
 
         A mid-parse network blip would otherwise leave a half-applied load.
 
-        `OSError` is caught alongside the network errors because the write side
-        of this loop is just as much a boundary as the read side: a full disk
-        would otherwise surface as a traceback rather than a refusal.
+        Retries only `requests.RequestException` — a transient network blip —
+        up to `DOWNLOAD_MAX_ATTEMPTS` times with a short ascending backoff,
+        bounded by `RUN_DEADLINE_SECONDS` on when a *retry* may still start.
+        `OSError` (a full disk) fails immediately: the write side of this loop
+        is just as much a boundary as the read side, but retrying it would not
+        help. Every attempt is recorded on `self._attempts` regardless of
+        outcome, so the run record shows how many were made even on failure.
         """
         self.stdout.write(f'Downloading {url}')
-        try:
-            response = requests.get(url, stream=True, timeout=DOWNLOAD_TIMEOUT)
-            response.raise_for_status()
-            with destination.open('wb') as handle:
-                for chunk in response.iter_content(chunk_size=CHUNK_SIZE):
-                    handle.write(chunk)
-        except (requests.RequestException, OSError) as exc:
-            raise CommandError(f'Could not download {url}: {exc}') from exc
+        deadline = time.monotonic() + RUN_DEADLINE_SECONDS
+        last_exc: Exception | None = None
+        for attempt in range(1, DOWNLOAD_MAX_ATTEMPTS + 1):
+            self._attempts = attempt
+            try:
+                response = requests.get(url, stream=True, timeout=DOWNLOAD_TIMEOUT)
+                response.raise_for_status()
+                with destination.open('wb') as handle:
+                    for chunk in response.iter_content(chunk_size=CHUNK_SIZE):
+                        handle.write(chunk)
+                return
+            except requests.RequestException as exc:
+                last_exc = exc
+                if attempt == DOWNLOAD_MAX_ATTEMPTS or time.monotonic() >= deadline:
+                    break
+                backoff = DOWNLOAD_RETRY_BACKOFF[min(attempt - 1, len(DOWNLOAD_RETRY_BACKOFF) - 1)]
+                self.stdout.write(
+                    f'Download attempt {attempt} failed ({exc}); retrying in {backoff}s'
+                )
+                _sleep(backoff)
+            except OSError as exc:
+                raise CommandError(f'Could not download {url}: {exc}') from exc
+        raise CommandError(
+            f'Could not download {url} after {self._attempts} attempt(s): {last_exc}'
+        ) from last_exc
 
     def _import(
         self,

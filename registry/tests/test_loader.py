@@ -352,6 +352,11 @@ class DownloadPathTests(LoaderTestCase):
     """
 
     REQUESTS_GET = 'registry.management.commands.import_registry.requests.get'
+    # A connection error is retried DOWNLOAD_MAX_ATTEMPTS times with a real
+    # backoff between attempts; patching the sleep keeps these tests fast
+    # without touching the retry constants themselves (a backoff short enough
+    # not to slow the suite would be too short to help a real transfer).
+    SLEEP = 'registry.management.commands.import_registry._sleep'
 
     def leftover_downloads(self) -> set[Path]:
         return set(Path(tempfile.gettempdir()).glob('registry-*.xml'))
@@ -361,11 +366,30 @@ class DownloadPathTests(LoaderTestCase):
         call_command('import_registry', '--min-products', '1', stdout=StringIO())
 
     def test_network_failure_becomes_a_command_error(self) -> None:
-        with patch(self.REQUESTS_GET, side_effect=requests.ConnectionError('no route')):
-            with self.assertRaises(CommandError):
-                self.run_download()
+        with patch(self.SLEEP):
+            with patch(self.REQUESTS_GET, side_effect=requests.ConnectionError('no route')):
+                with self.assertRaises(CommandError):
+                    self.run_download()
 
         self.assertEqual(Product.objects.count(), 0)
+
+    def test_network_failure_is_retried_up_to_the_attempt_ceiling(self) -> None:
+        # Pins the retry count itself, not just that a CommandError eventually
+        # surfaces — the highest-value thing to prove about the retry loop
+        # without coupling to _download's call shape.
+        from registry.management.commands.import_registry import DOWNLOAD_MAX_ATTEMPTS
+        from registry.models import ImportRun
+
+        with patch(self.SLEEP):
+            with patch(
+                self.REQUESTS_GET, side_effect=requests.ConnectionError('no route')
+            ) as requests_get:
+                with self.assertRaises(CommandError):
+                    self.run_download()
+
+        self.assertEqual(requests_get.call_count, DOWNLOAD_MAX_ATTEMPTS)
+        run = ImportRun.objects.get()
+        self.assertEqual(run.attempts, DOWNLOAD_MAX_ATTEMPTS)
 
     def test_disk_failure_becomes_a_command_error(self) -> None:
         # Without OSError in the except clause this escapes as a traceback: the
@@ -382,9 +406,10 @@ class DownloadPathTests(LoaderTestCase):
     def test_temp_file_is_removed_after_a_failed_download(self) -> None:
         before = self.leftover_downloads()
 
-        with patch(self.REQUESTS_GET, side_effect=requests.ConnectionError('no route')):
-            with self.assertRaises(CommandError):
-                self.run_download()
+        with patch(self.SLEEP):
+            with patch(self.REQUESTS_GET, side_effect=requests.ConnectionError('no route')):
+                with self.assertRaises(CommandError):
+                    self.run_download()
 
         self.assertEqual(self.leftover_downloads() - before, set())
 
