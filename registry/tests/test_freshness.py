@@ -8,6 +8,7 @@ would let that mistake back in silently.
 
 from datetime import timedelta
 from io import StringIO
+from unittest.mock import patch
 
 from django.core.management import call_command
 from django.core.management.base import CommandError
@@ -61,10 +62,18 @@ class VerdictTests(TestCase):
 
     def test_success_exactly_at_stale_after_reads_fresh(self) -> None:
         # is_stale is age > STALE_AFTER, not >=: the boundary itself belongs
-        # to "fresh".
-        make_run(started_at=timezone.now() - STALE_AFTER)
+        # to "fresh". "Now" has to be frozen to one instant for both the run's
+        # started_at and get_verdict()'s own timezone.now() call: without it,
+        # the two calls land microseconds apart, age ends up a hair over
+        # STALE_AFTER, and this test fails more often than it passes.
+        frozen_now = timezone.now()
+        make_run(started_at=frozen_now - STALE_AFTER)
 
-        self.assertFalse(get_verdict().is_stale)
+        with patch('registry.freshness.timezone.now', return_value=frozen_now):
+            verdict = get_verdict()
+
+        self.assertEqual(verdict.age, STALE_AFTER)
+        self.assertFalse(verdict.is_stale)
 
     def test_old_source_as_of_on_a_recent_success_still_reads_fresh(self) -> None:
         # Pins the collapse-to-one-number decision: last-successful-run is the
