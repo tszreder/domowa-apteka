@@ -50,6 +50,20 @@ class VerdictTests(TestCase):
         self.assertTrue(verdict.is_stale)
         self.assertIsNone(verdict.last_success_at)
 
+    def test_a_running_run_does_not_count_as_success(self) -> None:
+        # The whole reason RunStatus has a third value: a row created before
+        # the work starts and never reaching its update (a killed process, an
+        # OOM the except clause never got to run for) must not read as fresh.
+        # get_verdict() has to filter on status=SUCCESS specifically, not
+        # "not failed" — this is the test that would catch a regression to
+        # the latter.
+        make_run(started_at=timezone.now(), status=RunStatus.RUNNING)
+
+        verdict = get_verdict()
+
+        self.assertTrue(verdict.is_stale)
+        self.assertIsNone(verdict.last_success_at)
+
     def test_success_just_under_stale_after_reads_fresh(self) -> None:
         make_run(started_at=timezone.now() - STALE_AFTER + timedelta(minutes=1))
 
@@ -79,15 +93,18 @@ class VerdictTests(TestCase):
         # Pins the collapse-to-one-number decision: last-successful-run is the
         # headline, not the snapshot's own date. A later reader must not "fix"
         # this by folding source_as_of into is_stale.
-        make_run(
-            started_at=timezone.now(),
-            source_as_of=timezone.now().date() - timedelta(days=400),
-        )
+        # `today` is computed once, not re-derived in the assertion: two
+        # separate timezone.now().date() calls straddling a UTC midnight
+        # would otherwise make this flaky the same way the exact-boundary
+        # test above was.
+        today = timezone.now().date()
+        old_source_as_of = today - timedelta(days=400)
+        make_run(started_at=timezone.now(), source_as_of=old_source_as_of)
 
         verdict = get_verdict()
 
         self.assertFalse(verdict.is_stale)
-        self.assertEqual(verdict.source_as_of, timezone.now().date() - timedelta(days=400))
+        self.assertEqual(verdict.source_as_of, old_source_as_of)
 
     def test_recent_manual_run_reads_fresh(self) -> None:
         # The verdict is deliberately trigger-agnostic. Without this
