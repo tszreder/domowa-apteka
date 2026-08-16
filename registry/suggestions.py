@@ -6,7 +6,12 @@ the plan's "Critical Implementation Details" and "Key Discoveries" for why
 these two rules (grouping, tiebreak) exist and what they must hold against.
 """
 
+from collections import defaultdict
 from dataclasses import dataclass
+from functools import reduce
+from operator import or_
+
+from django.db.models import Q
 
 from .models import Product
 
@@ -45,8 +50,22 @@ def _default_product(rows: list[Product]) -> Product:
 def _build_presentation(rows: list[Product]) -> Presentation:
     default_product = _default_product(rows)
     substances = [link.substance.name for link in default_product.substance_links.all()]
+    # One producer per *distinct holder*, not per row. `Concor Cor 2,5` is 28
+    # rows across 8 holders; emitting a row each would offer 28 options the
+    # user cannot tell apart — the exact flaw presentation grouping exists to
+    # remove, reintroduced one level down. Worse than cosmetic: identical-
+    # looking options carry different `product_id`s, and in the 1.24% of
+    # groups whose rows disagree on substances they resolve to different
+    # substance sets. The representative row is chosen with `_default_product`
+    # so there is one tiebreak rule in this module, not two.
+    rows_by_holder: dict[str, list[Product]] = defaultdict(list)
+    for row in rows:
+        rows_by_holder[row.marketing_holder].append(row)
     producers = sorted(
-        (Producer(holder=row.marketing_holder, product_id=row.id) for row in rows),
+        (
+            Producer(holder=holder, product_id=_default_product(holder_rows).id)
+            for holder, holder_rows in rows_by_holder.items()
+        ),
         key=lambda producer: producer.holder,
     )
     first = rows[0]
@@ -74,26 +93,39 @@ def search_presentations(query: str, limit: int = 10) -> list[Presentation]:
     slow. Grouping in SQL first and slicing to `limit` there means only the
     handful of rows in the ≤`limit` chosen groups are ever hydrated. See
     the plan's "Performance Considerations".
+
+    The chosen groups are then hydrated in a *single* OR'd query rather than
+    one query per group: a per-group loop costs 1+3N statements (31 at the
+    default limit), and this endpoint fires on every debounced keystroke.
+    That is cheap on dev SQLite in-process but pays a round trip each in
+    production Postgres. The OR stays cheap only because `limit` bounds it
+    to ≤10 triples — it is not a general-purpose fetch.
     """
     if len(query) < 2:
         return []
 
-    keys = (
+    keys = list(
         Product.objects.filter(is_active=True, name__icontains=query)
         .order_by('name', 'strength', 'pharmaceutical_form')
         .values_list('name', 'strength', 'pharmaceutical_form')
         .distinct()[:limit]
     )
+    if not keys:
+        return []
 
-    presentations = []
-    for name, strength, pharmaceutical_form in keys:
-        rows = list(
-            Product.objects.filter(
-                is_active=True,
-                name=name,
-                strength=strength,
-                pharmaceutical_form=pharmaceutical_form,
-            ).prefetch_related('substance_links__substance')
-        )
-        presentations.append(_build_presentation(rows))
-    return presentations
+    chosen_groups = reduce(
+        or_,
+        (
+            Q(name=name, strength=strength, pharmaceutical_form=pharmaceutical_form)
+            for name, strength, pharmaceutical_form in keys
+        ),
+    )
+    rows_by_key: dict[tuple[str, str, str], list[Product]] = defaultdict(list)
+    for row in Product.objects.filter(chosen_groups, is_active=True).prefetch_related(
+        'substance_links__substance'
+    ):
+        rows_by_key[(row.name, row.strength, row.pharmaceutical_form)].append(row)
+
+    # Iterating `keys` preserves the SQL ordering; `rows_by_key` is only a
+    # lookup, so its insertion order is never relied on.
+    return [_build_presentation(rows_by_key[key]) for key in keys]

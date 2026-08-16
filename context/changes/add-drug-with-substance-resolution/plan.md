@@ -400,8 +400,22 @@ scale and it matches `cor` against `Concor Cor`.
 
 `Presentation` carries `name`, `strength`, `pharmaceutical_form`, the substance display
 names of its default product, and `producers` — a list of
-`(marketing_holder, product_id)` pairs for the group, sorted by holder name, with the
-default product's id identified.
+`(marketing_holder, product_id)` pairs for the group, **one pair per _distinct_
+`marketing_holder`, not one per row**, sorted by holder name, with the default product's
+id identified. The representative row for each holder is chosen with the same
+default-product rule below, so there is one tiebreak in the module rather than two.
+
+> **Corrected 2026-08-16 after implementation review (F7).** As originally written, this
+> paragraph said only "pairs for the group", which permits one pair per row — and that is
+> how it was implemented. Every measurement and rationale around it assumed distinct
+> holders (Phase 1 § 2 "8 distinct holders across 28 rows", manual criterion 3.6, and the
+> inline-payload sizing resting on "no group has more than 10 producers"), so the plan
+> contradicted itself and the contradiction was resolved silently in the permissive
+> direction. Per-row producers reintroduce exactly the flaw presentation grouping exists
+> to remove: `Concor Cor 2,5` offered 28 options across 8 distinguishable names, and
+> because identical-looking options carry different `product_id`s, in the 1.24% of groups
+> whose rows disagree on substances the user could unknowingly select a different
+> substance set. Do not "simplify" this back to one pair per row.
 
 The default-product rule, which is the phase's core contract:
 
@@ -926,7 +940,7 @@ Recorded here rather than left for S-03 to rediscover:
 - [x] 3.8 A single-producer product shows its producer without the field being touched — 2ffeed6
 - [x] 3.9 Picking a product with no substances saves, warns, and appears as unresolved on the list — 2ffeed6
 - [x] 3.10 Editing the search text after a pick prevents submission rather than saving the stale product — 2ffeed6
-- [ ] 3.11 The flow is usable on a phone-width viewport — NOT independently confirmed: the browser automation's resize_window call reported success but window.innerWidth stayed at 2342px in this environment, so no real narrow-viewport screenshot was obtained. Code-level signals are favorable (Pico.css is fluid/mobile-first by default, base.html has a correct `width=device-width` viewport meta tag, and the form has no fixed-width or multi-column elements) but this is inference, not measurement — flagged for the user to eyeball on an actual phone or browser devtools.
+- [x] 3.11 The flow is usable on a phone-width viewport — confirmed 2026-08-16 by the user directly at ~375px (the browser automation's `resize_window` could not do this in this environment; see measurements.md). Add flow, suggestion list, and producer picker all usable.
 - [x] 3.12 Save acknowledgement arrives within one second — 2ffeed6
 
 ### Phase 4: Delete, and end-to-end verification
@@ -947,6 +961,6 @@ Recorded here rather than left for S-03 to rediscover:
 - [x] 4.9 Member B of household A sees member A's item on their next page load — bff834e
 - [x] 4.10 A member of household B never sees household A's items, including via a direct delete POST — bff834e
 - [x] 4.11 Delete removes the item and the list reflects it immediately — bff834e
-- [ ] 4.12 The whole flow works at phone width — NOT independently confirmed, same tooling limitation as 3.11 (`resize_window` did not change `window.innerWidth` in this environment). See measurements.md.
+- [x] 4.12 The whole flow works at phone width — confirmed 2026-08-16 by the user directly at ~375px: search → pick presentation → pick producer → save → see it in the list → delete, all usable end to end. See measurements.md.
 - [x] 4.13 Save acknowledgement arrives within one second — bff834e
 - [x] 4.14 Resolved substance sets for the tried names recorded in the change folder — bff834e

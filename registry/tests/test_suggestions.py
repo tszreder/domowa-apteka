@@ -55,6 +55,47 @@ class GroupingTests(TestCase):
             [p.holder for p in results[0].producers], ['Actavis', 'Merck', 'Zentiva']
         )
 
+    def test_rows_sharing_a_holder_collapse_to_one_producer(self) -> None:
+        # The real `Concor Cor 2,5` shape: 28 rows, only 8 distinct holders.
+        # One producer per row would offer 28 options the user cannot tell
+        # apart — the flaw grouping exists to remove, one level down. Worse,
+        # identical-looking options carry different `product_id`s, so a
+        # distinction the user cannot see becomes a substance set they did
+        # not knowingly choose.
+        holders = ['Delfarma', 'Merck', 'Zentiva', 'Actavis']
+        for i in range(28):
+            make_product(
+                str(i), name='Concor Cor 2,5', strength='2,5 mg',
+                pharmaceutical_form='Tabletki', marketing_holder=holders[i % len(holders)],
+            )
+
+        results = search_presentations('concor')
+
+        self.assertEqual(len(results), 1)
+        self.assertEqual(
+            [p.holder for p in results[0].producers],
+            ['Actavis', 'Delfarma', 'Merck', 'Zentiva'],
+        )
+
+    def test_producer_representative_row_uses_the_default_product_tiebreak(self) -> None:
+        # Which of a holder's rows is offered is not arbitrary: it reuses
+        # `_default_product`, so the picked row prefers one carrying substance
+        # links. One tiebreak rule in the module, not two.
+        substance = Substance.objects.create(name='Bisoprololum', name_key='bisoprololum')
+        without_links = make_product(
+            '1', name='Concor Cor 2,5', marketing_holder='Delfarma',
+        )
+        with_links = make_product(
+            '2', name='Concor Cor 2,5', marketing_holder='Delfarma',
+        )
+        link(with_links, substance)
+
+        results = search_presentations('concor')
+
+        self.assertEqual(len(results[0].producers), 1)
+        self.assertEqual(results[0].producers[0].product_id, with_links.id)
+        self.assertNotEqual(results[0].producers[0].product_id, without_links.id)
+
     def test_same_name_different_strengths_are_separate_presentations(self) -> None:
         # The `Xanax` shape.
         make_product('1', name='Xanax', strength='0,25 mg')

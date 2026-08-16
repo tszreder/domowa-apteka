@@ -36,8 +36,44 @@ matches).
   (`Ibuprofenum` + `Paracetamolum`).
 - `xanax` — distinct strengths as separate presentations (0,25 mg / 0,5 mg / 1 mg / 2 mg /
   250 mcg / 500 mcg / SR variants), not 59 near-identical rows.
-- `concor cor 2,5` — collapses to **one** presentation with **28** producer rows across
-  several distinct holders (Allpharm, Delfarma, Forfarm, InPharm, ...).
+- `concor cor 2,5` — collapses to **one** presentation with **8** producers, one per
+  distinct holder (Allpharm, Delfarma, Forfarm, InPharm, Medezin, Merck, PharmaVitae,
+  Pretium Farm).
+
+  > **Corrected 2026-08-16 (review finding F7).** This line originally read "**28**
+  > producer rows across several distinct holders" and recorded that as a success. It was
+  > the symptom of a defect: 28 rows were being offered where only 8 are distinguishable,
+  > so typing `del` returned four entries all reading `Delfarma` with nothing to choose
+  > between them. Manual criterion 3.6 was ticked because the field *does* narrow — just
+  > to duplicates. Fixed by emitting one producer per distinct holder.
+
+## Phase 2 (revised 2026-08-16): after review findings F1 and F7
+
+Re-measured against the same real 20,247-active-product local database after replacing the
+per-group hydration loop with a single OR'd query, and after deduplicating producers by
+holder.
+
+| Metric | Before | After |
+| --- | --- | --- |
+| Queries per search (10 results) | 31 (1 + 3N) | **4** |
+| Queries per HTTP request (incl. 3 auth) | 34 | **7** |
+| Slowest sampled search (`in`, 10 results) | 20.0 ms | **15.6 ms** |
+| Producers offered for `Concor Cor 2,5` | 28 | **8** |
+| Largest sampled JSON payload | — | **2,685 bytes** |
+
+The query count is now independent of the number of matched groups, which is the property
+under test — `test_query_count_does_not_grow_with_the_number_of_groups` asserts one group
+and ten cost the same, and `test_query_count_is_bounded` pins the absolute 7.
+
+Both guards were mutation-checked rather than trusted green: reverting to the per-group
+loop makes them fail with `34 != 7`, and reverting the holder dedup makes both new
+`registry.tests.test_suggestions` cases fail. Largest producer count across the sampled
+queries was 4, inside the plan's "no group has more than 10" sizing assumption; payload
+stayed near the plan's ~2 KB estimate.
+
+Caveat unchanged from the original review: these are SQLite in-process on dev. The claim
+that 4 round trips beat 31 in production Postgres is inference from network latency, not a
+measurement against Postgres.
 
 ## Phase 4: North-star resolution, tried live against the real database
 
@@ -68,3 +104,9 @@ confirmation message.
 4.12) — the browser automation's `resize_window` reported success but
 `window.innerWidth` never changed from the desktop size, so no real narrow-viewport
 screenshot was taken. Flagged for the user to eyeball directly.
+
+**Confirmed 2026-08-16 by the user**, directly at ~375px in devtools against the running
+dev server (review finding F6): the add flow, suggestion list, and producer picker are
+usable at phone width (3.11), and the full search → pick presentation → pick producer →
+save → list → delete flow works end to end at that width (4.12). Both plan.md criteria
+ticked.

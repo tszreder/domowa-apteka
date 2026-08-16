@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_GET, require_POST
 
 from households.decorators import household_required
 from households.models import Household, Membership
@@ -31,6 +31,7 @@ def item_list(request: HttpRequest) -> HttpResponse:
 
 
 @household_required
+@require_GET
 def product_suggestions(request: HttpRequest) -> HttpResponse:
     query = request.GET.get('q', '')
     presentations = search_presentations(query)

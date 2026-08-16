@@ -55,8 +55,15 @@
     list.hidden = false;
   }
 
+  // Only `makeOption` rows carry role="option"; a failure message rendered
+  // into the same list is deliberately excluded, so arrow keys cannot land
+  // on a row that does nothing when picked.
+  function optionsOf(list) {
+    return Array.from(list.querySelectorAll('[role="option"]'));
+  }
+
   function activateOption(list, index) {
-    const options = Array.from(list.children);
+    const options = optionsOf(list);
     options.forEach((el, i) => el.classList.toggle('active', i === index));
     if (options[index]) options[index].scrollIntoView({ block: 'nearest' });
   }
@@ -64,7 +71,7 @@
   function attachKeyboardNav(input, list, onPickIndex) {
     let activeIndex = -1;
     input.addEventListener('keydown', (event) => {
-      const options = Array.from(list.children);
+      const options = optionsOf(list);
       if (list.hidden || options.length === 0) return;
       if (event.key === 'ArrowDown') {
         event.preventDefault();
@@ -142,6 +149,19 @@
     renderList(suggestionsList, options);
   }
 
+  // A lookup failure must never be silent (PRD guardrail). Picking a
+  // suggestion is the only way to add an item in v1, so a dead endpoint
+  // otherwise looks identical to "this drug is not in the registry".
+  function renderMessage(list, text) {
+    clearList(list);
+    const li = document.createElement('li');
+    li.textContent = text;
+    li.className = 'suggestion-message';
+    li.setAttribute('aria-live', 'polite');
+    list.appendChild(li);
+    list.hidden = false;
+  }
+
   async function fetchSuggestions(query) {
     const mySequence = ++sequence;
     if (abortController) abortController.abort();
@@ -151,13 +171,32 @@
         `/suggestions/?q=${encodeURIComponent(query)}`,
         { signal: abortController.signal }
       );
+      // Check before parsing: an expired session redirects to the login
+      // page, `fetch` follows it, and `response.json()` would throw a
+      // SyntaxError on HTML that the catch below would re-throw as an
+      // unhandled rejection — leaving the user typing into a dead field.
+      if (!response.ok) {
+        if (mySequence < latestRenderedSequence) return;
+        latestRenderedSequence = mySequence;
+        renderMessage(
+          suggestionsList,
+          'Nie udało się pobrać podpowiedzi. Zaloguj się ponownie i spróbuj jeszcze raz.'
+        );
+        return;
+      }
       const data = await response.json();
       // A slower, superseded response must never overwrite a newer one.
       if (mySequence < latestRenderedSequence) return;
       latestRenderedSequence = mySequence;
       renderPresentationOptions(data.results);
     } catch (error) {
-      if (error.name !== 'AbortError') throw error;
+      if (error.name === 'AbortError') return;
+      if (mySequence < latestRenderedSequence) return;
+      latestRenderedSequence = mySequence;
+      renderMessage(
+        suggestionsList,
+        'Nie udało się pobrać podpowiedzi. Sprawdź połączenie i spróbuj jeszcze raz.'
+      );
     }
   }
 
@@ -181,11 +220,11 @@
   });
 
   attachKeyboardNav(searchInput, suggestionsList, (index) => {
-    const li = suggestionsList.children[index];
+    const li = optionsOf(suggestionsList)[index];
     if (li) li.dispatchEvent(new MouseEvent('mousedown'));
   });
   attachKeyboardNav(producerSearchInput, producerSuggestionsList, (index) => {
-    const li = producerSuggestionsList.children[index];
+    const li = optionsOf(producerSuggestionsList)[index];
     if (li) li.dispatchEvent(new MouseEvent('mousedown'));
   });
 })();

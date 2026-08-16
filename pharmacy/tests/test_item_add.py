@@ -122,6 +122,25 @@ class ItemAddTests(TestCase):
         item = Item.objects.get()
         self.assertFalse(item.producer_confirmed)
 
+    def test_posting_producer_confirmed_false_stores_false(self) -> None:
+        # The path the browser actually takes: autocomplete.js always submits
+        # the literal string 'false', never omits the field. This passes only
+        # because BooleanField.to_python special-cases 'false' and '0' — an
+        # undocumented framework nicety. Without this test, changing the field
+        # or widget would make 'false' truthy, every unconfirmed item would
+        # render the tiebreak default producer as fact, and the suite would
+        # stay green. The omission test above covers a different, still-valid
+        # HTTP shape; neither replaces the other.
+        product = make_product('1')
+
+        self.client.post(
+            reverse('pharmacy:item_add'),
+            {'product': product.id, 'producer_confirmed': 'false'},
+        )
+
+        item = Item.objects.get()
+        self.assertFalse(item.producer_confirmed)
+
     def test_member_of_household_b_cannot_see_item_household_a_just_added(self) -> None:
         product = make_product('1', name='Apap Extra')
         self.client.post(
