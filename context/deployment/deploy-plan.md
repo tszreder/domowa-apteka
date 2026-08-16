@@ -425,8 +425,34 @@ This is empirical, sharper confirmation of the exact hazard
 built from code `web` hasn't deployed yet has **no** schema for that code at
 all". The fix already exists (`deploy.yml`'s `web`-then-cron ordering) — this
 failure predates that ordering ever applying, because the branch itself
-hadn't reached `main` yet. **Re-verify 3.4 after this branch merges and
-`web` redeploys** — see `plan.md`'s progress checklist.
+hadn't reached `main` yet.
+
+**Resolved, 2026-08-16 23:48 UTC, after merge.** PR #21 merged as `c506ae5`;
+`deploy.yml`'s `deploy` job redeployed `web` (running the migration) then
+`registry-import-cron`, in that order, exactly as designed. Re-triggered via
+"Run now": **succeeded in 15s** against the real registry —
+
+```
+Registry snapshot 2026-08-16
+  products in file:   22884 (all kinds)
+  products loaded:    20242 (0 new)
+  products inactive:  3
+  substances:         0 new
+  links:              25879
+    substance_row: 25465
+    common_name: 414
+  resolved:           19681 of 20242 (97.2%)
+  elapsed:            9.8 s
+```
+
+Not independently confirmed by reading the `ImportRun` row itself — no
+production admin credentials on hand, and the deployment has no live
+instance to attach a console to once the run exits (cron containers don't
+stay up). Confirmed by construction instead: `handle()`'s success path calls
+`run.save()` *before* `_report()` prints the summary above
+(`import_registry.py`), so seeing that summary in the deployment logs is
+proof the row landed with `status=success`, `trigger=scheduled` (the only
+value `railway.cron.json`'s `startCommand` ever passes).
 
 **Service variables — final state:**
 
@@ -446,12 +472,13 @@ No new setting is introduced by this change, so `.env.example` is unchanged.
   flags both. `SECURE_SSL_REDIRECT` was deferred because a redirect can turn the
   healthcheck's 200 into a 301 and fail deploys; HSTS is browser-cached and
   semi-irreversible. Both are safe to revisit now that the deploy is green.
-- **Daily ingestion cron is provisioned but not yet confirmed working.**
-  `registry-import-cron` exists, is configured from `railway.cron.json`, and
-  is wired with production variables — but its first manual trigger crashed
-  because `web`/production Postgres are still on pre-F-02 `main`, with no
-  `registry_importrun` table to write to. See "Registry import cron" above.
-  Re-verify once this branch merges and `web` redeploys.
+- **Daily ingestion cron is live and confirmed working.** `registry-import-cron`
+  runs `railway.cron.json`'s schedule (03:17 UTC daily) and a manually
+  triggered run succeeded end-to-end on real production data 2026-08-16 —
+  see "Registry import cron" above. What's left is Phase 4 of
+  `registry-freshness-refresh`: confirming an actual *unattended* scheduled
+  fire (not a manual "Run now") lands cleanly, which can't be checked until
+  the schedule has genuinely come around.
 - **CI's `check` job is a thin gate no longer** — `registry` and `households`
   both carry real tests now; `manage.py test` is a meaningful signal.
 - `ALLOWED_HOSTS` cannot be black-box tested from the internet: Railway's edge
