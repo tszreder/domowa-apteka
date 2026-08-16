@@ -134,9 +134,3 @@ def household_create(request: HttpRequest) -> HttpResponse:
     else:
         form = HouseholdCreateForm()
     return render(request, 'households/household_create.html', {'form': form})
-
-
-@household_required
-def item_list(request: HttpRequest) -> HttpResponse:
-    household = _household_of(cast(User, request.user))
-    return render(request, 'households/item_list.html', {'household': household})

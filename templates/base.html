@@ -18,6 +18,7 @@
                     <li>
                         {{ user.email }}{% if user.membership %} — <a href="{% url 'households:household_detail' %}">{{ user.membership.household.name }}</a>{% endif %}
                     </li>
+                    <li><a href="{% url 'pharmacy:item_list' %}">Lista leków</a></li>
                     <li>
                         <form method="post" action="{% url 'households:logout' %}">
                             {% csrf_token %}
