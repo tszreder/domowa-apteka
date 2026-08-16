@@ -626,9 +626,9 @@ Rollback is a table drop; nothing else in the app reads `ImportRun`.
 
 #### Automated
 
-- [x] 2.1 Boundary tests pass at, just under, and just over `STALE_AFTER` — 3bc60ac
+- [x] 2.1 Boundary tests pass at, just under, and just over `STALE_AFTER` — 3bc60ac, hardened at e568d69 (the exact-boundary test was flaky as first landed — ~60% failure rate on repeated local runs — fixed at 3f4b3f8; RUNNING-doesn't-count-as-fresh case added at e568d69)
 - [x] 2.2 `registry_status` exits non-zero when stale and zero when fresh — 3bc60ac
-- [x] 2.3 Full suite passes: `uv run python manage.py test` — 3bc60ac
+- [x] 2.3 Full suite passes: `uv run python manage.py test` — verified green (103 tests) as of e568d69, run 3x with no flakes after the fixes above
 - [x] 2.4 Type checking passes: `uv run mypy` — 3bc60ac
 - [x] 2.5 Django system checks pass: `uv run python manage.py check` — 3bc60ac
 
