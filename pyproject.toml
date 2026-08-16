@@ -15,6 +15,7 @@ dependencies = [
 [dependency-groups]
 dev = [
     "django-stubs>=6.0.7",
+    "jsonschema>=4.26.0",
     "mypy>=2.3.0",
     "types-requests>=2.33.0.20260712",
 ]

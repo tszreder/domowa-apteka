@@ -42,7 +42,7 @@ reality, and every other slice is downstream of it.
 | ID   | Change ID                          | Outcome (user can …)                                                                        | Prerequisites | PRD refs                     | Status   |
 | ---- | ---------------------------------- | ------------------------------------------------------------------------------------------- | ------------- | ---------------------------- | -------- |
 | F-01 | `registry-substance-data`          | (foundation) product → active-substance records from the official registry are queryable locally, each traceable to its source row | —             | FR-001, FR-002, NFR (verified sources) | done |
-| F-02 | `registry-freshness-refresh`       | (foundation) registry data refreshes on a schedule and the app knows when it last succeeded | F-01          | NFR (registry freshness)     | proposed |
+| F-02 | `registry-freshness-refresh`       | (foundation) registry data refreshes on a schedule and the app knows when it last succeeded | F-01          | NFR (registry freshness)     | planning |
 | S-01 | `household-accounts-and-invites`   | sign in, create a household, invite another adult by link/code, and have them join with full symmetric access | —             | FR-005, US-02, Access Control | done     |
 | S-02 | `add-drug-with-substance-resolution` | add a pharmaceutical by name with registry-backed autocomplete, see its resolved active substance(s) — or a clear lookup-failure message — and have the item appear on the shared household list | F-01, S-01    | FR-001, FR-002, US-01        | proposed |
 | S-03 | `duplicate-flagging-on-list`       | see household list items flagged as full duplicates (identical substance sets) and partial duplicates (overlapping but not identical) | S-02          | FR-003, US-03                | proposed |
@@ -107,7 +107,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Unknowns:**
   - What signal distinguishes "the scheduler fired" from "the data is current", given that a skipped run leaves no error behind? — Owner: user. Block: no.
 - **Risk:** `context/foundation/infrastructure.md` records that the platform's cron silently *drops* a scheduled run when the previous execution is still active — it does not queue it, and it does not error. So the naive design ("the cron is scheduled, therefore the data is fresh") is documented to be wrong here. This is why the outcome is an app-side timestamp, not a cron configuration. Sequenced after the north star because the freshness promise only starts costing anything once real users are reading substance data.
-- **Status:** proposed
+- **Status:** planning
 
 ## Slices
 

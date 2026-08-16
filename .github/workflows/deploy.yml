@@ -79,7 +79,19 @@ jobs:
       # --ci streams the build log then exits, instead of holding a TTY.
       # RAILWAY_TOKEN is a project token scoped to the production
       # environment; it carries the project context, so no `railway link`.
-      - name: Deploy to Railway
+      - name: Deploy web
         run: railway up --service web --ci
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+      # Second and last: web's startCommand runs `migrate --noinput`, so
+      # deploying it first guarantees the cron service can never execute
+      # against a schema the database has not migrated to yet. Same token —
+      # it carries project context, and railwayConfigFile on this service
+      # instance (set once via `railway api`, not in this workflow) is what
+      # points its build at railway.cron.json instead of the repo-root
+      # railway.json.
+      - name: Deploy registry-import-cron
+        run: railway up --service registry-import-cron --ci
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}

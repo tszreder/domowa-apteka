@@ -106,3 +106,66 @@ class ProductSubstance(models.Model):
 
     def __str__(self) -> str:
         return f'{self.substance} in {self.product}'
+
+
+class RunStatus(models.TextChoices):
+    """Where an import attempt currently stands.
+
+    `RUNNING` is the state a row is created in, before any work happens —
+    `import_registry` writes the row first so a crash the `except` clause
+    cannot even catch (a killed process, an OOM) still leaves evidence rather
+    than nothing. It should never be the last state anyone reads for a
+    completed process; a row stuck at `RUNNING` past its own run is itself a
+    signal, not a success.
+    """
+
+    RUNNING = 'running', 'Running'
+    SUCCESS = 'success', 'Success'
+    FAILED = 'failed', 'Failed'
+
+
+class RunTrigger(models.TextChoices):
+    """How an import attempt was started.
+
+    Diagnosis only — the freshness verdict is deliberately trigger-agnostic —
+    but without it a manually-run import would make a dead cron look healthy.
+    """
+
+    MANUAL = 'manual', 'Manual'
+    SCHEDULED = 'scheduled', 'Scheduled'
+
+
+class ImportRun(models.Model):
+    """One row per `import_registry` attempt, success or failure.
+
+    Written outside the import's own `transaction.atomic()` block (see
+    `import_registry.py`), so a failure record survives the exact rollback it
+    exists to capture. This is the app's own record of "did the pipeline run",
+    independent of whether the platform's cron scheduler fired it — see
+    `registry/freshness.py` for the verdict this feeds.
+    """
+
+    started_at = models.DateTimeField(db_index=True)
+    finished_at = models.DateTimeField(null=True, blank=True)
+    status = models.CharField(max_length=16, choices=RunStatus.choices, default=RunStatus.RUNNING)
+    trigger = models.CharField(max_length=16, choices=RunTrigger.choices)
+    attempts = models.PositiveSmallIntegerField(default=0)
+    # The snapshot's own stanNaDzien. Null on a failed run: it never learned
+    # one. Carried for display and diagnosis; deliberately NOT part of the
+    # freshness verdict — see registry/freshness.py.
+    source_as_of = models.DateField(null=True, blank=True)
+    error = models.TextField(blank=True)
+
+    # LoadStats counters, all nullable: a failed run has none of them.
+    products_loaded = models.PositiveIntegerField(null=True, blank=True)
+    products_created = models.PositiveIntegerField(null=True, blank=True)
+    products_inactive = models.PositiveIntegerField(null=True, blank=True)
+    substances_created = models.PositiveIntegerField(null=True, blank=True)
+    links_created = models.PositiveIntegerField(null=True, blank=True)
+    products_without_links = models.PositiveIntegerField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-started_at']
+
+    def __str__(self) -> str:
+        return f'{self.status} run started {self.started_at}'
