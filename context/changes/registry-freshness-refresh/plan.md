@@ -626,17 +626,17 @@ Rollback is a table drop; nothing else in the app reads `ImportRun`.
 
 #### Automated
 
-- [ ] 2.1 Boundary tests pass at, just under, and just over `STALE_AFTER`
-- [ ] 2.2 `registry_status` exits non-zero when stale and zero when fresh
-- [ ] 2.3 Full suite passes: `uv run python manage.py test`
-- [ ] 2.4 Type checking passes: `uv run mypy`
-- [ ] 2.5 Django system checks pass: `uv run python manage.py check`
+- [x] 2.1 Boundary tests pass at, just under, and just over `STALE_AFTER` — 3bc60ac
+- [x] 2.2 `registry_status` exits non-zero when stale and zero when fresh — 3bc60ac
+- [x] 2.3 Full suite passes: `uv run python manage.py test` — 3bc60ac
+- [x] 2.4 Type checking passes: `uv run mypy` — 3bc60ac
+- [x] 2.5 Django system checks pass: `uv run python manage.py check` — 3bc60ac
 
 #### Manual
 
-- [ ] 2.6 `/admin/registry/importrun/` renders the run list with the verdict visible above it
-- [ ] 2.7 The admin page offers no add, change or delete affordance
-- [ ] 2.8 `uv run python manage.py registry_status` prints a readable summary locally
+- [x] 2.6 `/admin/registry/importrun/` renders the run list with the verdict visible above it — 3bc60ac
+- [x] 2.7 The admin page offers no add, change or delete affordance — 3bc60ac
+- [x] 2.8 `uv run python manage.py registry_status` prints a readable summary locally — 3bc60ac
 
 ### Phase 3: Railway cron service, configured in-repo
 
