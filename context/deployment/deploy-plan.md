@@ -343,10 +343,14 @@ moot.
 
 **What is code-complete:**
 - `railway.cron.json` — `deploy.startCommand` runs `python manage.py
-  import_registry --trigger scheduled`, `deploy.cronSchedule` is `17 3 * * *`
-  (03:17 UTC — after the publisher's daily refresh, deliberately off the
+  import_registry --trigger scheduled`, `deploy.cronSchedule` is `5 23 * * *`
+  (23:05 UTC, i.e. 00:05 CET — chosen by the user 2026-08-17, superseding the
+  original `17 3 * * *` this section documented at Phase 3 landing; off the
   `@daily`/midnight mark where platform contention is worst), and
-  `deploy.restartPolicyType` is `NEVER`. `deploy.region` is pinned to
+  `deploy.restartPolicyType` is `NEVER`. **Static UTC cron, no DST
+  awareness**: Railway does not shift this for CET↔CEST, so it holds at
+  23:05 UTC year-round and reads as 00:05 CET only in winter — 01:05 CEST in
+  summer. `deploy.region` is pinned to
   `europe-west4-drams3a`, same as `web`'s pin and for the same reason (see
   "Deploy configuration" above) — unpinned, a later `railway up` could
   reassert the workspace default, and a split-region cron would pay
@@ -386,11 +390,12 @@ default is correct until it's ever changed (see the drift-risk note below).
 
 **Confirmed against the running service** (`railway api` querying
 `service(id).serviceInstances.edges.node.latestDeployment.meta`): the deploy's
-`fileServiceManifest.deploy` shows `cronSchedule: "17 3 * * *"`,
+`fileServiceManifest.deploy` shows `cronSchedule: "17 3 * * *"` (the schedule
+*at Phase 3 landing* — see above for the current `5 23 * * *`),
 `region: "europe-west4-drams3a"`, `restartPolicyType: "NEVER"`, and the
 expected `startCommand` — `railway.cron.json` is genuinely driving this
 service, not just pointed at. The dashboard's **Cron Runs** tab independently
-agrees: "Runs at 03:17 am (UTC)".
+agreed: "Runs at 03:17 am (UTC)".
 
 **A `railway up` or `railway redeploy` against a cron-scheduled service is
 build-only** — confirmed by inspecting `deployment.meta.buildOnly: true` on
@@ -473,9 +478,9 @@ No new setting is introduced by this change, so `.env.example` is unchanged.
   healthcheck's 200 into a 301 and fail deploys; HSTS is browser-cached and
   semi-irreversible. Both are safe to revisit now that the deploy is green.
 - **Daily ingestion cron is live and confirmed working.** `registry-import-cron`
-  runs `railway.cron.json`'s schedule (03:17 UTC daily) and a manually
-  triggered run succeeded end-to-end on real production data 2026-08-16 —
-  see "Registry import cron" above. What's left is Phase 4 of
+  runs `railway.cron.json`'s schedule (currently `5 23 * * *`, 23:05 UTC /
+  00:05 CET) and a manually triggered run succeeded end-to-end on real
+  production data 2026-08-16 — see "Registry import cron" above. What's left is Phase 4 of
   `registry-freshness-refresh`: confirming an actual *unattended* scheduled
   fire (not a manual "Run now") lands cleanly, which can't be checked until
   the schedule has genuinely come around.
