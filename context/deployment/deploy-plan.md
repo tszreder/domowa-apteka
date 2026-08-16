@@ -28,7 +28,7 @@ this file is the short answer to "what is deployed and how do I touch it".
 | Environment | `production` | `3704dc3d-20dc-4744-97c9-fd94624a7d42` |
 | Web service | `web` | `4adb8513-d6dc-4441-94bd-a375ef368a0d` |
 | Database | `Postgres` | `534de5e9-ce4e-4cde-b1ce-532f6d5988a8` |
-| Cron service | `registry-import-cron` | **not yet provisioned** — config-as-code in `railway.cron.json` is ready; see "Registry import cron" below for what still needs a human decision |
+| Cron service | `registry-import-cron` | `d87f619c-4a72-4976-be68-a9ad9bf33f9d` |
 
 Workspace `tszreder's Projects` (`9780cb91-a4f2-4498-904c-b75fa84ee62f`),
 workspace `preferredRegion` = `europe-west4-drams3a`.
@@ -359,28 +359,84 @@ moot.
   registry-import-cron --ci` step, sequenced **after** `web`'s, so a cron
   execution can never hit an unmigrated schema.
 
-**What is deliberately NOT done, and needs a human decision before it is:**
-creating the `registry-import-cron` service itself, running
-`serviceInstanceUpdate` to point it at `railway.cron.json`, wiring its
-service variables (below), and triggering a manual execution. All four are
-production-infrastructure changes with a real cost and billing footprint —
-outside what an unattended implementation pass should do without a
-go-ahead. Until that service exists, **the `deploy` job's new step will fail
-`railway up --service registry-import-cron` on the next merge to `main`** —
-provision the service (or drop the step) before merging this branch.
+**Provisioned 2026-08-16**, with explicit go-ahead (creating billed
+production infrastructure and wiring production credentials was held for a
+human decision — see git history on this section for the earlier
+not-yet-provisioned state):
 
-**Service variables the cron service will need**, once created (same shape
-as `web`'s, per `railway.json`'s `startCommand` which also runs `migrate`
-first — `registry-import-cron` does not, so it only needs what
-`import_registry` itself reads at import time):
+```
+railway add --service registry-import-cron --json
+railway api 'mutation($serviceId: String!, $environmentId: String!) {
+  serviceInstanceUpdate(serviceId: $serviceId, environmentId: $environmentId,
+    input: { railwayConfigFile: "railway.cron.json" })
+}' --variables '{"serviceId":"d87f619c-4a72-4976-be68-a9ad9bf33f9d","environmentId":"3704dc3d-20dc-4744-97c9-fd94624a7d42"}'
+railway variable set 'DATABASE_URL=${{Postgres.DATABASE_URL}}' --service registry-import-cron --skip-deploys
+railway variable set 'SECRET_KEY=${{web.SECRET_KEY}}'          --service registry-import-cron --skip-deploys
+railway variable set 'DEBUG=False'                              --service registry-import-cron --skip-deploys
+railway up --service registry-import-cron --ci
+```
+
+`SECRET_KEY` and `DATABASE_URL` were set as **references** (`${{web.SECRET_KEY}}`,
+`${{Postgres.DATABASE_URL}}`), not raw values — the actual secret was never
+seen, typed, or logged by the agent driving this. `ALLOWED_HOSTS` and
+`REGISTRY_OVERALL_URL` were deliberately left unset: a management command
+never serves an HTTP request, so `ALLOWED_HOSTS`'s fallback
+(`['localhost', '127.0.0.1']`) is inert, and `REGISTRY_OVERALL_URL`'s in-code
+default is correct until it's ever changed (see the drift-risk note below).
+
+**Confirmed against the running service** (`railway api` querying
+`service(id).serviceInstances.edges.node.latestDeployment.meta`): the deploy's
+`fileServiceManifest.deploy` shows `cronSchedule: "17 3 * * *"`,
+`region: "europe-west4-drams3a"`, `restartPolicyType: "NEVER"`, and the
+expected `startCommand` — `railway.cron.json` is genuinely driving this
+service, not just pointed at. The dashboard's **Cron Runs** tab independently
+agrees: "Runs at 03:17 am (UTC)".
+
+**A `railway up` or `railway redeploy` against a cron-scheduled service is
+build-only** — confirmed by inspecting `deployment.meta.buildOnly: true` on
+both the initial deploy and a subsequent `railway redeploy`. Neither actually
+executes `startCommand`; the container only runs at the next cron tick, or via
+the dashboard's **Cron Runs → Run now** button (no CLI/GraphQL equivalent
+found — `serviceInstanceDeploy(V2)` and `serviceInstanceRedeploy` take no
+"run now" argument). This is new information beyond what the plan anticipated
+(it only marked the config-*path* mechanism unverified, not manual
+triggerability) — worth knowing before assuming any CLI-only workflow can
+kick off an out-of-schedule run.
+
+**First manual trigger (via "Run now"), 2026-08-16 23:36 UTC: crashed, not a
+clean `failed` row.**
+
+```
+django.db.utils.ProgrammingError: relation "registry_importrun" does not exist
+```
+
+Cause: `registry-import-cron` was built from the **`feature/registry-freshness-refresh`
+branch**, which carries the `0002_importrun` migration — but `web` was still
+serving `main`, which predates F-02 entirely, so production Postgres never
+ran that migration. The cron container's own code creates an `ImportRun` row
+as the very first thing `handle()` does (see `import_registry.py`), and that
+`INSERT` hit a table that doesn't exist — so the crash happened **below**
+the run-record safety net Phase 1 built, not despite it. No `ImportRun` row
+was written at all; there was no row to write to.
+
+This is empirical, sharper confirmation of the exact hazard
+"Timing & lifecycle — deploy order matters" in `plan.md` describes: not just
+"a cron execution could race an unmigrated schema", but "a cron service
+built from code `web` hasn't deployed yet has **no** schema for that code at
+all". The fix already exists (`deploy.yml`'s `web`-then-cron ordering) — this
+failure predates that ordering ever applying, because the branch itself
+hadn't reached `main` yet. **Re-verify 3.4 after this branch merges and
+`web` redeploys** — see `plan.md`'s progress checklist.
+
+**Service variables — final state:**
 
 | Variable | Source |
 | --- | --- |
-| `DATABASE_URL` | `${{Postgres.DATABASE_URL}}` reference, same as `web` |
-| `SECRET_KEY` | same value as `web` (`settings.py` imports at module load regardless of command) |
+| `DATABASE_URL` | reference `${{Postgres.DATABASE_URL}}` |
+| `SECRET_KEY` | reference `${{web.SECRET_KEY}}` |
 | `DEBUG` | `False` |
-| `ALLOWED_HOSTS` | same as `web` |
-| `REGISTRY_OVERALL_URL` | unset today — falls back to the in-code default, same as `web`. **If this is ever set on `web`** (to bump the export version), **set it identically on the cron service in the same change.** `settings.py`'s own comment says the variable exists so a version bump is "a variable change, not a code deploy" — a cron service left behind would keep importing the old version while `web`'s config claims otherwise, silently reintroducing the drift the variable exists to prevent. |
+| `ALLOWED_HOSTS` | unset — inert for a non-HTTP management command |
+| `REGISTRY_OVERALL_URL` | unset — falls back to the in-code default, same as `web`. **If this is ever set on `web`** (to bump the export version), **set it identically on the cron service in the same change.** `settings.py`'s own comment says the variable exists so a version bump is "a variable change, not a code deploy" — a cron service left behind would keep importing the old version while `web`'s config claims otherwise, silently reintroducing the drift the variable exists to prevent. |
 
 No new setting is introduced by this change, so `.env.example` is unchanged.
 
@@ -390,11 +446,12 @@ No new setting is introduced by this change, so `.env.example` is unchanged.
   flags both. `SECURE_SSL_REDIRECT` was deferred because a redirect can turn the
   healthcheck's 200 into a 301 and fail deploys; HSTS is browser-cached and
   semi-irreversible. Both are safe to revisit now that the deploy is green.
-- **Daily ingestion cron is code-complete but not yet live.** `registry` now
-  exists (F-01) and `railway.cron.json` + the `deploy.yml` step are ready
-  (F-02 Phase 3), but the `registry-import-cron` service itself has not been
-  provisioned — see "Registry import cron" above for exactly what remains and
-  why it was left for a human decision.
+- **Daily ingestion cron is provisioned but not yet confirmed working.**
+  `registry-import-cron` exists, is configured from `railway.cron.json`, and
+  is wired with production variables — but its first manual trigger crashed
+  because `web`/production Postgres are still on pre-F-02 `main`, with no
+  `registry_importrun` table to write to. See "Registry import cron" above.
+  Re-verify once this branch merges and `web` redeploys.
 - **CI's `check` job is a thin gate no longer** — `registry` and `households`
   both carry real tests now; `manage.py test` is a meaningful signal.
 - `ALLOWED_HOSTS` cannot be black-box tested from the internet: Railway's edge

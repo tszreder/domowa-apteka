@@ -647,8 +647,8 @@ Rollback is a table drop; nothing else in the app reads `ImportRun`.
 
 #### Manual
 
-- [ ] 3.3 The cron service exists and its config file mechanism is confirmed and written down — **partial** (164e91c): the config-file mechanism is confirmed and written down (`railwayConfigFile` via `serviceInstanceUpdate`); the service itself is deliberately NOT provisioned — production-infrastructure cost/billing decision left for the user, see deploy-plan.md
-- [ ] 3.4 A manually triggered execution of the cron service completes and writes an `ImportRun` row with `trigger=scheduled` — blocked on 3.3
+- [x] 3.3 The cron service exists and its config file mechanism is confirmed and written down — service provisioned 2026-08-16 with explicit go-ahead; `railwayConfigFile` confirmed live against the deployment's own resolved manifest (not just set), see deploy-plan.md
+- [ ] 3.4 A manually triggered execution of the cron service completes and writes an `ImportRun` row with `trigger=scheduled` — **attempted 2026-08-16, crashed** (`relation "registry_importrun" does not exist`): `web`/production Postgres are still on pre-F-02 `main`, so the table this run tried to write to doesn't exist yet. Also discovered: `railway up`/`redeploy` are build-only for a cron-scheduled service — only the dashboard's "Cron Runs → Run now" actually executes it. Re-trigger and re-verify after this branch merges and `web` redeploys.
 - [x] 3.5 Reading the `deploy.yml` diff confirms the cron `railway up` step is sequenced after the `web` one — 164e91c
 - [x] 3.6 `deploy-plan.md` reflects the new service, its variables, and the schedule — 164e91c
 
