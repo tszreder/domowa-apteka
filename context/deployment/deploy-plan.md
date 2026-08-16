@@ -28,6 +28,7 @@ this file is the short answer to "what is deployed and how do I touch it".
 | Environment | `production` | `3704dc3d-20dc-4744-97c9-fd94624a7d42` |
 | Web service | `web` | `4adb8513-d6dc-4441-94bd-a375ef368a0d` |
 | Database | `Postgres` | `534de5e9-ce4e-4cde-b1ce-532f6d5988a8` |
+| Cron service | `registry-import-cron` | **not yet provisioned** — config-as-code in `railway.cron.json` is ready; see "Registry import cron" below for what still needs a human decision |
 
 Workspace `tszreder's Projects` (`9780cb91-a4f2-4498-904c-b75fa84ee62f`),
 workspace `preferredRegion` = `europe-west4-drams3a`.
@@ -319,18 +320,78 @@ Three things that bit, worth knowing before repeating this:
 
 Measured effect: `/health/` went from ~292ms to ~88ms from Poland.
 
+## Registry import cron (`registry-freshness-refresh` F-02, Phase 3)
+
+**Config-path mechanism — settled empirically, 2026-08-16, without touching
+production.** `railway up`/`railway service` expose no config-path flag (per
+the plan's own note), but the GraphQL API does: `ServiceInstance.railwayConfigFile`
+is a plain `String` field, and it is also on `ServiceInstanceUpdateInput` —
+confirmed by introspecting the live schema:
+
+```
+railway api 'query { __type(name: "ServiceInstance") { fields { name } } }'
+railway api 'query { __type(name: "ServiceInstanceUpdateInput") { inputFields { name type { name } } } }'
+railway api 'query { __schema { mutationType { fields { name } } } }'   # → serviceInstanceUpdate
+```
+
+So a second service is pointed at `railway.cron.json` instead of the
+repo-root `railway.json` by setting `railwayConfigFile: "railway.cron.json"`
+on that service's instance via `serviceInstanceUpdate` — a one-time
+API/dashboard step, not a CLI flag and not something `deploy.yml` can express.
+No dashboard fallback was needed; the documented fallback in `plan.md` is
+moot.
+
+**What is code-complete:**
+- `railway.cron.json` — `deploy.startCommand` runs `python manage.py
+  import_registry --trigger scheduled`, `deploy.cronSchedule` is `17 3 * * *`
+  (03:17 UTC — after the publisher's daily refresh, deliberately off the
+  `@daily`/midnight mark where platform contention is worst), and
+  `deploy.restartPolicyType` is `NEVER`. No `healthcheckPath`, no
+  `numReplicas` — both are `web`-only concerns. Validated against the live
+  `https://railway.com/railway.schema.json` with `jsonschema` (`uv add --dev
+  jsonschema`).
+- `.github/workflows/deploy.yml` gained a second `railway up --service
+  registry-import-cron --ci` step, sequenced **after** `web`'s, so a cron
+  execution can never hit an unmigrated schema.
+
+**What is deliberately NOT done, and needs a human decision before it is:**
+creating the `registry-import-cron` service itself, running
+`serviceInstanceUpdate` to point it at `railway.cron.json`, wiring its
+service variables (below), and triggering a manual execution. All four are
+production-infrastructure changes with a real cost and billing footprint —
+outside what an unattended implementation pass should do without a
+go-ahead. Until that service exists, **the `deploy` job's new step will fail
+`railway up --service registry-import-cron` on the next merge to `main`** —
+provision the service (or drop the step) before merging this branch.
+
+**Service variables the cron service will need**, once created (same shape
+as `web`'s, per `railway.json`'s `startCommand` which also runs `migrate`
+first — `registry-import-cron` does not, so it only needs what
+`import_registry` itself reads at import time):
+
+| Variable | Source |
+| --- | --- |
+| `DATABASE_URL` | `${{Postgres.DATABASE_URL}}` reference, same as `web` |
+| `SECRET_KEY` | same value as `web` (`settings.py` imports at module load regardless of command) |
+| `DEBUG` | `False` |
+| `ALLOWED_HOSTS` | same as `web` |
+| `REGISTRY_OVERALL_URL` | unset — falls back to the in-code default, same as `web` |
+
+No new setting is introduced by this change, so `.env.example` is unchanged.
+
 ## Known gaps
 
 - `SECURE_SSL_REDIRECT` and `SECURE_HSTS_SECONDS` are **off**. `check --deploy`
   flags both. `SECURE_SSL_REDIRECT` was deferred because a redirect can turn the
   healthcheck's 200 into a 301 and fail deploys; HSTS is browser-cached and
   semi-irreversible. Both are safe to revisit now that the deploy is green.
-- No application code yet beyond the scaffold — no Django app, no models. The
-  daily ingestion cron (Phase 6 of the plan) is blocked on that feature work.
-- **CI's `check` job is a thin gate.** `manage.py test` finds 0 tests, so today
-  the only real signals are lockfile sync and Django's system checks. It gets
-  meaningful the moment the first app exists — it is wired now so there is
-  somewhere for those tests to land.
+- **Daily ingestion cron is code-complete but not yet live.** `registry` now
+  exists (F-01) and `railway.cron.json` + the `deploy.yml` step are ready
+  (F-02 Phase 3), but the `registry-import-cron` service itself has not been
+  provisioned — see "Registry import cron" above for exactly what remains and
+  why it was left for a human decision.
+- **CI's `check` job is a thin gate no longer** — `registry` and `households`
+  both carry real tests now; `manage.py test` is a meaningful signal.
 - `ALLOWED_HOSTS` cannot be black-box tested from the internet: Railway's edge
   router returns 404 for an unknown Host before the request reaches Django.
   Verify by reading the stored variable, not by probing.
