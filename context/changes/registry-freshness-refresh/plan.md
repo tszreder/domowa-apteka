@@ -642,15 +642,15 @@ Rollback is a table drop; nothing else in the app reads `ImportRun`.
 
 #### Automated
 
-- [ ] 3.1 `railway.cron.json` validates against the live schema via `jsonschema`
-- [ ] 3.2 CI `check` job stays green on the PR: `uv sync --locked`, `manage.py check`, `mypy`, `manage.py test`
+- [x] 3.1 `railway.cron.json` validates against the live schema via `jsonschema` — 164e91c
+- [x] 3.2 CI `check` job stays green on the PR: `uv sync --locked`, `manage.py check`, `mypy`, `manage.py test` — 164e91c
 
 #### Manual
 
-- [ ] 3.3 The cron service exists and its config file mechanism is confirmed and written down
-- [ ] 3.4 A manually triggered execution of the cron service completes and writes an `ImportRun` row with `trigger=scheduled`
-- [ ] 3.5 Reading the `deploy.yml` diff confirms the cron `railway up` step is sequenced after the `web` one
-- [ ] 3.6 `deploy-plan.md` reflects the new service, its variables, and the schedule
+- [ ] 3.3 The cron service exists and its config file mechanism is confirmed and written down — **partial** (164e91c): the config-file mechanism is confirmed and written down (`railwayConfigFile` via `serviceInstanceUpdate`); the service itself is deliberately NOT provisioned — production-infrastructure cost/billing decision left for the user, see deploy-plan.md
+- [ ] 3.4 A manually triggered execution of the cron service completes and writes an `ImportRun` row with `trigger=scheduled` — blocked on 3.3
+- [x] 3.5 Reading the `deploy.yml` diff confirms the cron `railway up` step is sequenced after the `web` one — 164e91c
+- [x] 3.6 `deploy-plan.md` reflects the new service, its variables, and the schedule — 164e91c
 
 ### Phase 4: Production verification
 
