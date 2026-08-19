@@ -360,14 +360,31 @@ moot.
 
 **What is code-complete:**
 - `railway.cron.json` — `deploy.startCommand` runs `python manage.py
-  import_registry --trigger scheduled`, `deploy.cronSchedule` is `5 23 * * *`
-  (23:05 UTC, i.e. 00:05 CET — chosen by the user 2026-08-17, superseding the
-  original `17 3 * * *` this section documented at Phase 3 landing; off the
-  `@daily`/midnight mark where platform contention is worst), and
-  `deploy.restartPolicyType` is `NEVER`. **Static UTC cron, no DST
-  awareness**: Railway does not shift this for CET↔CEST, so it holds at
-  23:05 UTC year-round and reads as 00:05 CET only in winter — 01:05 CEST in
-  summer. `deploy.region` is pinned to
+  import_registry --trigger scheduled`, `deploy.cronSchedule` is `17 3 * * *`
+  (03:17 UTC), and `deploy.restartPolicyType` is `NEVER`.
+
+  **Schedule history — and the one thing still unverified about it.** Phase 3
+  landed at `17 3 * * *`, matching plan.md's contract ("early morning UTC,
+  after the publisher's daily refresh, and not `@daily`-style midnight"). It
+  was moved to `5 23 * * *` (23:05 UTC) on 2026-08-17 for a local-time reason —
+  it reads as 00:05 CET — and the three production fires recorded in
+  `context/changes/registry-freshness-refresh/production-verification.md` ran
+  on that slot. It was moved **back** to `17 3 * * *` on 2026-08-20 during
+  `/10x-impl-review` triage, to restore the plan's stated window.
+
+  Consequence to watch: those three fires are the only evidence we have about
+  when the publisher refreshes, and they only prove the day's snapshot is up
+  **by 23:05 UTC**. Whether it is up by 03:17 UTC is untested. If it is not,
+  runs will quietly load the *previous* day's snapshot — which does not fail
+  (`_reject_older_snapshot` compares `<`, so an equal date passes) and does not
+  read as stale (`registry/freshness.py` keys the verdict on run time, not
+  snapshot date), so the app would sit one day behind in silence. **Check the
+  first fire's `stanNaDzien` against its run date**; if it lags, move the
+  schedule later rather than assuming it will catch up.
+
+  **Static UTC cron, no DST awareness**: Railway does not shift this for
+  CET↔CEST, so 03:17 UTC holds year-round and reads as 04:17 CET in winter,
+  05:17 CEST in summer. `deploy.region` is pinned to
   `europe-west4-drams3a`, same as `web`'s pin and for the same reason (see
   "Deploy configuration" above) — unpinned, a later `railway up` could
   reassert the workspace default, and a split-region cron would pay
@@ -408,7 +425,8 @@ default is correct until it's ever changed (see the drift-risk note below).
 **Confirmed against the running service** (`railway api` querying
 `service(id).serviceInstances.edges.node.latestDeployment.meta`): the deploy's
 `fileServiceManifest.deploy` shows `cronSchedule: "17 3 * * *"` (the schedule
-*at Phase 3 landing* — see above for the current `5 23 * * *`),
+*at Phase 3 landing*, and again the current one after the 2026-08-20 revert —
+see the schedule history above),
 `region: "europe-west4-drams3a"`, `restartPolicyType: "NEVER"`, and the
 expected `startCommand` — `railway.cron.json` is genuinely driving this
 service, not just pointed at. The dashboard's **Cron Runs** tab independently
@@ -484,7 +502,7 @@ value `railway.cron.json`'s `startCommand` ever passes).
 | `SECRET_KEY` | reference `${{web.SECRET_KEY}}` |
 | `DEBUG` | `False` |
 | `ALLOWED_HOSTS` | unset — inert for a non-HTTP management command |
-| `REGISTRY_OVERALL_URL` | unset — falls back to the in-code default, same as `web`. **If this is ever set on `web`** (to bump the export version), **set it identically on the cron service in the same change.** `settings.py`'s own comment says the variable exists so a version bump is "a variable change, not a code deploy" — a cron service left behind would keep importing the old version while `web`'s config claims otherwise, silently reintroducing the drift the variable exists to prevent. |
+| `REGISTRY_OVERALL_URL` | **Set explicitly**, 2026-08-20, to the 6.0.0 URL — the same value `settings.py`'s in-code default already resolved to, so this changed no behaviour. Pinned because **this service is the only one that reads it**: `registry-import-cron` is the only place `import_registry` ever runs, so setting the variable on `web` has no effect at all — which makes `web` the natural-looking but wrong place to reach for. `settings.py`'s comment ("a version bump must be a variable change, not a code deploy") is only true if the change lands on *this* service: `railway variable set 'REGISTRY_OVERALL_URL=<new URL>' --service registry-import-cron --skip-deploys`, then redeploy the cron service so the next execution picks it up. |
 
 No new setting is introduced by this change, so `.env.example` is unchanged.
 
@@ -494,13 +512,16 @@ No new setting is introduced by this change, so `.env.example` is unchanged.
   flags both. `SECURE_SSL_REDIRECT` was deferred because a redirect can turn the
   healthcheck's 200 into a 301 and fail deploys; HSTS is browser-cached and
   semi-irreversible. Both are safe to revisit now that the deploy is green.
-- **Daily ingestion cron is live and confirmed working.** `registry-import-cron`
-  runs `railway.cron.json`'s schedule (currently `5 23 * * *`, 23:05 UTC /
-  00:05 CET) and a manually triggered run succeeded end-to-end on real
-  production data 2026-08-16 — see "Registry import cron" above. What's left is Phase 4 of
-  `registry-freshness-refresh`: confirming an actual *unattended* scheduled
-  fire (not a manual "Run now") lands cleanly, which can't be checked until
-  the schedule has genuinely come around.
+- **Daily ingestion cron is live and production-verified.** `registry-import-cron`
+  runs `railway.cron.json`'s schedule (currently `17 3 * * *`, 03:17 UTC) and
+  three consecutive *unattended* fires landed cleanly 2026-08-16 through
+  2026-08-18 with counters matching the F-01 baseline — see "Registry import
+  cron" above and
+  `context/changes/registry-freshness-refresh/production-verification.md`.
+  `registry-freshness-refresh` is closed through Phase 4. **One open check**:
+  those fires all ran on the previous 23:05 UTC slot, so the 03:17 UTC schedule
+  restored on 2026-08-20 is not yet confirmed to land after the publisher's
+  daily refresh — verify the first fire's `stanNaDzien` matches its run date.
 - **CI's `check` job is a thin gate no longer** — `registry` and `households`
   both carry real tests now; `manage.py test` is a meaningful signal.
 - `ALLOWED_HOSTS` cannot be black-box tested from the internet: Railway's edge

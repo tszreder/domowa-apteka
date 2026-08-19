@@ -247,6 +247,15 @@ command's own summary; a run rejected by the min-products guard leaves a
 `failed` row *and* leaves the database otherwise untouched; `--trigger` is
 recorded.
 
+**Addendum (2026-08-20, `/10x-impl-review`)**: `registry/tests/test_loader.py`
+is also modified by this phase, though it is not listed above. §4's retry loop
+lands in the download path `DownloadPathTests` already exercises, so three of
+its cases must patch out `_sleep` or the suite pays the real backoff, and one
+new case (`test_network_failure_is_retried_up_to_the_attempt_ceiling`) pins
+`DOWNLOAD_MAX_ATTEMPTS` and the recorded `attempts` without coupling to
+`_download`'s call shape. Recorded so a future plan-vs-diff read finds no
+unexplained file.
+
 ### Success Criteria:
 
 #### Automated Verification:
@@ -418,6 +427,22 @@ midnight where platform contention is worst.
 Add `jsonschema` as a dev dependency with `uv add --dev jsonschema` (never pip —
 `uv sync --locked` gates every PR and Railway's build) so criterion 3.1 has
 something to validate with.
+
+**Addendum (2026-08-20, `/10x-impl-review`)**: `railway.cron.json` also carries
+`deploy.region: "europe-west4-drams3a"`, which the contract above neither
+requires nor excludes (it enumerates only `healthcheckPath` and `numReplicas` as
+web-service concerns to omit). Added in `0ba2b83` for the same reason
+`railway.json` pins it for `web`: unpinned, a later `railway up` can reassert
+the workspace default, and a split-region cron pays transatlantic RTT on every
+~74 MB download plus writes to `postgres.railway.internal`. Rationale recorded
+in `deploy-plan.md`.
+
+**Addendum (2026-08-20, `/10x-impl-review`)**: the schedule moved twice after
+this phase landed — to `5 23 * * *` on 2026-08-17 for a local-time reason, then
+back to `17 3 * * *` during review triage to restore this contract's stated
+window. The three production fires in `production-verification.md` all ran on
+the 23:05 UTC slot, so they do **not** establish that 03:17 UTC lands after the
+publisher's daily refresh. Open check recorded in `deploy-plan.md`.
 
 #### 3. Deploy the cron service from CI
 
@@ -643,7 +668,7 @@ Rollback is a table drop; nothing else in the app reads `ImportRun`.
 #### Automated
 
 - [x] 3.1 `railway.cron.json` validates against the live schema via `jsonschema` — 164e91c
-- [x] 3.2 CI `check` job stays green on the PR: `uv sync --locked`, `manage.py check`, `mypy`, `manage.py test` — 164e91c. **Caveat:** verified as the identical local commands, not an actual PR run (no PR was opened this session); the branch was never pushed. Push + open a PR to close this against the letter of the criterion.
+- [x] 3.2 CI `check` job stays green on the PR: `uv sync --locked`, `manage.py check`, `mypy`, `manage.py test` — 164e91c. Closed against the letter of the criterion: `check` passed on **PR #21** (carrying 164e91c; Actions run 31974387952) and again on **PR #23** (run 31975233535) — confirmed via `gh pr checks` during `/10x-impl-review`, 2026-08-20. The earlier caveat here ("no PR was opened this session; the branch was never pushed") was accurate when written and is now superseded.
 
 #### Manual
 

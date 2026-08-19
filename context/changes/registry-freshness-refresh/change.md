@@ -1,9 +1,9 @@
 ---
 change_id: registry-freshness-refresh
 title: Registry freshness refresh
-status: planned
+status: impl_reviewed
 created: 2026-08-14
-updated: 2026-08-14
+updated: 2026-08-20
 archived_at: null
 ---
 

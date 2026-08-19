@@ -84,13 +84,22 @@ jobs:
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
-      # Second and last: web's startCommand runs `migrate --noinput`, so
-      # deploying it first guarantees the cron service can never execute
-      # against a schema the database has not migrated to yet. Same token —
-      # it carries project context, and railwayConfigFile on this service
-      # instance (set once via `railway api`, not in this workflow) is what
-      # points its build at railway.cron.json instead of the repo-root
-      # railway.json.
+      # Second and last, and the order is load-bearing — but not for the
+      # reason it looks. `railway up --ci` returns when the BUILD finishes;
+      # web's `migrate --noinput` runs later, at container start. So this
+      # step ordering alone does not sequence the migration. What actually
+      # protects the cron service is that `railway up` against a
+      # cron-scheduled service is `buildOnly: true` (verified — it never
+      # executes startCommand), and its next execution is the 03:17 UTC tick
+      # hours away, by which time web has long since started and migrated.
+      # Keep web first anyway: it costs nothing and it is the only ordering
+      # under which that margin is never negative. The 2026-08-16
+      # `relation "registry_importrun" does not exist` crash is what this
+      # margin exists to prevent — see deploy-plan.md § "Registry import
+      # cron". Same token — it carries project context, and
+      # railwayConfigFile on this service instance (set once via
+      # `railway api`, not in this workflow) is what points its build at
+      # railway.cron.json instead of the repo-root railway.json.
       - name: Deploy registry-import-cron
         run: railway up --service registry-import-cron --ci
         env:
