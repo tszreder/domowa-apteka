@@ -3,7 +3,7 @@ project: domowa-apteka
 version: 1
 status: draft
 created: 2026-08-03
-updated: 2026-08-14
+updated: 2026-08-19
 prd_version: 1
 main_goal: speed
 top_blocker: decisions
@@ -44,7 +44,7 @@ reality, and every other slice is downstream of it.
 | F-01 | `registry-substance-data`          | (foundation) product → active-substance records from the official registry are queryable locally, each traceable to its source row | —             | FR-001, FR-002, NFR (verified sources) | done |
 | F-02 | `registry-freshness-refresh`       | (foundation) registry data refreshes on a schedule and the app knows when it last succeeded | F-01          | NFR (registry freshness)     | planning |
 | S-01 | `household-accounts-and-invites`   | sign in, create a household, invite another adult by link/code, and have them join with full symmetric access | —             | FR-005, US-02, Access Control | done     |
-| S-02 | `add-drug-with-substance-resolution` | add a pharmaceutical by name with registry-backed autocomplete, see its resolved active substance(s) — or a clear lookup-failure message — and have the item appear on the shared household list | F-01, S-01    | FR-001, FR-002, US-01        | proposed |
+| S-02 | `add-drug-with-substance-resolution` | add a pharmaceutical by name with registry-backed autocomplete, see its resolved active substance(s) — or a clear lookup-failure message — and have the item appear on the shared household list | F-01, S-01    | FR-001, FR-002, US-01        | done |
 | S-03 | `duplicate-flagging-on-list`       | see household list items flagged as full duplicates (identical substance sets) and partial duplicates (overlapping but not identical) | S-02          | FR-003, US-03                | proposed |
 | S-04 | `expiration-date-per-item`         | optionally record an expiration date when adding or editing an item                         | S-02          | FR-004                       | proposed |
 
@@ -137,7 +137,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
   - When the registry holds several products under the same name but different strength or form, what does autocomplete show so the user picks the right one? FR-001's revision says autocomplete "disambiguates specific products" but does not say how. — Owner: user. Block: no.
   - When lookup fails, is the item still saved (with an unresolved marker) or is the save rejected? US-01 requires the failure be visible; US-03 requires unresolved items be shown separately — which implies saved, but the PRD never states it. — Owner: user. Block: no.
 - **Risk:** The north star. Everything unproven in this project lives here: whether the registry can be queried fast enough to feel like autocomplete, and whether a real product name resolves to a substance set a household would recognise. The NFR requiring acknowledgement within one second bites in this slice specifically. Sequenced as early as its Prerequisites permit — it cannot come before F-01 (no data) or S-01 (nowhere shared to publish into).
-- **Status:** proposed
+- **Status:** done
 
 ### S-03: Full and partial duplicates flagged on the household list
 
@@ -197,3 +197,4 @@ Foundations below assume these are present and do NOT re-scaffold them.
 
 - **S-01: an adult can sign in, create a household, generate a shareable invite link or code, and the invited adult can join through it and immediately see the household's shared list with full symmetric access.** — Archived 2026-08-07 → `context/archive/2026-08-05-household-accounts-and-invites/`. Lesson: —.
 - **F-01: (foundation) a local, queryable copy of product → active-substance records drawn from the official Polish national medicinal-products registry, loaded by one repeatable command, with every substance value traceable back to the source row it came from.** — Archived 2026-08-14 → `context/archive/2026-08-07-registry-substance-data/`. Lesson: A plan can contradict itself; resolve it in code *and* write the resolution back.
+- **S-02: an adult can add a pharmaceutical by typing its name with registry-backed autocomplete, see which active substance(s) the app resolved for it — or a clear message that lookup failed — and have the item appear on the shared household list where other members see it without a manual refresh step.** — Archived 2026-08-19 → `context/archive/2026-08-14-add-drug-with-substance-resolution/`. Lesson: —.
