@@ -177,6 +177,23 @@ since it is per-clone and trivially skipped with `--no-verify`.
 
 ## Runbooks
 
+**The dashboard's Console tab is a real one-off-command channel** — `railway
+ssh` hangs non-interactively (see "How the superuser was created" below),
+but `web`'s Console tab (Service → Console) gives a live shell in the running
+container, usable from a browser session for exactly the kind of one-off
+verification `railway run`/`ssh` can't do. Confirmed 2026-08-19:
+`python manage.py registry_status` run this way against production, output
+readable via a screenshot. **Hazard, learned the hard way**: a click that
+misses the terminal and lands on the empty canvas behind it doesn't fail
+silently — it can open Railway's "Function" quick-create panel, and further
+typed keystrokes (a management command with quotes/brackets) land as
+canvas keyboard shortcuts, not terminal input, staging a new draft service.
+It stays undeployed (an "Apply N changes" banner, not a live resource) until
+someone clicks **Deploy** — check for and use **Discard Changes** (the "…"
+menu next to that banner) before doing anything else if this happens.
+Confirm the terminal actually has focus (click directly inside the black
+terminal pane, verify a cursor) before typing.
+
 **Deploy** — normally: merge a PR into `main` and let the workflow run.
 To deploy without a merge (hotfix, or CI is down):
 ```powershell
