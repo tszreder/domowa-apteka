@@ -656,11 +656,11 @@ Rollback is a table drop; nothing else in the app reads `ImportRun`.
 
 #### Automated
 
-- [ ] 4.1 `manage.py registry_status` against production exits zero within 48 h of the scheduled run
+- [x] 4.1 `manage.py registry_status` against production exits zero within 48 h of the scheduled run — confirmed 2026-08-19 by running it live in production's `web` container via the Railway dashboard Console: exit 0, "Registry data is fresh.", timestamp matches Run 3 (2026-08-18 23:05:11 UTC) to the second
 
 #### Manual
 
-- [ ] 4.2 A scheduled execution the operator did not trigger appears in `/admin/registry/importrun/` with `trigger=scheduled`
-- [ ] 4.3 Its counters are consistent with the F-01 production baseline
-- [ ] 4.4 `production-verification.md` records the run and the schedule-vs-actual drift
-- [ ] 4.5 `infrastructure.md`'s risk-register row reflects the shipped mitigation
+- [x] 4.2 A scheduled execution the operator did not trigger appears in `/admin/registry/importrun/` with `trigger=scheduled` — three unattended fires confirmed via `deploymentInstanceExecutions` (independent of any manual trigger), 2026-08-16 through 2026-08-18; `trigger=scheduled` confirmed by construction (the only value `railway.cron.json`'s `startCommand` ever passes) plus the live `registry_status` read in 4.1 confirming Run 3's row exists. Not screenshotted in `/admin/` directly — see production-verification.md for the full reasoning and a console-safety note learned along the way
+- [x] 4.3 Its counters are consistent with the F-01 production baseline — see production-verification.md's comparison table (all three runs within a few products of the 2026-08-13 baseline, resolved share 97.2% throughout)
+- [x] 4.4 `production-verification.md` records the run and the schedule-vs-actual drift — records all three fires (+2m2s, +1m54s, +9s drift, shrinking toward on-time)
+- [x] 4.5 `infrastructure.md`'s risk-register row reflects the shipped mitigation
