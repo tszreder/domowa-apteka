@@ -2,7 +2,7 @@
   "$schema": "https://railway.com/railway.schema.json",
   "deploy": {
     "startCommand": "python manage.py import_registry --trigger scheduled",
-    "cronSchedule": "5 23 * * *",
+    "cronSchedule": "17 3 * * *",
     "restartPolicyType": "NEVER",
     "region": "europe-west4-drams3a"
   }
