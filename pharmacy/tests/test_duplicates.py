@@ -213,3 +213,42 @@ class BuildListViewTests(TestCase):
         # as the other's partner, only the combination product does.
         self.assertNotIn('Sudafed', para_group.partners.get('Paracetamol', []))
         self.assertNotIn('Apap', pseudo_group.partners.get('Pseudoefedryna', []))
+
+    def test_shared_substances_are_ordered_alphabetically_not_by_set_iteration(self) -> None:
+        """Pins badge order against per-process string-hash randomisation.
+
+        `partners` is filled by iterating `key_a & key_b`, a `frozenset[str]`.
+        Python randomises string hashing per process, so without an explicit
+        sort two gunicorn workers render the same badge with its substances —
+        and its `partner_names` — in different orders, and the text under an
+        item changes as the user reloads. The links below are created in
+        reverse alphabetical order so a pass cannot come from insertion order.
+        """
+        wit = make_substance('Witamina C', 'witamina-c')
+        para = make_substance('Paracetamol', 'paracetamol')
+        amox = make_substance('Amoksycylina', 'amoksycylina')
+        ibu = make_substance('Ibuprofen', 'ibuprofen')
+
+        broad_product = make_product('11', name='Szeroki')
+        link(broad_product, wit, order=0)
+        link(broad_product, para, order=1)
+        link(broad_product, amox, order=2)
+        link(broad_product, ibu, order=3)
+        broad_item = self.make_item(broad_product)
+
+        narrow_product = make_product('12', name='Wąski')
+        link(narrow_product, wit, order=0)
+        link(narrow_product, para, order=1)
+        link(narrow_product, amox, order=2)
+        narrow_item = self.make_item(narrow_product)
+
+        view = self._view()
+        broad_group = next(g for g in view.groups if broad_item in g.items)
+        narrow_group = next(g for g in view.groups if narrow_item in g.items)
+
+        self.assertEqual(
+            list(broad_group.partners), ['Amoksycylina', 'Paracetamol', 'Witamina C']
+        )
+        self.assertEqual(
+            list(narrow_group.partners), ['Amoksycylina', 'Paracetamol', 'Witamina C']
+        )

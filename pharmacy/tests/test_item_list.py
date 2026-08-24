@@ -6,11 +6,12 @@ N+1 must fail CI, not be noticed in production.
 """
 
 import re
-from datetime import date
+from datetime import date, timedelta
 
 from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from households.models import Household, Membership
 from pharmacy.models import Item
@@ -163,7 +164,10 @@ class ItemListRenderingTests(TestCase):
         self.assertContains(response, 'class="partial-overlap-badge"', count=3)
         summaries = re.findall(r'Wspólna substancja: ([^<]*)</summary>', content)
         self.assertEqual(len(summaries), 3)
-        # the combo's summary names both singles as partners, order not pinned
+        # The combo's summary names both singles. Their relative order comes
+        # from group order (added_at), not from set iteration; the substance
+        # ordering the badge itself controls is pinned in
+        # BuildListViewTests.test_shared_substances_are_ordered_alphabetically_not_by_set_iteration.
         combo_summary = next(s for s in summaries if 'Apap Extra' in s and 'Sudafeed' in s)
         self.assertIn('Apap Extra', combo_summary)
         self.assertIn('Sudafeed', combo_summary)
@@ -171,6 +175,69 @@ class ItemListRenderingTests(TestCase):
         self.assertIn('Pseudoefedryna: Sudafeed', content)
         # each single shows only the combo as its partner
         self.assertEqual(summaries.count('ManualTest Combo'), 2)
+
+    def test_adding_to_an_older_cluster_moves_it_above_a_newer_single(self) -> None:
+        """Pins the plan's ordering rule: a cluster sits at its newest member's `added_at`.
+
+        Deliberately an integration test rather than a `build_list_view` unit
+        test. The guarantee has two halves and the builder owns only one: its
+        docstring hands newest-first ordering to the caller, so a future
+        `.order_by(...)` on the view's queryset (`pharmacy/views.py`) would
+        break the rule with a green unit suite. Product names are chosen so
+        alphabetical order differs from `added_at` order — otherwise an
+        `.order_by('product__name')` regression would coincidentally pass.
+        """
+        substance_x = Substance.objects.create(name='Substancja X', name_key='substancja-x')
+        substance_y = Substance.objects.create(name='Substancja Y', name_key='substancja-y')
+
+        oldest_product = make_product('40', name='Apap Stary')
+        ProductSubstance.objects.create(
+            product=oldest_product,
+            substance=substance_x,
+            source_field=SourceField.SUBSTANCE_ROW,
+            source_order=0,
+        )
+        single_product = make_product('41', name='Metformina Srednia')
+        ProductSubstance.objects.create(
+            product=single_product,
+            substance=substance_y,
+            source_field=SourceField.SUBSTANCE_ROW,
+            source_order=0,
+        )
+        newest_product = make_product('42', name='Zamiennik Nowy')
+        ProductSubstance.objects.create(
+            product=newest_product,
+            substance=substance_x,
+            source_field=SourceField.SUBSTANCE_ROW,
+            source_order=0,
+        )
+
+        oldest = Item.objects.create(household=self.household, product=oldest_product)
+        middle = Item.objects.create(household=self.household, product=single_product)
+        newest = Item.objects.create(household=self.household, product=newest_product)
+
+        # `added_at` is `auto_now_add`, so all three land within one tick and
+        # cannot be set on create. Write the intended spread explicitly, so
+        # the assertions below test grouping rather than clock resolution.
+        base = timezone.now() - timedelta(days=3)
+        Item.objects.filter(pk=oldest.pk).update(added_at=base)
+        Item.objects.filter(pk=middle.pk).update(added_at=base + timedelta(days=1))
+        Item.objects.filter(pk=newest.pk).update(added_at=base + timedelta(days=2))
+
+        response = self.client.get(reverse('pharmacy:item_list'))
+        content = response.content.decode()
+
+        self.assertContains(response, 'class="duplicate-cluster"', count=1)
+        self.assertLess(
+            content.index('duplicate-cluster'),
+            content.index('Metformina Srednia'),
+            'the cluster its newest member joined must render above the older single',
+        )
+        self.assertLess(
+            content.index('Zamiennik Nowy'),
+            content.index('Apap Stary'),
+            'within a cluster, the newest member must render first',
+        )
 
     def test_item_with_no_overlap_renders_no_badge(self) -> None:
         substance = Substance.objects.create(name='Ibuprofen', name_key='ibuprofen')
@@ -358,6 +425,9 @@ class ItemListRenderingTests(TestCase):
         self.assertNotContains(response, 'class="duplicate-cluster"')
         self.assertContains(response, 'Peditrace')
         self.assertContains(response, 'Nifedypina')
+        # Only the unresolved section's list — the groups <ul> must not be
+        # emitted empty, which Pico would render as a stray vertical gap.
+        self.assertContains(response, 'class="item-list"', count=1)
 
     def test_unresolved_item_and_resolved_item_are_never_grouped(self) -> None:
         substance = Substance.objects.create(name='Paracetamol', name_key='paracetamol')

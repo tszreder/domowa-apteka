@@ -155,7 +155,11 @@ def build_list_view(items: Iterable[Item]) -> ItemListView:
                 continue
             labels_a = _product_names(members_by_key[key_a])
             labels_b = _product_names(members_by_key[key_b])
-            for substance_key in key_a & key_b:
+            # Sorted, not raw set iteration: `frozenset[str]` iterates in
+            # string-hash order, which Python randomises per process, so two
+            # workers would render the same badge with its substances — and
+            # its `partner_names` — in different orders.
+            for substance_key in sorted(key_a & key_b, key=lambda k: substance_names[k]):
                 name = substance_names[substance_key]
                 partners[key_a].setdefault(name, []).extend(labels_b)
                 partners[key_b].setdefault(name, []).extend(labels_a)
