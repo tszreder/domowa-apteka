@@ -11,6 +11,7 @@ from households.decorators import household_required
 from households.models import Household, Membership
 from registry.suggestions import search_presentations
 
+from .duplicates import build_list_view
 from .forms import ItemAddForm
 from .models import Item
 
@@ -24,10 +25,17 @@ def _household_of(user: User) -> Household:
 @household_required
 def item_list(request: HttpRequest) -> HttpResponse:
     household = _household_of(cast(User, request.user))
-    items = Item.objects.filter(household=household).select_related('product').prefetch_related(
-        'product__substance_links__substance'
+    items = list(
+        Item.objects.filter(household=household)
+        .select_related('product')
+        .prefetch_related('product__substance_links__substance')
     )
-    return render(request, 'pharmacy/item_list.html', {'household': household, 'items': items})
+    list_view = build_list_view(items)
+    return render(
+        request,
+        'pharmacy/item_list.html',
+        {'household': household, 'items': items, 'list_view': list_view},
+    )
 
 
 @household_required

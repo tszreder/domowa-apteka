@@ -1,9 +1,9 @@
 ---
-change_id: registry-freshness-refresh
-title: Registry freshness refresh
-status: impl_reviewed
-created: 2026-08-14
-updated: 2026-08-20
+change_id: duplicate-flagging-on-list
+title: Duplicate flagging on list
+status: implemented
+created: 2026-08-24
+updated: 2026-08-25
 archived_at: null
 ---
 

@@ -1,2 +1,44 @@
 /* Override seam for the vendored classless stylesheet. */
 
+.duplicate-cluster {
+    border: 1px solid var(--pico-primary-border, currentColor);
+    border-radius: var(--pico-border-radius, 0.25rem);
+    padding: 0.75rem 1rem;
+    margin-block-end: 1rem;
+    list-style: none;
+}
+
+.duplicate-cluster-label {
+    margin: 0 0 0.5rem;
+    font-weight: bold;
+}
+
+.duplicate-cluster-items {
+    margin: 0;
+    padding: 0;
+}
+
+.duplicate-cluster-items > li {
+    list-style: none;
+    padding-block: 0.5rem;
+}
+
+.duplicate-cluster-items > li:not(:last-child) {
+    border-bottom: 1px dashed var(--pico-muted-border-color, currentColor);
+}
+
+.partial-overlap-badge {
+    margin-block-start: 0.5rem;
+    font-size: 0.85em;
+    color: var(--pico-muted-color, currentColor);
+}
+
+.partial-overlap-badge summary {
+    cursor: pointer;
+}
+
+.partial-overlap-detail {
+    margin: 0.25rem 0 0;
+    padding-inline-start: 1.25rem;
+}
+
