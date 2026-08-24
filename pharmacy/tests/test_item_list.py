@@ -128,3 +128,138 @@ class ItemListRenderingTests(TestCase):
             response = self.client.get(reverse('pharmacy:item_list'))
 
         self.assertEqual(response.status_code, 200)
+
+    def test_identical_substances_on_different_products_render_as_zamienniki_cluster(
+        self,
+    ) -> None:
+        substance = Substance.objects.create(name='Paracetamol', name_key='paracetamol')
+        product_a = make_product('10', name='Apap Extra')
+        product_b = make_product('11', name='Panadol')
+        for product in (product_a, product_b):
+            ProductSubstance.objects.create(
+                product=product,
+                substance=substance,
+                source_field=SourceField.SUBSTANCE_ROW,
+                source_order=0,
+            )
+        Item.objects.create(household=self.household, product=product_a)
+        Item.objects.create(household=self.household, product=product_b)
+
+        response = self.client.get(reverse('pharmacy:item_list'))
+
+        self.assertContains(response, 'class="duplicate-cluster"')
+        self.assertContains(response, 'Zamienniki')
+        self.assertNotContains(response, 'Ten sam produkt')
+
+    def test_same_product_repeated_renders_as_same_product_cluster_not_zamienniki(
+        self,
+    ) -> None:
+        substance = Substance.objects.create(name='Paracetamol', name_key='paracetamol')
+        product = make_product('12', name='Apap Extra')
+        ProductSubstance.objects.create(
+            product=product,
+            substance=substance,
+            source_field=SourceField.SUBSTANCE_ROW,
+            source_order=0,
+        )
+        Item.objects.create(household=self.household, product=product)
+        Item.objects.create(household=self.household, product=product)
+
+        response = self.client.get(reverse('pharmacy:item_list'))
+
+        self.assertContains(response, 'class="duplicate-cluster"')
+        self.assertContains(response, 'Ten sam produkt')
+        self.assertNotContains(response, 'Zamienniki')
+
+    def test_disjoint_substances_render_as_singles_in_no_cluster(self) -> None:
+        substance_a = Substance.objects.create(name='Paracetamol', name_key='paracetamol')
+        substance_b = Substance.objects.create(name='Ibuprofen', name_key='ibuprofen')
+        product_a = make_product('13', name='Apap Extra')
+        ProductSubstance.objects.create(
+            product=product_a,
+            substance=substance_a,
+            source_field=SourceField.SUBSTANCE_ROW,
+            source_order=0,
+        )
+        product_b = make_product('14', name='Ibum')
+        ProductSubstance.objects.create(
+            product=product_b,
+            substance=substance_b,
+            source_field=SourceField.SUBSTANCE_ROW,
+            source_order=0,
+        )
+        Item.objects.create(household=self.household, product=product_a)
+        Item.objects.create(household=self.household, product=product_b)
+
+        response = self.client.get(reverse('pharmacy:item_list'))
+
+        self.assertNotContains(response, 'class="duplicate-cluster"')
+        self.assertContains(response, 'Apap Extra')
+        self.assertContains(response, 'Ibum')
+
+    def test_two_unresolved_items_are_not_grouped_and_appear_in_unresolved_section(
+        self,
+    ) -> None:
+        product_a = make_product('15', name='Peditrace')
+        product_b = make_product('16', name='Nifedypina')
+        Item.objects.create(household=self.household, product=product_a)
+        Item.objects.create(household=self.household, product=product_b)
+
+        response = self.client.get(reverse('pharmacy:item_list'))
+
+        self.assertContains(response, 'class="unresolved-section"')
+        self.assertNotContains(response, 'class="duplicate-cluster"')
+        self.assertContains(response, 'Peditrace')
+        self.assertContains(response, 'Nifedypina')
+
+    def test_unresolved_item_and_resolved_item_are_never_grouped(self) -> None:
+        substance = Substance.objects.create(name='Paracetamol', name_key='paracetamol')
+        resolved_product = make_product('17', name='Apap Extra')
+        ProductSubstance.objects.create(
+            product=resolved_product,
+            substance=substance,
+            source_field=SourceField.SUBSTANCE_ROW,
+            source_order=0,
+        )
+        unresolved_product = make_product('18', name='Peditrace')
+        Item.objects.create(household=self.household, product=resolved_product)
+        Item.objects.create(household=self.household, product=unresolved_product)
+
+        response = self.client.get(reverse('pharmacy:item_list'))
+
+        self.assertNotContains(response, 'class="duplicate-cluster"')
+        self.assertContains(response, 'class="unresolved-section"')
+
+    def test_n_plus_one_guard_holds_with_cluster_single_and_unresolved_present(
+        self,
+    ) -> None:
+        substance = Substance.objects.create(name='Paracetamol', name_key='paracetamol')
+
+        cluster_product_a = make_product('19', name='Apap Extra')
+        cluster_product_b = make_product('20', name='Panadol')
+        for product in (cluster_product_a, cluster_product_b):
+            ProductSubstance.objects.create(
+                product=product,
+                substance=substance,
+                source_field=SourceField.SUBSTANCE_ROW,
+                source_order=0,
+            )
+            Item.objects.create(household=self.household, product=product)
+
+        single_substance = Substance.objects.create(name='Ibuprofen', name_key='ibuprofen')
+        single_product = make_product('21', name='Ibum')
+        ProductSubstance.objects.create(
+            product=single_product,
+            substance=single_substance,
+            source_field=SourceField.SUBSTANCE_ROW,
+            source_order=0,
+        )
+        Item.objects.create(household=self.household, product=single_product)
+
+        unresolved_product = make_product('22', name='Peditrace')
+        Item.objects.create(household=self.household, product=unresolved_product)
+
+        with self.assertNumQueries(7):
+            response = self.client.get(reverse('pharmacy:item_list'))
+
+        self.assertEqual(response.status_code, 200)

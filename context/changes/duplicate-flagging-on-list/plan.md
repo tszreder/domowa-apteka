@@ -511,16 +511,16 @@ read path and is reverted by reverting the commits.
 
 #### Automated
 
-- [ ] 2.1 Test suite passes: `uv run manage.py test`
-- [ ] 2.2 List tests pass: `uv run manage.py test pharmacy.tests.test_item_list`
-- [ ] 2.3 Type checking passes: `uv run mypy .`
-- [ ] 2.4 Query count unchanged from the pre-change contract
+- [x] 2.1 Test suite passes: `uv run manage.py test`
+- [x] 2.2 List tests pass: `uv run manage.py test pharmacy.tests.test_item_list`
+- [x] 2.3 Type checking passes: `uv run mypy .`
+- [x] 2.4 Query count unchanged from the pre-change contract — `assertNumQueries(7)` holds both on the original 5-resolved-item test (now exercising the cluster path since they share one substance) and on a new test with a cluster, a single, and an unresolved item present simultaneously.
 
 #### Manual
 
-- [ ] 2.5 New tests watched to go red; unresolved-grouping test falsified by removing the unresolved partition
-- [ ] 2.6 On a phone-width viewport a cluster reads as one unit and the unresolved section as a separate concern
-- [ ] 2.7 Adding a new item still places it or its cluster at the top of the list
+- [x] 2.5 New tests watched to go red; unresolved-grouping test falsified by removing the unresolved partition — mutation: changed `(resolved if keys else unresolved).append(item)` to unconditionally `resolved.append(item)` in `build_list_view`. `test_two_unresolved_items_are_not_grouped_and_appear_in_unresolved_section` failed: both unresolved items (empty substance sets are equal) collapsed into one `duplicate-cluster` labelled "Zamienniki", and `class="unresolved-section"` never appeared — exactly the silent-grouping bug the guard exists to prevent. Reverted.
+- [x] 2.6 On a phone-width viewport a cluster reads as one unit and the unresolved section as a separate concern — verified live via Claude in Chrome at 390×844 against a seeded household: a "Zamienniki — ta sama substancja czynna" cluster rendered as one bordered box, and "Nie udało się ustalić substancji" rendered as a clearly separate section below with its own heading, not a third duplicate category.
+- [x] 2.7 Adding a new item still places it or its cluster at the top of the list — verified live: adding a second "ManualTest Ibum" through the real add-item UI formed a same-product cluster labelled "Ten sam produkt dodany wielokrotnie" (not "Zamienniki") that appeared at the very top of the list, above all previously-newest items.
 
 ### Phase 3: Partial-overlap badges
 
