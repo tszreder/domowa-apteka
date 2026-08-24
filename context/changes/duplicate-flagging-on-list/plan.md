@@ -229,8 +229,15 @@ fixture's own construction:
 - **either side empty → `NONE`** (the empty-set guard — the highest-value case here)
 - a product with a repeated `(product, substance)` pair at different amounts matching a
   product carrying that substance once → `FULL`
-- two products whose substances differ only in `Substance.name` but share a `name_key`
-  → `FULL` (proves the comparison is keyed on identity, not display form)
+- ~~two products whose substances differ only in `Substance.name` but share a `name_key`
+  → `FULL` (proves the comparison is keyed on identity, not display form)~~
+  **Corrected during implementation:** this state is unrepresentable — `Substance.name_key`
+  carries a unique constraint (`registry/models.py`), so two rows cannot share a key while
+  differing in `name`. Delivered instead as
+  `SubstanceKeysTests.test_reads_name_key_not_display_name`: one substance whose `name` and
+  `name_key` differ, asserting `substance_keys` returns the `name_key`. Same intent —
+  the comparison reads the identity column, not the display form — via the only shape the
+  schema permits.
 - builder level: unresolved items appear in the unresolved bucket and in no cluster or
   partner list; a same-product cluster is labelled distinctly from a cross-product one;
   a combination product lands in the partner lists of two mutually disjoint items.
@@ -433,8 +440,11 @@ this slice's hardest presentation problem.
 
 - `classify` across all four outcomes, with the empty-set case treated as the primary
   correctness guard rather than an edge case.
-- `substance_keys` over the repeated-`(product, substance)` shape and the shared-`name_key`
-  shape — the two cases the registry's own model comments say exist in real data.
+- `substance_keys` over the repeated-`(product, substance)` shape and the
+  ~~shared-`name_key`~~ **differing-`name`-vs-`name_key`** shape — the two cases the
+  registry's own model comments say exist in real data. (**Corrected during
+  implementation:** two rows sharing a `name_key` is unrepresentable under that column's
+  unique constraint; see the Phase 1 note above.)
 - The builder's partitioning, clustering, labelling, and ordering rules.
 
 ### Integration Tests:
@@ -535,4 +545,25 @@ read path and is reverted by reverting the commits.
 
 - [x] 3.5 New tests watched to go red; "no badge when no overlap" test falsified by emitting an empty partner list instead of omitting the badge — mutation: removed the `{% if group.partners %}` guard from `_partial_overlap_badge.html` so the `<details class="partial-overlap-badge">` element always rendered. `test_item_with_no_overlap_renders_no_badge` failed: an empty badge (`Wspólna substancja: ` with no names) rendered for the single Ibuprofen item that has no overlap. Reverted. — d6e7728
 - [x] 3.6 Collapsed badge fits a phone-width viewport without wrapping into a paragraph — verified live via Claude in Chrome at 390×844 against the seeded household: "Wspólna substancja: ManualTest Sudafeed, ManualTest Apap, ManualTest Panadol" (a combo product overlapping both a single and a 3-member cluster) rendered on one line without wrapping. Expansion content itself (correct substance→partner attribution) is covered by the automated integration tests (`test_combination_product_badge_shows_both_partners_and_singles_show_only_combo`); the live click-to-expand interaction was not separately captured before this session wrapped up early on a quota warning. — d6e7728
+
+  **Completed during impl review (2026-08-25, finding F5).** The expand half was verified
+  live at a true 390px viewport (the page rendered through the real view and template, then
+  loaded in a 390×844 frame in Chrome). Measured before/after toggling the worst-case badge
+  — a combination product overlapping both a single and a 2-member cluster:
+
+  | | collapsed | expanded |
+  |---|---|---|
+  | page `scrollY` | 0 | 0 |
+  | `<h1>` top | 151.93 | 151.93 |
+  | badge top | 392.79 | 392.79 |
+  | badge height | 32 | 134 |
+  | next `<li>` top | 440.78 | 542.32 |
+
+  Nothing above the badge moves, and the badge's own top is fixed, so the control does not
+  jump out from under the finger; the whole +102px is growth downward, below the tap point.
+  Non-disruptive — criterion met. **One nuance found:** with three long partner names
+  (`Sudafed Tabletki Powlekane, Apap Extra Tabletki Powlekane, Panadol Extra`) the collapsed
+  summary wraps to **2 lines** at 390px, not the 1 line the earlier shorter-named check saw.
+  Two lines is not "a paragraph", so 3.5's first clause still holds, but the badge is not
+  strictly single-line for realistic Polish product names.
 - [x] 3.7 With ~10 real items where only two overlap, the screen reads as a list with two notes, not a warning screen — badge CSS (`static/css/app.css`) deliberately uses `var(--pico-muted-color)` and `font-size: 0.85em`, subordinate to the item it annotates rather than an alarm style; confirmed visually that badges read as small collapsed notes, not banners, in the seeded household screenshots. — d6e7728
