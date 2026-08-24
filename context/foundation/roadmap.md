@@ -3,7 +3,7 @@ project: domowa-apteka
 version: 1
 status: draft
 created: 2026-08-03
-updated: 2026-08-24
+updated: 2026-08-25
 prd_version: 1
 main_goal: speed
 top_blocker: decisions
@@ -45,7 +45,7 @@ reality, and every other slice is downstream of it.
 | F-02 | `registry-freshness-refresh`       | (foundation) registry data refreshes on a schedule and the app knows when it last succeeded | F-01          | NFR (registry freshness)     | done     |
 | S-01 | `household-accounts-and-invites`   | sign in, create a household, invite another adult by link/code, and have them join with full symmetric access | —             | FR-005, US-02, Access Control | done     |
 | S-02 | `add-drug-with-substance-resolution` | add a pharmaceutical by name with registry-backed autocomplete, see its resolved active substance(s) — or a clear lookup-failure message — and have the item appear on the shared household list | F-01, S-01    | FR-001, FR-002, US-01        | done |
-| S-03 | `duplicate-flagging-on-list`       | see household list items flagged as full duplicates (identical substance sets) and partial duplicates (overlapping but not identical) | S-02          | FR-003, US-03                | planning |
+| S-03 | `duplicate-flagging-on-list`       | see household list items flagged as full duplicates (identical substance sets) and partial duplicates (overlapping but not identical) | S-02          | FR-003, US-03                | in-progress |
 | S-04 | `expiration-date-per-item`         | optionally record an expiration date when adding or editing an item                         | S-02          | FR-004                       | proposed |
 
 ## Streams
@@ -151,7 +151,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
   - A combination product can be a partial duplicate of several other items at once — how is that presented without the list becoming unreadable? The PRD states the requirement but not the display shape. — Owner: user. Block: no.
   - Do flags recompute on read, or on write when an item is added? US-03 requires them to update automatically with no manual step, which both satisfy. — Owner: user. Block: no.
 - **Risk:** This is the payoff the whole product is built around, and it is also the slice most likely to be judged on feel rather than correctness — a technically correct partial-duplicate flag that reads as noise fails the user story. Deliberately sequenced after S-02 rather than merged into it: merging would put four of the five must-have requirements in one slice, and duplicate flagging cannot be exercised at all until at least two items with resolved substances exist.
-- **Status:** planning
+- **Status:** in-progress
 
 ### S-04: Optional expiration date per item
 

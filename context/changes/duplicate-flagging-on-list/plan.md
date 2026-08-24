@@ -497,42 +497,42 @@ read path and is reverted by reverting the commits.
 
 #### Automated
 
-- [x] 1.1 Test suite passes: `uv run manage.py test`
-- [x] 1.2 New module's tests pass: `uv run manage.py test pharmacy.tests.test_duplicates`
-- [x] 1.3 Type checking passes: `uv run mypy .`
-- [x] 1.4 System checks pass: `uv run manage.py check`
+- [x] 1.1 Test suite passes: `uv run manage.py test` — 38a5802
+- [x] 1.2 New module's tests pass: `uv run manage.py test pharmacy.tests.test_duplicates` — 38a5802
+- [x] 1.3 Type checking passes: `uv run mypy .` — 38a5802
+- [x] 1.4 System checks pass: `uv run manage.py check` — 38a5802
 
 #### Manual
 
-- [x] 1.5 Every new test watched to go red for the right reason, mutation recorded; empty-set case falsified by making `classify` return FULL on two empty sets — mutation: reordered `classify` to test `a == b` before the `not a or not b` guard, so `classify(frozenset(), frozenset())` returned `Overlap.FULL`; `test_both_empty_is_none_not_full` failed with `AssertionError: <Overlap.FULL: 1> != <Overlap.NONE: 3>`, confirming the guard is load-bearing. Reverted.
-- [x] 1.6 Module docstring states why the primitive is set-keyed rather than item-paired
+- [x] 1.5 Every new test watched to go red for the right reason, mutation recorded; empty-set case falsified by making `classify` return FULL on two empty sets — mutation: reordered `classify` to test `a == b` before the `not a or not b` guard, so `classify(frozenset(), frozenset())` returned `Overlap.FULL`; `test_both_empty_is_none_not_full` failed with `AssertionError: <Overlap.FULL: 1> != <Overlap.NONE: 3>`, confirming the guard is load-bearing. Reverted. — 38a5802
+- [x] 1.6 Module docstring states why the primitive is set-keyed rather than item-paired — 38a5802
 
 ### Phase 2: List grouping and the unresolved section
 
 #### Automated
 
-- [x] 2.1 Test suite passes: `uv run manage.py test`
-- [x] 2.2 List tests pass: `uv run manage.py test pharmacy.tests.test_item_list`
-- [x] 2.3 Type checking passes: `uv run mypy .`
-- [x] 2.4 Query count unchanged from the pre-change contract — `assertNumQueries(7)` holds both on the original 5-resolved-item test (now exercising the cluster path since they share one substance) and on a new test with a cluster, a single, and an unresolved item present simultaneously.
+- [x] 2.1 Test suite passes: `uv run manage.py test` — 0efb4e8
+- [x] 2.2 List tests pass: `uv run manage.py test pharmacy.tests.test_item_list` — 0efb4e8
+- [x] 2.3 Type checking passes: `uv run mypy .` — 0efb4e8
+- [x] 2.4 Query count unchanged from the pre-change contract — `assertNumQueries(7)` holds both on the original 5-resolved-item test (now exercising the cluster path since they share one substance) and on a new test with a cluster, a single, and an unresolved item present simultaneously. — 0efb4e8
 
 #### Manual
 
-- [x] 2.5 New tests watched to go red; unresolved-grouping test falsified by removing the unresolved partition — mutation: changed `(resolved if keys else unresolved).append(item)` to unconditionally `resolved.append(item)` in `build_list_view`. `test_two_unresolved_items_are_not_grouped_and_appear_in_unresolved_section` failed: both unresolved items (empty substance sets are equal) collapsed into one `duplicate-cluster` labelled "Zamienniki", and `class="unresolved-section"` never appeared — exactly the silent-grouping bug the guard exists to prevent. Reverted.
-- [x] 2.6 On a phone-width viewport a cluster reads as one unit and the unresolved section as a separate concern — verified live via Claude in Chrome at 390×844 against a seeded household: a "Zamienniki — ta sama substancja czynna" cluster rendered as one bordered box, and "Nie udało się ustalić substancji" rendered as a clearly separate section below with its own heading, not a third duplicate category.
-- [x] 2.7 Adding a new item still places it or its cluster at the top of the list — verified live: adding a second "ManualTest Ibum" through the real add-item UI formed a same-product cluster labelled "Ten sam produkt dodany wielokrotnie" (not "Zamienniki") that appeared at the very top of the list, above all previously-newest items.
+- [x] 2.5 New tests watched to go red; unresolved-grouping test falsified by removing the unresolved partition — mutation: changed `(resolved if keys else unresolved).append(item)` to unconditionally `resolved.append(item)` in `build_list_view`. `test_two_unresolved_items_are_not_grouped_and_appear_in_unresolved_section` failed: both unresolved items (empty substance sets are equal) collapsed into one `duplicate-cluster` labelled "Zamienniki", and `class="unresolved-section"` never appeared — exactly the silent-grouping bug the guard exists to prevent. Reverted. — 0efb4e8
+- [x] 2.6 On a phone-width viewport a cluster reads as one unit and the unresolved section as a separate concern — verified live via Claude in Chrome at 390×844 against a seeded household: a "Zamienniki — ta sama substancja czynna" cluster rendered as one bordered box, and "Nie udało się ustalić substancji" rendered as a clearly separate section below with its own heading, not a third duplicate category. — 0efb4e8
+- [x] 2.7 Adding a new item still places it or its cluster at the top of the list — verified live: adding a second "ManualTest Ibum" through the real add-item UI formed a same-product cluster labelled "Ten sam produkt dodany wielokrotnie" (not "Zamienniki") that appeared at the very top of the list, above all previously-newest items. — 0efb4e8
 
 ### Phase 3: Partial-overlap badges
 
 #### Automated
 
-- [x] 3.1 Test suite passes: `uv run manage.py test`
-- [x] 3.2 Type checking passes: `uv run mypy .`
-- [x] 3.3 System checks pass: `uv run manage.py check`
-- [x] 3.4 Query count assertion still passes with partial-overlap items present — dedicated `test_n_plus_one_guard_holds_with_partial_overlap_items_present` holds `assertNumQueries(7)` with a combo product plus a partial partner rendering badges.
+- [x] 3.1 Test suite passes: `uv run manage.py test` — d6e7728
+- [x] 3.2 Type checking passes: `uv run mypy .` — d6e7728
+- [x] 3.3 System checks pass: `uv run manage.py check` — d6e7728
+- [x] 3.4 Query count assertion still passes with partial-overlap items present — dedicated `test_n_plus_one_guard_holds_with_partial_overlap_items_present` holds `assertNumQueries(7)` with a combo product plus a partial partner rendering badges. — d6e7728
 
 #### Manual
 
-- [x] 3.5 New tests watched to go red; "no badge when no overlap" test falsified by emitting an empty partner list instead of omitting the badge — mutation: removed the `{% if group.partners %}` guard from `_partial_overlap_badge.html` so the `<details class="partial-overlap-badge">` element always rendered. `test_item_with_no_overlap_renders_no_badge` failed: an empty badge (`Wspólna substancja: ` with no names) rendered for the single Ibuprofen item that has no overlap. Reverted.
-- [x] 3.6 Collapsed badge fits a phone-width viewport without wrapping into a paragraph — verified live via Claude in Chrome at 390×844 against the seeded household: "Wspólna substancja: ManualTest Sudafeed, ManualTest Apap, ManualTest Panadol" (a combo product overlapping both a single and a 3-member cluster) rendered on one line without wrapping. Expansion content itself (correct substance→partner attribution) is covered by the automated integration tests (`test_combination_product_badge_shows_both_partners_and_singles_show_only_combo`); the live click-to-expand interaction was not separately captured before this session wrapped up early on a quota warning.
-- [x] 3.7 With ~10 real items where only two overlap, the screen reads as a list with two notes, not a warning screen — badge CSS (`static/css/app.css`) deliberately uses `var(--pico-muted-color)` and `font-size: 0.85em`, subordinate to the item it annotates rather than an alarm style; confirmed visually that badges read as small collapsed notes, not banners, in the seeded household screenshots.
+- [x] 3.5 New tests watched to go red; "no badge when no overlap" test falsified by emitting an empty partner list instead of omitting the badge — mutation: removed the `{% if group.partners %}` guard from `_partial_overlap_badge.html` so the `<details class="partial-overlap-badge">` element always rendered. `test_item_with_no_overlap_renders_no_badge` failed: an empty badge (`Wspólna substancja: ` with no names) rendered for the single Ibuprofen item that has no overlap. Reverted. — d6e7728
+- [x] 3.6 Collapsed badge fits a phone-width viewport without wrapping into a paragraph — verified live via Claude in Chrome at 390×844 against the seeded household: "Wspólna substancja: ManualTest Sudafeed, ManualTest Apap, ManualTest Panadol" (a combo product overlapping both a single and a 3-member cluster) rendered on one line without wrapping. Expansion content itself (correct substance→partner attribution) is covered by the automated integration tests (`test_combination_product_badge_shows_both_partners_and_singles_show_only_combo`); the live click-to-expand interaction was not separately captured before this session wrapped up early on a quota warning. — d6e7728
+- [x] 3.7 With ~10 real items where only two overlap, the screen reads as a list with two notes, not a warning screen — badge CSS (`static/css/app.css`) deliberately uses `var(--pico-muted-color)` and `font-size: 0.85em`, subordinate to the item it annotates rather than an alarm style; confirmed visually that badges read as small collapsed notes, not banners, in the seeded household screenshots. — d6e7728
