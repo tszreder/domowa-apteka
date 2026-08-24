@@ -22,10 +22,14 @@
                                 <li>{% include "pharmacy/_item_row.html" %}</li>
                             {% endfor %}
                         </ul>
+                        {% include "pharmacy/_partial_overlap_badge.html" %}
                     </li>
                 {% else %}
                     {% with item=group.items.0 %}
-                        <li>{% include "pharmacy/_item_row.html" %}</li>
+                        <li>
+                            {% include "pharmacy/_item_row.html" %}
+                            {% include "pharmacy/_partial_overlap_badge.html" %}
+                        </li>
                     {% endwith %}
                 {% endif %}
             {% endfor %}

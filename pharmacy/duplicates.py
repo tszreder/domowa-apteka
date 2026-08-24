@@ -82,6 +82,16 @@ class DuplicateGroup:
     def is_cluster(self) -> bool:
         return len(self.items) > 1
 
+    @property
+    def partner_names(self) -> list[str]:
+        """Deduplicated, order-preserving union of partner labels across all shared substances."""
+        names: list[str] = []
+        for labels in self.partners.values():
+            for label in labels:
+                if label not in names:
+                    names.append(label)
+        return names
+
 
 @dataclass(frozen=True)
 class ItemListView:

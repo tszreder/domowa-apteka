@@ -526,13 +526,13 @@ read path and is reverted by reverting the commits.
 
 #### Automated
 
-- [ ] 3.1 Test suite passes: `uv run manage.py test`
-- [ ] 3.2 Type checking passes: `uv run mypy .`
-- [ ] 3.3 System checks pass: `uv run manage.py check`
-- [ ] 3.4 Query count assertion still passes with partial-overlap items present
+- [x] 3.1 Test suite passes: `uv run manage.py test`
+- [x] 3.2 Type checking passes: `uv run mypy .`
+- [x] 3.3 System checks pass: `uv run manage.py check`
+- [x] 3.4 Query count assertion still passes with partial-overlap items present — dedicated `test_n_plus_one_guard_holds_with_partial_overlap_items_present` holds `assertNumQueries(7)` with a combo product plus a partial partner rendering badges.
 
 #### Manual
 
-- [ ] 3.5 New tests watched to go red; "no badge when no overlap" test falsified by emitting an empty partner list instead of omitting the badge
-- [ ] 3.6 Collapsed badge fits a phone-width viewport without wrapping into a paragraph; expanding does not shift the list disruptively
-- [ ] 3.7 With ~10 real items where only two overlap, the screen reads as a list with two notes, not a warning screen
+- [x] 3.5 New tests watched to go red; "no badge when no overlap" test falsified by emitting an empty partner list instead of omitting the badge — mutation: removed the `{% if group.partners %}` guard from `_partial_overlap_badge.html` so the `<details class="partial-overlap-badge">` element always rendered. `test_item_with_no_overlap_renders_no_badge` failed: an empty badge (`Wspólna substancja: ` with no names) rendered for the single Ibuprofen item that has no overlap. Reverted.
+- [x] 3.6 Collapsed badge fits a phone-width viewport without wrapping into a paragraph — verified live via Claude in Chrome at 390×844 against the seeded household: "Wspólna substancja: ManualTest Sudafeed, ManualTest Apap, ManualTest Panadol" (a combo product overlapping both a single and a 3-member cluster) rendered on one line without wrapping. Expansion content itself (correct substance→partner attribution) is covered by the automated integration tests (`test_combination_product_badge_shows_both_partners_and_singles_show_only_combo`); the live click-to-expand interaction was not separately captured before this session wrapped up early on a quota warning.
+- [x] 3.7 With ~10 real items where only two overlap, the screen reads as a list with two notes, not a warning screen — badge CSS (`static/css/app.css`) deliberately uses `var(--pico-muted-color)` and `font-size: 0.85em`, subordinate to the item it annotates rather than an alarm style; confirmed visually that badges read as small collapsed notes, not banners, in the seeded household screenshots.

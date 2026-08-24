@@ -5,6 +5,7 @@ described in the plan's "Critical Implementation Details": a regression to
 N+1 must fail CI, not be noticed in production.
 """
 
+import re
 from datetime import date
 
 from django.contrib.auth.models import User
@@ -128,6 +129,152 @@ class ItemListRenderingTests(TestCase):
             response = self.client.get(reverse('pharmacy:item_list'))
 
         self.assertEqual(response.status_code, 200)
+
+    def test_combination_product_badge_shows_both_partners_and_singles_show_only_combo(
+        self,
+    ) -> None:
+        para = Substance.objects.create(name='Paracetamol', name_key='paracetamol')
+        pseudo = Substance.objects.create(name='Pseudoefedryna', name_key='pseudoefedryna')
+
+        combo = make_product('30', name='ManualTest Combo')
+        ProductSubstance.objects.create(
+            product=combo, substance=para, source_field=SourceField.SUBSTANCE_ROW, source_order=0
+        )
+        ProductSubstance.objects.create(
+            product=combo, substance=pseudo, source_field=SourceField.SUBSTANCE_ROW, source_order=1
+        )
+        Item.objects.create(household=self.household, product=combo)
+
+        para_only = make_product('31', name='Apap Extra')
+        ProductSubstance.objects.create(
+            product=para_only, substance=para, source_field=SourceField.SUBSTANCE_ROW, source_order=0
+        )
+        Item.objects.create(household=self.household, product=para_only)
+
+        pseudo_only = make_product('32', name='Sudafeed')
+        ProductSubstance.objects.create(
+            product=pseudo_only, substance=pseudo, source_field=SourceField.SUBSTANCE_ROW, source_order=0
+        )
+        Item.objects.create(household=self.household, product=pseudo_only)
+
+        response = self.client.get(reverse('pharmacy:item_list'))
+        content = response.content.decode()
+
+        self.assertContains(response, 'class="partial-overlap-badge"', count=3)
+        summaries = re.findall(r'Wspólna substancja: ([^<]*)</summary>', content)
+        self.assertEqual(len(summaries), 3)
+        # the combo's summary names both singles as partners, order not pinned
+        combo_summary = next(s for s in summaries if 'Apap Extra' in s and 'Sudafeed' in s)
+        self.assertIn('Apap Extra', combo_summary)
+        self.assertIn('Sudafeed', combo_summary)
+        self.assertIn('Paracetamol: Apap Extra', content)
+        self.assertIn('Pseudoefedryna: Sudafeed', content)
+        # each single shows only the combo as its partner
+        self.assertEqual(summaries.count('ManualTest Combo'), 2)
+
+    def test_item_with_no_overlap_renders_no_badge(self) -> None:
+        substance = Substance.objects.create(name='Ibuprofen', name_key='ibuprofen')
+        product = make_product('33', name='Ibum')
+        ProductSubstance.objects.create(
+            product=product, substance=substance, source_field=SourceField.SUBSTANCE_ROW, source_order=0
+        )
+        Item.objects.create(household=self.household, product=product)
+
+        response = self.client.get(reverse('pharmacy:item_list'))
+
+        self.assertNotContains(response, 'partial-overlap-badge')
+
+    def test_unresolved_item_renders_no_badge(self) -> None:
+        product = make_product('34', name='Peditrace')
+        Item.objects.create(household=self.household, product=product)
+
+        response = self.client.get(reverse('pharmacy:item_list'))
+
+        self.assertNotContains(response, 'partial-overlap-badge')
+
+    def test_containment_renders_as_partial_not_full(self) -> None:
+        para = Substance.objects.create(name='Paracetamol', name_key='paracetamol')
+        pseudo = Substance.objects.create(name='Pseudoefedryna', name_key='pseudoefedryna')
+
+        combo = make_product('35', name='ManualTest Combo')
+        ProductSubstance.objects.create(
+            product=combo, substance=para, source_field=SourceField.SUBSTANCE_ROW, source_order=0
+        )
+        ProductSubstance.objects.create(
+            product=combo, substance=pseudo, source_field=SourceField.SUBSTANCE_ROW, source_order=1
+        )
+        Item.objects.create(household=self.household, product=combo)
+
+        para_only = make_product('36', name='Apap Extra')
+        ProductSubstance.objects.create(
+            product=para_only, substance=para, source_field=SourceField.SUBSTANCE_ROW, source_order=0
+        )
+        Item.objects.create(household=self.household, product=para_only)
+
+        response = self.client.get(reverse('pharmacy:item_list'))
+
+        # containment is partial, not full: no shared cluster, but a badge
+        self.assertNotContains(response, 'class="duplicate-cluster"')
+        self.assertContains(response, 'class="partial-overlap-badge"', count=2)
+
+    def test_badge_emitted_once_per_cluster_not_once_per_member(self) -> None:
+        cluster_substance = Substance.objects.create(name='Paracetamol', name_key='paracetamol')
+        shared = Substance.objects.create(name='Pseudoefedryna', name_key='pseudoefedryna')
+
+        # A 3-member full-duplicate cluster (combo products carrying both
+        # substances, cross-product) that also partially overlaps a fourth,
+        # single-substance item.
+        for i, rid in enumerate(('37', '38', '39')):
+            product = make_product(rid, name=f'ComboBrand {rid}')
+            ProductSubstance.objects.create(
+                product=product,
+                substance=cluster_substance,
+                source_field=SourceField.SUBSTANCE_ROW,
+                source_order=0,
+            )
+            ProductSubstance.objects.create(
+                product=product,
+                substance=shared,
+                source_field=SourceField.SUBSTANCE_ROW,
+                source_order=1,
+            )
+            Item.objects.create(household=self.household, product=product)
+
+        pseudo_only = make_product('40', name='Sudafeed')
+        ProductSubstance.objects.create(
+            product=pseudo_only, substance=shared, source_field=SourceField.SUBSTANCE_ROW, source_order=0
+        )
+        Item.objects.create(household=self.household, product=pseudo_only)
+
+        response = self.client.get(reverse('pharmacy:item_list'))
+
+        # one badge for the 3-member cluster, one for the single — never 3.
+        self.assertContains(response, 'class="partial-overlap-badge"', count=2)
+
+    def test_n_plus_one_guard_holds_with_partial_overlap_items_present(self) -> None:
+        para = Substance.objects.create(name='Paracetamol', name_key='paracetamol')
+        pseudo = Substance.objects.create(name='Pseudoefedryna', name_key='pseudoefedryna')
+
+        combo = make_product('41', name='ManualTest Combo')
+        ProductSubstance.objects.create(
+            product=combo, substance=para, source_field=SourceField.SUBSTANCE_ROW, source_order=0
+        )
+        ProductSubstance.objects.create(
+            product=combo, substance=pseudo, source_field=SourceField.SUBSTANCE_ROW, source_order=1
+        )
+        Item.objects.create(household=self.household, product=combo)
+
+        para_only = make_product('42', name='Apap Extra')
+        ProductSubstance.objects.create(
+            product=para_only, substance=para, source_field=SourceField.SUBSTANCE_ROW, source_order=0
+        )
+        Item.objects.create(household=self.household, product=para_only)
+
+        with self.assertNumQueries(7):
+            response = self.client.get(reverse('pharmacy:item_list'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'class="partial-overlap-badge"', count=2)
 
     def test_identical_substances_on_different_products_render_as_zamienniki_cluster(
         self,

@@ -1,0 +1,10 @@
+{% if group.partners %}
+    <details class="partial-overlap-badge">
+        <summary>Wspólna substancja: {{ group.partner_names|join:", " }}</summary>
+        <ul class="partial-overlap-detail">
+            {% for substance_name, partner_names in group.partners.items %}
+                <li>{{ substance_name }}: {{ partner_names|join:", " }}</li>
+            {% endfor %}
+        </ul>
+    </details>
+{% endif %}
