@@ -99,6 +99,15 @@
     renderProducerOptions(producerSearchInput.value);
   });
 
+  // Focusing the empty field lists every holder, because an empty needle
+  // matches all of them. Without this the only way to see the options is to
+  // guess a substring of a name you are trying to look up — and unlike the drug
+  // search, this list is already in memory and bounded (10 holders at the
+  // registry's worst), so there is nothing to debounce and no request to spare.
+  producerSearchInput.addEventListener('focus', () => {
+    renderProducerOptions(producerSearchInput.value);
+  });
+
   attachKeyboardNav(producerSearchInput, producerSuggestionsList, (index) => {
     const li = optionsOf(producerSuggestionsList)[index];
     if (li) li.dispatchEvent(new MouseEvent('mousedown'));
