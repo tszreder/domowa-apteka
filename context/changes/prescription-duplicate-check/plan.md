@@ -383,6 +383,38 @@ property that distinguishes this screen from the add screen.
   substance. `SHARED_SUBSTANCE` rows name the shared substances; the other two do not
   (they are identical by definition). Every row shows name, strength, form and
   `Liczba opakowań: N`.
+
+  > **Added 2026-08-30, during Phase 1 implementation — the `SAME_PRODUCT` label
+  > degrades on multi-holder presentations.** The check screen picks at presentation
+  > level with no producer step, so the candidate is always the presentation's
+  > `_default_product`. The add screen *does* have a producer step, so a household item
+  > can point at a different holder's row under the same presentation. When that
+  > happens, `item.product_id == candidate.pk` is false, `classify` still returns
+  > `FULL`, and the row is labelled `SAME_SUBSTANCES` rather than `SAME_PRODUCT`.
+  >
+  > Measured against the 20,254 active products in the dev registry: **1,003 of 16,200
+  > presentations (6.19%) carry more than one `marketing_holder`** — that is the
+  > ceiling on how often this can happen, not how often it does, since it additionally
+  > requires the item to have been added with `producer_confirmed` on a non-default
+  > holder. (`Nurofen 200 mg, tabletki powlekane` is a single row and never degrades;
+  > `Nurofen dla dzieci Forte truskawkowy 40 mg/ml` spans 6 holders and can.)
+  >
+  > The failure is a one-tier softening, never a false positive and never a "no match":
+  > `SAME_PRODUCT` is a primary-key equality, so it can be missed but not invented, and
+  > the row still appears at the top of the list with its pack count. The cost is
+  > credibility — the screen would label a box reading *Nurofen dla dzieci Forte
+  > truskawkowy* as "a different product with the same active substance".
+  >
+  > **Decision for this phase: absorb it in the copy.** Word the `SAME_SUBSTANCES`
+  > label so it does not insist the product is *different*; the row already prints the
+  > name, so the reader reconciles it at a glance. Two alternatives were considered and
+  > rejected here: treating the whole presentation as identity inverts the never-guess
+  > NFR (it would claim "exactly this" across the 1.24% of presentations whose rows
+  > disagree on substances), and matching the item against every `Producer.product_id`
+  > in the presentation is honest but forces `duplicates.py` to know what a presentation
+  > is and changes `check_candidate`'s signature — a design change that needs its own
+  > plan, not a mid-phase edit. Revisit under `S-06` if the softened label reads badly
+  > in real use.
 - **No-match statement** (resolved, zero matches) — a plain statement that nothing in the
   household contains those substances. A fact, with no consequence attached.
 - **Uncomparable disclosure** (when `resolved` **and** `uncomparable_count > 0`) — a line
@@ -681,15 +713,15 @@ view, a form, a template, a pure function and three static files.
 
 #### Automated
 
-- [ ] 1.1 Unit tests pass: `uv run manage.py test pharmacy.tests.test_duplicates`
-- [ ] 1.2 Full suite passes: `uv run manage.py test`
-- [ ] 1.3 Type checking passes: `uv run mypy .`
-- [ ] 1.4 Django system checks pass: `uv run manage.py check`
+- [x] 1.1 Unit tests pass: `uv run manage.py test pharmacy.tests.test_duplicates`
+- [x] 1.2 Full suite passes: `uv run manage.py test`
+- [x] 1.3 Type checking passes: `uv run mypy .`
+- [x] 1.4 Django system checks pass: `uv run manage.py check`
 
 #### Manual
 
-- [ ] 1.5 Docstrings match the module's existing density — why, not what
-- [ ] 1.6 `check_candidate` contains no direct set comparison; every relationship goes through `classify`
+- [x] 1.5 Docstrings match the module's existing density — why, not what
+- [x] 1.6 `check_candidate` contains no direct set comparison; every relationship goes through `classify`
 
 ### Phase 2: The check screen
 

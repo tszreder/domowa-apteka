@@ -5,12 +5,22 @@ snapshotted from the function's current output — test-plan.md §2 risk #3
 names that anti-pattern explicitly.
 """
 
+from collections.abc import Iterable
 from datetime import date
 
 from django.test import SimpleTestCase, TestCase
 
 from households.models import Household
-from pharmacy.duplicates import ItemListView, Overlap, build_list_view, classify, substance_keys
+from pharmacy.duplicates import (
+    CandidateCheck,
+    ItemListView,
+    MatchKind,
+    Overlap,
+    build_list_view,
+    check_candidate,
+    classify,
+    substance_keys,
+)
 from pharmacy.models import Item
 from registry.models import Product, ProductSubstance, SourceField, Substance
 
@@ -251,4 +261,267 @@ class BuildListViewTests(TestCase):
         )
         self.assertEqual(
             list(narrow_group.partners), ['Amoksycylina', 'Paracetamol', 'Witamina C']
+        )
+
+
+class CheckCandidateTests(TestCase):
+    """One candidate product against a whole household.
+
+    Every expectation below is read off how the fixture was built — which
+    substances were linked to which product, and which product each box points
+    at — never off what `check_candidate` happens to return today.
+    """
+
+    def setUp(self) -> None:
+        self.household = Household.objects.create(name='Kowalscy')
+
+    def make_item(self, product: Product, **overrides: object) -> Item:
+        return Item.objects.create(household=self.household, product=product, **overrides)
+
+    def _check(self, candidate: Product, items: Iterable[Item] | None = None) -> CandidateCheck:
+        """Run the check the way the view will: both sides prefetched.
+
+        `items` defaults to the household's own queryset in `Item.Meta.ordering`;
+        pass an explicit list only where the test needs to control input order.
+        """
+        if items is None:
+            items = (
+                Item.objects.filter(household=self.household)
+                .select_related('product')
+                .prefetch_related('product__substance_links__substance')
+            )
+        return check_candidate(
+            Product.objects.prefetch_related('substance_links__substance').get(pk=candidate.pk),
+            items,
+        )
+
+    def test_unresolved_candidate_not_held_refuses_instead_of_reporting_no_match(self) -> None:
+        """The candidate side of the silent-guess trap.
+
+        A candidate with no substance links classifies as NONE against
+        everything, so a naive screen would report "nothing at home matches" —
+        a buy signal for a product we merely failed to resolve. `resolved` is
+        what lets the caller tell the two apart. The household deliberately
+        holds a product with a near-identical name and a different key: a name
+        collision is not identity, and must not become one.
+        """
+        para = make_substance('Paracetamol', 'paracetamol')
+        lookalike = make_product('1', name='Apap Extra')
+        link(lookalike, para)
+        self.make_item(lookalike)
+        candidate = make_product('2', name='Apap')
+
+        result = self._check(candidate)
+
+        self.assertFalse(result.resolved)
+        self.assertEqual(result.candidate_substances, [])
+        self.assertEqual(result.matches, [])
+
+    def test_unresolved_candidate_the_household_holds_is_still_confirmed_by_identity(self) -> None:
+        """Pins identity as independent of resolution.
+
+        This is the test that keeps `check_candidate` from over-refusing.
+        Falsify it by gating the `product_id == candidate.pk` branch on a
+        non-empty key set — the way a "we could not resolve it, so we cannot
+        answer" reading of the rule would — and it goes red, because the
+        household's own boxes disappear from an answer that never needed
+        substances to be certain.
+        """
+        candidate = make_product('1', name='Peditrace')
+        self.make_item(candidate)
+        self.make_item(candidate)
+
+        result = self._check(candidate)
+
+        self.assertFalse(result.resolved)
+        self.assertEqual([match.kind for match in result.matches], [MatchKind.SAME_PRODUCT])
+        self.assertEqual(result.matches[0].pack_count, 2)
+
+    def test_household_owning_the_identical_product_is_same_product_with_empty_shared(self) -> None:
+        para = make_substance('Paracetamol', 'paracetamol')
+        candidate = make_product('1', name='Apap')
+        link(candidate, para)
+        self.make_item(candidate)
+
+        result = self._check(candidate)
+
+        self.assertTrue(result.resolved)
+        self.assertEqual([match.kind for match in result.matches], [MatchKind.SAME_PRODUCT])
+        # Identical by definition, so there is nothing to name.
+        self.assertEqual(result.matches[0].shared, [])
+
+    def test_different_product_with_the_same_set_is_same_substances_not_same_product(self) -> None:
+        # The split `MatchKind` exists for exactly this pair: both are FULL to
+        # `classify`, and they are different facts to someone at the pharmacy.
+        para = make_substance('Paracetamol', 'paracetamol')
+        candidate = make_product('1', name='Apap')
+        link(candidate, para)
+        substitute = make_product('2', name='Paracetamol Hasco')
+        link(substitute, para)
+        self.make_item(substitute)
+
+        result = self._check(candidate)
+
+        self.assertEqual(len(result.matches), 1)
+        match = result.matches[0]
+        self.assertEqual(match.kind, MatchKind.SAME_SUBSTANCES)
+        self.assertFalse(match.is_same_product)
+        self.assertEqual(match.product.pk, substitute.pk)
+        self.assertEqual(match.shared, [])
+
+    def test_combination_candidate_shares_exactly_the_intersection(self) -> None:
+        para = make_substance('Paracetamol', 'paracetamol')
+        pseudo = make_substance('Pseudoefedryna', 'pseudoefedryna')
+        candidate = make_product('1', name='Combo')
+        link(candidate, para, order=0)
+        link(candidate, pseudo, order=1)
+        para_only = make_product('2', name='Apap')
+        link(para_only, para)
+        self.make_item(para_only)
+
+        result = self._check(candidate)
+
+        self.assertEqual([match.kind for match in result.matches], [MatchKind.SHARED_SUBSTANCE])
+        # Pseudoefedryna is on the candidate only, so it is not shared.
+        self.assertEqual(result.matches[0].shared, ['Paracetamol'])
+        self.assertEqual(result.candidate_substances, ['Paracetamol', 'Pseudoefedryna'])
+
+    def test_disjoint_household_item_produces_no_match(self) -> None:
+        para = make_substance('Paracetamol', 'paracetamol')
+        ibu = make_substance('Ibuprofen', 'ibuprofen')
+        candidate = make_product('1', name='Apap')
+        link(candidate, para)
+        unrelated = make_product('2', name='Ibuprom')
+        link(unrelated, ibu)
+        self.make_item(unrelated)
+
+        result = self._check(candidate)
+
+        self.assertTrue(result.resolved)
+        self.assertEqual(result.matches, [])
+        # Resolved, just disjoint — nothing was skipped, so nothing to disclose.
+        self.assertEqual(result.uncomparable_count, 0)
+
+    def test_unresolved_household_items_are_counted_and_never_matched(self) -> None:
+        """The household side of the silent-guess trap.
+
+        Items whose own products never resolved classify as NONE against
+        everything and so vanish from `matches`. Without the count travelling
+        alongside, a "nothing at home matches" verdict would be computed over a
+        household the comparison only partly saw.
+        """
+        para = make_substance('Paracetamol', 'paracetamol')
+        candidate = make_product('1', name='Apap')
+        link(candidate, para)
+        substitute = make_product('2', name='Paracetamol Hasco')
+        link(substitute, para)
+        self.make_item(substitute)
+        self.make_item(make_product('3', name='Peditrace'))
+        self.make_item(make_product('4', name='Nutriflex'))
+
+        result = self._check(candidate)
+
+        self.assertEqual([match.kind for match in result.matches], [MatchKind.SAME_SUBSTANCES])
+        self.assertEqual(result.uncomparable_count, 2)
+
+    def test_the_candidates_own_unresolved_box_is_matched_by_identity_and_still_counted(self) -> None:
+        """`uncomparable_count` is computed the same way whether or not the candidate resolved.
+
+        The candidate's own box matched on identity, not on substances, so it
+        genuinely took no part in a substance comparison and belongs in the
+        count. The screen — not this function — decides that the count is not
+        worth showing when `resolved` is false, because the refusal message
+        already says no comparison ran.
+        """
+        candidate = make_product('1', name='Peditrace')
+        self.make_item(candidate)
+        self.make_item(make_product('2', name='Nutriflex'))
+
+        result = self._check(candidate)
+
+        self.assertFalse(result.resolved)
+        self.assertEqual([match.kind for match in result.matches], [MatchKind.SAME_PRODUCT])
+        self.assertEqual(result.uncomparable_count, 2)
+
+    def test_three_boxes_of_one_product_collapse_to_one_match(self) -> None:
+        para = make_substance('Paracetamol', 'paracetamol')
+        candidate = make_product('1', name='Apap')
+        link(candidate, para)
+        substitute = make_product('2', name='Paracetamol Hasco')
+        link(substitute, para)
+        for _ in range(3):
+            self.make_item(substitute)
+
+        result = self._check(candidate)
+
+        self.assertEqual(len(result.matches), 1)
+        # One Item is one physical box, so pack_count has no second source.
+        self.assertEqual(result.matches[0].pack_count, 3)
+        self.assertEqual(len(result.matches[0].items), 3)
+
+    def test_matches_are_ordered_strongest_first(self) -> None:
+        """Ordering comes from the tier, not from the order items arrive in.
+
+        `items` is handed over in deliberately reversed tier order, so a pass
+        cannot come from the caller's ordering surviving untouched.
+        """
+        para = make_substance('Paracetamol', 'paracetamol')
+        pseudo = make_substance('Pseudoefedryna', 'pseudoefedryna')
+
+        candidate = make_product('1', name='Combo')
+        link(candidate, para, order=0)
+        link(candidate, pseudo, order=1)
+        same_set = make_product('2', name='Combo Hasco')
+        link(same_set, para, order=0)
+        link(same_set, pseudo, order=1)
+        para_only = make_product('3', name='Apap')
+        link(para_only, para)
+
+        shared_item = self.make_item(para_only)
+        same_substances_item = self.make_item(same_set)
+        same_product_item = self.make_item(candidate)
+
+        result = self._check(
+            candidate,
+            items=[shared_item, same_substances_item, same_product_item],
+        )
+
+        self.assertEqual(
+            [match.kind for match in result.matches],
+            [MatchKind.SAME_PRODUCT, MatchKind.SAME_SUBSTANCES, MatchKind.SHARED_SUBSTANCE],
+        )
+
+    def test_shared_substances_are_ordered_alphabetically_not_by_set_iteration(self) -> None:
+        """Pins `shared` and `candidate_substances` against per-process hash randomisation.
+
+        Both are built from `frozenset[str]` contents, and Python randomises
+        string hashing per process, so without an explicit sort two gunicorn
+        workers would name the same match's shared substances in different
+        orders. The links are created in reverse alphabetical order so a pass
+        cannot come from insertion order.
+        """
+        wit = make_substance('Witamina C', 'witamina-c')
+        para = make_substance('Paracetamol', 'paracetamol')
+        amox = make_substance('Amoksycylina', 'amoksycylina')
+        ibu = make_substance('Ibuprofen', 'ibuprofen')
+
+        candidate = make_product('1', name='Szeroki')
+        link(candidate, wit, order=0)
+        link(candidate, para, order=1)
+        link(candidate, amox, order=2)
+        link(candidate, ibu, order=3)
+
+        narrow = make_product('2', name='Wąski')
+        link(narrow, wit, order=0)
+        link(narrow, para, order=1)
+        link(narrow, amox, order=2)
+        self.make_item(narrow)
+
+        result = self._check(candidate)
+
+        self.assertEqual([match.kind for match in result.matches], [MatchKind.SHARED_SUBSTANCE])
+        self.assertEqual(result.matches[0].shared, ['Amoksycylina', 'Paracetamol', 'Witamina C'])
+        self.assertEqual(
+            result.candidate_substances,
+            ['Amoksycylina', 'Ibuprofen', 'Paracetamol', 'Witamina C'],
         )
