@@ -1,7 +1,7 @@
 ---
 change_id: test-plan-refresh-2026-08-29
 title: Refresh test-plan.md after duplicate-flagging ships
-status: new
+status: preparing
 created: 2026-08-29
 updated: 2026-08-29
 archived_at: null
