@@ -6,7 +6,7 @@
 >
 > Refresh: re-run `/10x-test-plan --refresh` when stale (see §8).
 >
-> Last updated: 2026-08-19
+> Last updated: 2026-08-29
 
 ## 1. Strategy
 
@@ -55,6 +55,7 @@ research's job, see §1 principle #3).
 | 4 | A lookup failure is swallowed — the item is saved as though it resolved, or disappears — so the user believes the app knows what is in the box when it does not | High | Medium | PRD Success Criteria Guardrail (lookup failures surfaced clearly, never silently dropped or guessed); PRD US-01 AC (the save is not silent); PRD US-03 AC (an unresolved item is shown separately, never grouped, hidden, or guessed into a duplicate relationship) |
 | 5 | A household member reads another household's medicine list — the request is authenticated, but ownership of the resource is never checked | High | Medium | interview Q1; PRD NFR (household medical data never visible outside the household) and US-01 AC (items never visible to members of a different household); archive `2026-08-05-household-accounts-and-invites` review finding that the cross-household assertion in the suite today is mutation-dead — the guardrail is asserted but not proven |
 | 6 | An invite artifact keeps granting full symmetric access to household medical data after it should have stopped — forwarded, leaked, or reused by someone who has left the household | Medium-High | Medium | PRD Access Control (joining grants immediate full symmetric access with no pending state); roadmap S-01 Unknown 2, which records invite expiry and revocation as unresolved; archive `2026-08-05-household-accounts-and-invites` review finding that the invite token is not consumed on the login path |
+| 7 | Two correctly-resolved medicines are placed in the wrong relationship to each other — flagged as the same when they are not, or shown as unrelated when they share an active substance — or a correct relationship is presented wrongly, with the shared-substance summary contradicting the detail line beneath it. The household then acts on a flag that is not true: keeps a real duplicate, or discards a box that was never one. The case where one medicine partially overlaps several others at once is where both failures are most likely, and nothing but a human implementation review catches either before merge | High | Medium | interview Q1 (the top production worry) and Q3 (the least-confident area); archive `2026-08-24-duplicate-flagging-on-list` review, where 3 of its 5 findings were real defects surfaced by human reading over a green suite; the `pharmacy/` hot-spot directory (§4 churn), which corroborates rather than originates this risk; and a self-contradicting rendering measured during the 2026-08-29 refresh in exactly the several-partners-at-once case |
 
 Abuse lens applied. Risk #5 is the authorization/ownership case (IDOR) and
 risk #6 the lifetime of a credential-equivalent artifact. Resource abuse
@@ -65,8 +66,19 @@ request path. See §7 rather than a padded risk map.
 
 Likelihood is not argued from churn anywhere in this table. The Phase 2
 interview answered "uniform" to the question of where change feels least
-confident, and the two newest surfaces landed through a squash-merge, so
-churn counts understate them. Churn is recorded in §4 as context only.
+confident, and that answer still governs. As of the 2026-08-29 refresh churn
+no longer understates the newest surfaces — `pharmacy/` has grown into a
+genuine hot spot — but the rule is unchanged: risk #7 cites that churn as
+corroboration, never as its origin. Churn is recorded in §4 as context only.
+
+**Challenger note (2026-08-29).** Roadmap slices S-05, S-06 and S-07 are
+proposed, not built, and none licenses a risk row yet — a row would describe
+software that does not exist. Their absence from this table is a decision, not
+an oversight, and it binds the next refresh too: add a row when a slice ships,
+not when it is scheduled. S-05 (`prescription-duplicate-check`) is the one to
+watch, because it is built to consume the same duplicate primitive risk #7
+covers — a defect left there today is inherited by S-05 rather than
+re-introduced.
 
 ### Risk Response Guidance
 
@@ -78,6 +90,7 @@ churn counts understate them. Churn is recorded in §4 as context only.
 | #4 | A product that cannot be resolved produces a visible, specific failure state for the user, and the item is persisted in a state that keeps it out of any duplicate relationship | "An empty result means the product has no substances." An unresolved item and a genuinely substance-free item must not be the same stored state | What the save path does when resolution misses, and how an unresolved item is represented so later duplicate logic cannot group it | Integration over the add flow with an input that cannot resolve | Asserting an HTTP 200 and nothing about what the user actually sees or what was persisted |
 | #5 | A member of household A issuing a well-formed request for a household B resource is refused — and the test goes red when the ownership check is deleted | "The user is logged in, therefore the object is theirs." Ownership is a per-object check, not a session check | Which views take an identifier from the request, and whether the queryset is scoped by membership or filtered after the fetch | Integration per identifier-taking view, each one falsified | Repeating the pattern already found in this suite — asserting a status code without proving which branch produced it |
 | #6 | An invite artifact stops working once the condition the product intends has occurred, and presenting a spent or revoked one refuses cleanly rather than erroring or silently re-joining | "One person joined, therefore the link is done." The product has not decided expiry or revocation, so the rule must be stated before it can be tested | The intended lifetime rule — a product decision, currently unrecorded — and every path that consumes a token, including login and signup, not only join | Integration over the token paths, once the rule is stated | Testing whatever the code happens to do today and calling it the requirement; that test has no oracle |
+| #7 | Which medicines are grouped together, which shared substances are named against each one, and the order the groups appear in are all derivable from the substance sets the boxes carry — and the tests protecting them go red when the grouping, the accumulation of a second overlapping medicine, or the display order is mutated. Two shapes must be representable: one medicine overlapping two or more others at once, and two different registry products that share a display name | "The review already caught this, so it is covered." Two of that review's findings did land committed, mutation-checked regression tests — the suite grew 176 → 178 for exactly that reason — so the challenge is not that the review was shallow. It is narrower and verified: every committed assertion about a medicine's overlapping partners expects exactly one partner, so the path that accumulates a second one is asserted at no layer, and the de-duplication that feeds the user-visible summary line has no test that reaches it. A green suite here means the easy shape is covered | Which layer owns grouping, which owns the shared-substance annotation, and which owns display order; where de-duplication is applied and where it is not, since a summary and its detail line are produced by different paths; and whether the review's falsification technique already exists as a repeatable committed test or was run by hand | Unit over the classification and the group assembly, with fixtures where one substance draws two or more partners and where two distinct products share a display name; integration only for the ordering guarantee, since a unit test on the assembler cannot observe a caller re-sorting its output | Re-asserting today's grouping output as the expected value — the oracle problem; expected groups must be derived from substance-set arithmetic. And treating the summary line as evidence for the detail line when the two are produced by different paths and have already been measured disagreeing |
 
 ## 3. Phased Rollout
 
@@ -91,13 +104,16 @@ orchestrator updates Status as artifacts appear on disk.
 | 2 | Add-item integrity | Prove the chosen product is the saved product, that its substances match the source row, and that a resolution failure is visible — including one query-shape assertion for the one-second acknowledgement requirement | #1, #3, #4 | integration, unit, collision fixtures, query-count assertion | not started | — |
 | 3 | Ingestion and freshness without a deploy | Make the scheduled import path exercisable in-process, and prove a bad or stale snapshot is refused rather than served as current | #2 | integration, clock-injected assertions | not started | — |
 | 4 | Access boundaries and gate wiring | Prove ownership is checked per object and that invite artifacts stop working when intended, then wire the missing CI gates | #5, #6 | integration, falsification checks, gates | not started | — |
+| 5 | Duplicate relationship correctness | Prove group membership, shared-substance annotation, and display order are each derived from substance sets rather than from today's output — including one medicine overlapping several others at once | #7 | unit, integration, fan-out fixtures, falsification checks | not started | — |
 
-**Sequencing decision (2026-08-19).** Phases 1 and 2 run now. Phases 3 and 4
-are deliberately parked until roadmap slice S-03 (`duplicate-flagging-on-list`)
-ships. S-03 is a must-have (FR-003, US-03), is not built, and the PRD's hard
-deadline is 2026-09-14 under after-hours-only capacity — so the rollout yields
-the remaining evenings to the product's payoff after phase 2. Phases 3 and 4
-keep their rows and stay `not started`; re-run `/10x-test-plan` to resume them.
+**Sequencing decision (2026-08-29).** Phases 1 and 2 run now. The previous
+refresh held phases 3 and 4 behind roadmap slice S-03
+(`duplicate-flagging-on-list`), yielding the evenings before the PRD's
+2026-09-14 deadline to the product's payoff. S-03 shipped on 2026-08-25, so that
+condition is spent and no longer constrains the rollout. Phases 3, 4 and 5 are
+`not started` because nobody has started them — not because anything blocks
+them, with the single exception recorded immediately below. Re-run
+`/10x-test-plan` to pick up the next one.
 
 **Open decision blocking Phase 4.** The invite lifetime rule — whether links
 expire, whether they can be revoked, and on what condition — is unrecorded in
@@ -112,34 +128,35 @@ date so future readers can see which lines need re-verification.
 
 | Layer | Tool | Version | Notes |
 |---|---|---|---|
-| unit + integration | Django test runner (`manage.py test`) | Django 5.2.16 / Python 3.11.9 | 14 test modules, 150 test methods across the three apps. No pytest and no pytest-django — deliberately, the built-in runner covers every layer this plan needs |
-| typecheck | mypy + django-stubs | 2.3.0 | Wired in CI; scoped by `pyproject.toml` to the three app packages |
-| test data | XML fixtures under the registry app's test tree, plus in-test object creation | n/a | Collision fixtures for risk #1 do not exist yet — see Phase 2 |
+| unit + integration | Django test runner (`manage.py test`) | Django 5.2.16 / Python 3.11.9 | 15 test modules, 178 test methods across the three apps. No pytest and no pytest-django — deliberately, the built-in runner covers every layer this plan needs |
+| typecheck | mypy + django-stubs | mypy 2.3.0 / django-stubs 6.0.7 | Wired in CI; scoped by `pyproject.toml` to the three app packages |
+| test data | XML fixtures under the registry app's test tree, plus in-test object creation | n/a | Collision fixtures for risk #1 do not exist yet — see Phase 2. Fan-out fixtures for risk #7 — one substance drawing two or more partner products, and two distinct products sharing a display name — do not exist either; see Phase 5 |
 | query shape | `assertNumQueries` (Django built-in) | Django 5.2.16 | The chosen instrument for the one-second acknowledgement requirement — see §7 on why not wall-clock |
 | clock control | injected clock seam | n/a | Already established by the freshness work; reused rather than reinvented in Phase 3 |
 | HTTP boundary mocking | none yet — see Phase 3 | — | The registry download goes out over `requests`; the import path has no seam for a truncated or failed response yet |
 | e2e | none yet — see Phase 4 | — | `StaticLiveServerTestCase` is Django's native host for a browser-driven test and needs no pytest migration |
 | lint + format | none yet — see Phase 4 | — | No ruff, black, or equivalent anywhere in the repo (verified by grep over `pyproject.toml` and the workflow) |
 | coverage measurement | none, and not planned | — | Line coverage is not the metric; the risk-to-test map from Phase 1 is (see §6.5) |
-| (optional) AI-native | agent-driven test-quality audit — checked: 2026-08-19 | n/a | An agent reads an assertion and judges whether it can fail, feeding Phase 1's falsification checks. **When NOT to use:** as a substitute for actually running the falsification — an agent's opinion that a test looks strong is not evidence that it goes red |
-| (rejected) AI-native | LLM-as-judge over resolved substance sets — checked: 2026-08-19 | n/a | Rejected on this product. The PRD's NFR requires substance identity to trace to the source registry row and never to be inferred; a model judging whether a resolution "looks right" supplies the oracle from a model instead of the registry. The deterministic comparison against the source row is both cheaper and the only correct one. **When NOT to use:** always, here |
-| (deferred) AI-native | selective multimodal review of the household list screen — checked: 2026-08-19 | n/a | The roadmap notes S-03 is the slice most likely to be judged on feel rather than correctness, which is where a visual judgement adds signal a DOM assertion cannot. Deferred because the screen does not exist yet. **When NOT to use:** on any screen whose correctness a DOM assertion already settles |
+| (optional) AI-native | agent-driven test-quality audit — checked: 2026-08-29 | n/a | An agent reads an assertion and judges whether it can fail, feeding Phase 1's falsification checks. **When NOT to use:** as a substitute for actually running the falsification — an agent's opinion that a test looks strong is not evidence that it goes red |
+| (rejected) AI-native | LLM-as-judge over resolved substance sets — checked: 2026-08-29 | n/a | Rejected on this product. The PRD's NFR requires substance identity to trace to the source registry row and never to be inferred; a model judging whether a resolution "looks right" supplies the oracle from a model instead of the registry. The deterministic comparison against the source row is both cheaper and the only correct one. **When NOT to use:** always, here |
+| (deferred) AI-native | selective multimodal review of the household list screen — checked: 2026-08-29 | n/a | The roadmap notes S-03 is the slice most likely to be judged on feel rather than correctness, which is where a visual judgement adds signal a DOM assertion cannot. The screen now exists — S-03 shipped 2026-08-25 — but the deferral stands on a different ground than before: it shipped its semantics in text rather than in styling (verified, see §7), so a DOM assertion settles what a visual judgement would. **When NOT to use:** on any screen whose correctness a DOM assertion already settles |
 
 **Stack grounding tools (current session):**
-- Docs: Context7 via the `ctx7` CLI — confirmed that `StaticLiveServerTestCase` is Django's native browser-test host and `assertNumQueries` its native query-count assertion, both usable from the existing runner with no pytest migration; checked: 2026-08-19
-- Search: Exa MCP available, not used — every tool question resolved against primary framework docs; checked: 2026-08-19
-- Runtime/browser: Claude-in-Chrome MCP available. Usable for one-off manual verification of a rendered screen; not proposed as the automated e2e layer, since it drives a real browser session rather than a CI-reproducible one; checked: 2026-08-19
-- Provider/platform: GitHub through the `gh` CLI and Railway through its CLI, neither exposed as an MCP. No Playwright MCP in this session; checked: 2026-08-19
+- Docs: Context7 via the `ctx7` CLI — confirmed that `StaticLiveServerTestCase` is Django's native browser-test host and `assertNumQueries` its native query-count assertion, both usable from the existing runner with no pytest migration; checked: 2026-08-29
+- Search: Exa MCP available, not used — every tool question resolved against primary framework docs; checked: 2026-08-29
+- Runtime/browser: Claude-in-Chrome MCP and Playwright MCP are both available (the previous entry recorded no Playwright MCP; that is corrected). Either is usable for one-off manual verification of a rendered screen. Neither is proposed as the automated e2e layer: both drive a live browser out of an agent session rather than a CI-reproducible one, so `StaticLiveServerTestCase` remains the Phase 4 recommendation; checked: 2026-08-29
+- Provider/platform: GitHub through the `gh` CLI and Railway through its CLI, neither exposed as an MCP; checked: 2026-08-29
 
 **Churn context (not used as likelihood evidence).** Over the 30 days to
-2026-08-19 the scoped history holds 69 commits. Source-directory churn:
-`households/views.py` 7, `registry/management/` 6, `domowa_apteka/settings.py` 6,
-`households/urls.py` 5, `registry/models.py` 3, `registry/migrations/` 3. Two
-caveats cap what this is worth: the newest surfaces (the pharmacy app and the
-suggestion module) show a single commit each because their pull request was
-squash-merged, so churn understates the least-exercised code in the product;
-and the hardest-churning directories are the test trees themselves, which is
-weak evidence for a product failure.
+2026-08-29 the scoped history holds 91 commits. Directory-level churn:
+`households` 23, `registry` 14, `pharmacy` 11 — plus 11 more in the pharmacy
+test tree and 7 in its templates — `domowa_apteka` 8, and `.github/workflows` 7;
+the pharmacy list template alone was touched 4 times. `pharmacy/` is therefore a
+genuine hot spot now, at roughly 32 file-touches across its subdirectories
+against 1 at the previous refresh, which retires that refresh's caveat that the
+newest surfaces landed as one flattened commit each and so looked untouched. One
+caveat still caps what this is worth: the hardest-churning directories remain
+the test trees themselves, which is weak evidence for a product failure.
 
 ## 5. Quality Gates
 
@@ -210,8 +227,14 @@ these unless the underlying assumption changes.
   the registry's format is stable. Re-evaluate if the registry changes its
   schema or its publication format. (Source: Phase 2 interview Q5.)
 - **Template styling and layout** — a broken layout is visible and cheap to
-  fix; a wrong substance is neither. Re-evaluate if the list screen starts
-  encoding meaning in styling, which S-03's duplicate flags may do.
+  fix; a wrong substance is neither. Re-checked 2026-08-29 against its own
+  trigger, which did not fire: S-03 shipped and did *not* start encoding
+  meaning in styling. Cluster kind, unresolved state, and shared substances are
+  each stated in words, and the duplicate styling is structural only — spacing,
+  borders, weight — with no colour-coded semantics, so no meaning is lost to a
+  DOM assertion and the existing tests already assert on that text.
+  Re-evaluate if a screen ever encodes a distinction that only a rendered view
+  can see.
 - **Wall-clock latency for the one-second acknowledgement requirement** —
   asserted through query shape instead. This project's own lessons register
   already records the difference between query shape and measured latency.
@@ -219,18 +242,26 @@ these unless the underlying assumption changes.
 - **Rate limiting and suggestion-endpoint flooding** — no such surface exists
   at household scale. Re-evaluate if the app is ever opened beyond invited
   members.
-- **Duplicate-flagging correctness** — S-03 is not built, so a risk row for it
-  would describe an implementation rather than a defect. Phase 2 protects the
-  substance-set inputs that S-03 will compare. Re-evaluate the moment S-03
-  ships. (Source: challenger pass, 2026-08-19.)
+- **Pixel-level visual-regression testing for the proposed S-06 (UX audit) and
+  S-07 (visual refresh) slices** — on two grounds. Appearance changes are cheap
+  to eyeball, and there is no baseline worth diffing against: S-07 exists
+  precisely to replace stock framework defaults, and S-06's own roadmap note
+  requires the audit be produced by driving the running app at phone width,
+  which is a human or agent judgement rather than a diff. The one appearance
+  deviation on record — the collapsed shared-substance summary wrapping to two
+  lines at 390px when three long partner names are present — was found exactly
+  that way, which is the argument for the cheaper method rather than against it.
+  Re-evaluate if either slice ships a screen whose correctness depends on
+  layout rather than on text. (Source: Phase 2 interview Q5; challenger pass,
+  2026-08-29.)
 - **PRD non-goals** — barcode and photo capture, the child role, native and
   offline support, and expiration alerting are all out of scope for v1.
 
 ## 8. Freshness Ledger
 
-- Strategy (§1–§5) last reviewed: 2026-08-19
-- Stack versions last verified: 2026-08-19
-- AI-native tool references last verified: 2026-08-19
+- Strategy (§1–§5) last reviewed: 2026-08-29
+- Stack versions last verified: 2026-08-29
+- AI-native tool references last verified: 2026-08-29
 
 Refresh (`/10x-test-plan --refresh`) when:
 
