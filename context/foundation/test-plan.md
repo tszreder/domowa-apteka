@@ -6,7 +6,7 @@
 >
 > Refresh: re-run `/10x-test-plan --refresh` when stale (see §8).
 >
-> Last updated: 2026-08-19
+> Last updated: 2026-08-29
 
 ## 1. Strategy
 
@@ -106,8 +106,8 @@ orchestrator updates Status as artifacts appear on disk.
 | 4 | Access boundaries and gate wiring | Prove ownership is checked per object and that invite artifacts stop working when intended, then wire the missing CI gates | #5, #6 | integration, falsification checks, gates | not started | — |
 | 5 | Duplicate relationship correctness | Prove group membership, shared-substance annotation, and display order are each derived from substance sets rather than from today's output — including one medicine overlapping several others at once | #7 | unit, integration, fan-out fixtures, falsification checks | not started | — |
 
-**Sequencing decision (2026-08-29).** Phases 1 and 2 run now. The 2026-08-19
-decision held phases 3 and 4 behind roadmap slice S-03
+**Sequencing decision (2026-08-29).** Phases 1 and 2 run now. The previous
+refresh held phases 3 and 4 behind roadmap slice S-03
 (`duplicate-flagging-on-list`), yielding the evenings before the PRD's
 2026-09-14 deadline to the product's payoff. S-03 shipped on 2026-08-25, so that
 condition is spent and no longer constrains the rollout. Phases 3, 4 and 5 are
@@ -137,14 +137,14 @@ date so future readers can see which lines need re-verification.
 | e2e | none yet — see Phase 4 | — | `StaticLiveServerTestCase` is Django's native host for a browser-driven test and needs no pytest migration |
 | lint + format | none yet — see Phase 4 | — | No ruff, black, or equivalent anywhere in the repo (verified by grep over `pyproject.toml` and the workflow) |
 | coverage measurement | none, and not planned | — | Line coverage is not the metric; the risk-to-test map from Phase 1 is (see §6.5) |
-| (optional) AI-native | agent-driven test-quality audit — checked: 2026-08-19 | n/a | An agent reads an assertion and judges whether it can fail, feeding Phase 1's falsification checks. **When NOT to use:** as a substitute for actually running the falsification — an agent's opinion that a test looks strong is not evidence that it goes red |
-| (rejected) AI-native | LLM-as-judge over resolved substance sets — checked: 2026-08-19 | n/a | Rejected on this product. The PRD's NFR requires substance identity to trace to the source registry row and never to be inferred; a model judging whether a resolution "looks right" supplies the oracle from a model instead of the registry. The deterministic comparison against the source row is both cheaper and the only correct one. **When NOT to use:** always, here |
+| (optional) AI-native | agent-driven test-quality audit — checked: 2026-08-29 | n/a | An agent reads an assertion and judges whether it can fail, feeding Phase 1's falsification checks. **When NOT to use:** as a substitute for actually running the falsification — an agent's opinion that a test looks strong is not evidence that it goes red |
+| (rejected) AI-native | LLM-as-judge over resolved substance sets — checked: 2026-08-29 | n/a | Rejected on this product. The PRD's NFR requires substance identity to trace to the source registry row and never to be inferred; a model judging whether a resolution "looks right" supplies the oracle from a model instead of the registry. The deterministic comparison against the source row is both cheaper and the only correct one. **When NOT to use:** always, here |
 | (deferred) AI-native | selective multimodal review of the household list screen — checked: 2026-08-29 | n/a | The roadmap notes S-03 is the slice most likely to be judged on feel rather than correctness, which is where a visual judgement adds signal a DOM assertion cannot. The screen now exists — S-03 shipped 2026-08-25 — but the deferral stands on a different ground than before: it shipped its semantics in text rather than in styling (verified, see §7), so a DOM assertion settles what a visual judgement would. **When NOT to use:** on any screen whose correctness a DOM assertion already settles |
 
 **Stack grounding tools (current session):**
 - Docs: Context7 via the `ctx7` CLI — confirmed that `StaticLiveServerTestCase` is Django's native browser-test host and `assertNumQueries` its native query-count assertion, both usable from the existing runner with no pytest migration; checked: 2026-08-29
 - Search: Exa MCP available, not used — every tool question resolved against primary framework docs; checked: 2026-08-29
-- Runtime/browser: Claude-in-Chrome MCP and Playwright MCP are both available (the 2026-08-19 entry recorded no Playwright MCP; that is corrected). Either is usable for one-off manual verification of a rendered screen. Neither is proposed as the automated e2e layer: both drive a live browser out of an agent session rather than a CI-reproducible one, so `StaticLiveServerTestCase` remains the Phase 4 recommendation; checked: 2026-08-29
+- Runtime/browser: Claude-in-Chrome MCP and Playwright MCP are both available (the previous entry recorded no Playwright MCP; that is corrected). Either is usable for one-off manual verification of a rendered screen. Neither is proposed as the automated e2e layer: both drive a live browser out of an agent session rather than a CI-reproducible one, so `StaticLiveServerTestCase` remains the Phase 4 recommendation; checked: 2026-08-29
 - Provider/platform: GitHub through the `gh` CLI and Railway through its CLI, neither exposed as an MCP; checked: 2026-08-29
 
 **Churn context (not used as likelihood evidence).** Over the 30 days to
@@ -153,7 +153,7 @@ date so future readers can see which lines need re-verification.
 test tree and 7 in its templates — `domowa_apteka` 8, and `.github/workflows` 7;
 the pharmacy list template alone was touched 4 times. `pharmacy/` is therefore a
 genuine hot spot now, at roughly 32 file-touches across its subdirectories
-against 1 at the previous refresh. That retires the 2026-08-19 caveat that the
+against 1 at the previous refresh, which retires that refresh's caveat that the
 newest surfaces landed as one flattened commit each and so looked untouched. One
 caveat still caps what this is worth: the hardest-churning directories remain
 the test trees themselves, which is weak evidence for a product failure.
@@ -227,8 +227,14 @@ these unless the underlying assumption changes.
   the registry's format is stable. Re-evaluate if the registry changes its
   schema or its publication format. (Source: Phase 2 interview Q5.)
 - **Template styling and layout** — a broken layout is visible and cheap to
-  fix; a wrong substance is neither. Re-evaluate if the list screen starts
-  encoding meaning in styling, which S-03's duplicate flags may do.
+  fix; a wrong substance is neither. Re-checked 2026-08-29 against its own
+  trigger, which did not fire: S-03 shipped and did *not* start encoding
+  meaning in styling. Cluster kind, unresolved state, and shared substances are
+  each stated in words, and the duplicate styling is structural only — spacing,
+  borders, weight — with no colour-coded semantics, so no meaning is lost to a
+  DOM assertion and the existing tests already assert on that text.
+  Re-evaluate if a screen ever encodes a distinction that only a rendered view
+  can see.
 - **Wall-clock latency for the one-second acknowledgement requirement** —
   asserted through query shape instead. This project's own lessons register
   already records the difference between query shape and measured latency.
@@ -236,18 +242,26 @@ these unless the underlying assumption changes.
 - **Rate limiting and suggestion-endpoint flooding** — no such surface exists
   at household scale. Re-evaluate if the app is ever opened beyond invited
   members.
-- **Duplicate-flagging correctness** — S-03 is not built, so a risk row for it
-  would describe an implementation rather than a defect. Phase 2 protects the
-  substance-set inputs that S-03 will compare. Re-evaluate the moment S-03
-  ships. (Source: challenger pass, 2026-08-19.)
+- **Pixel-level visual-regression testing for the proposed S-06 (UX audit) and
+  S-07 (visual refresh) slices** — on two grounds. Appearance changes are cheap
+  to eyeball, and there is no baseline worth diffing against: S-07 exists
+  precisely to replace stock framework defaults, and S-06's own roadmap note
+  requires the audit be produced by driving the running app at phone width,
+  which is a human or agent judgement rather than a diff. The one appearance
+  deviation on record — the collapsed shared-substance summary wrapping to two
+  lines at 390px when three long partner names are present — was found exactly
+  that way, which is the argument for the cheaper method rather than against it.
+  Re-evaluate if either slice ships a screen whose correctness depends on
+  layout rather than on text. (Source: Phase 2 interview Q5; challenger pass,
+  2026-08-29.)
 - **PRD non-goals** — barcode and photo capture, the child role, native and
   offline support, and expiration alerting are all out of scope for v1.
 
 ## 8. Freshness Ledger
 
-- Strategy (§1–§5) last reviewed: 2026-08-19
-- Stack versions last verified: 2026-08-19
-- AI-native tool references last verified: 2026-08-19
+- Strategy (§1–§5) last reviewed: 2026-08-29
+- Stack versions last verified: 2026-08-29
+- AI-native tool references last verified: 2026-08-29
 
 Refresh (`/10x-test-plan --refresh`) when:
 

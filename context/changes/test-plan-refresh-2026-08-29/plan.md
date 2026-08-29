@@ -569,14 +569,14 @@ after §3 Phase 4" markers and any external reference to phases 1–4 remain val
 
 #### Automated
 
-- [x] 2.1 The park condition is gone from §3
-- [x] 2.2 The Phase 4 invite-lifetime blocker survives
-- [x] 2.3 §3 table has a Phase 5 row whose Risks covered cell contains #7
-- [x] 2.4 The 14-modules / 150-methods counts are gone and 15 modules is present
-- [x] 2.5 The "No Playwright MCP" line is gone
-- [x] 2.6 No occurrence of squash-merge remains anywhere in the file
-- [x] 2.7 The 69-commit figure is gone and 91 commits is present
-- [x] 2.8 §4's test-data Notes cell mentions Phase 5
+- [x] 2.1 The park condition is gone from §3 — 0c2d12c
+- [x] 2.2 The Phase 4 invite-lifetime blocker survives — 0c2d12c
+- [x] 2.3 §3 table has a Phase 5 row whose Risks covered cell contains #7 — 0c2d12c
+- [x] 2.4 The 14-modules / 150-methods counts are gone and 15 modules is present — 0c2d12c
+- [x] 2.5 The "No Playwright MCP" line is gone — 0c2d12c
+- [x] 2.6 No occurrence of squash-merge remains anywhere in the file — 0c2d12c
+- [x] 2.7 The 69-commit figure is gone and 91 commits is present — 0c2d12c
+- [x] 2.8 §4's test-data Notes cell mentions Phase 5 — 0c2d12c
 
 #### Manual
 
@@ -588,15 +588,15 @@ after §3 Phase 4" markers and any external reference to phases 1–4 remain val
 
 #### Automated
 
-- [ ] 3.1 The "Duplicate-flagging correctness" exclusion is removed
-- [ ] 3.2 The "Template styling and layout" exclusion is retained
-- [ ] 3.3 The new S-06/S-07 exclusion is present and names the 390px wrap nuance
-- [ ] 3.4 No occurrence of 2026-08-19 remains in the file
-- [ ] 3.5 The header reads Last updated: 2026-08-29
-- [ ] 3.6 Every checked: date resolves to the single value 2026-08-29
-- [ ] 3.7 Suite green: uv run manage.py test reports Ran 178 tests OK
-- [ ] 3.8 Django system checks pass
-- [ ] 3.9 git diff --stat lists only paths under context/
+- [x] 3.1 The "Duplicate-flagging correctness" exclusion is removed
+- [x] 3.2 The "Template styling and layout" exclusion is retained
+- [x] 3.3 The new S-06/S-07 exclusion is present and names the 390px wrap nuance
+- [x] 3.4 No occurrence of 2026-08-19 remains in the file
+- [x] 3.5 The header reads Last updated: 2026-08-29
+- [x] 3.6 Every checked: date resolves to the single value 2026-08-29
+- [x] 3.7 Suite green: uv run manage.py test reports Ran 178 tests OK
+- [x] 3.8 Django system checks pass
+- [x] 3.9 git diff --stat lists only paths under context/
 
 #### Manual
 
