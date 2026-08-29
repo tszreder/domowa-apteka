@@ -561,9 +561,9 @@ after §3 Phase 4" markers and any external reference to phases 1–4 remain val
 
 #### Manual
 
-- [ ] 1.7 "Must challenge" reads as a genuine challenge grounded in the verified gap
-- [ ] 1.8 Risk #7's Source cell is traceable without opening any source file
-- [ ] 1.9 The challenger note reads as a live constraint, not as history
+- [x] 1.7 "Must challenge" reads as a genuine challenge grounded in the verified gap — 4111993
+- [x] 1.8 Risk #7's Source cell is traceable without opening any source file — 4111993
+- [x] 1.9 The challenger note reads as a live constraint, not as history — 4111993
 
 ### Phase 2: §3 rollout and §4 stack
 
@@ -580,27 +580,27 @@ after §3 Phase 4" markers and any external reference to phases 1–4 remain val
 
 #### Manual
 
-- [ ] 2.9 The Phase 5 goal line matches rows 1–4 in voice and grain
-- [ ] 2.10 The corrected Playwright line cannot be misread as an e2e endorsement
-- [ ] 2.11 The new churn paragraph stays consistent with §2's no-churn-for-likelihood rule
+- [x] 2.9 The Phase 5 goal line matches rows 1–4 in voice and grain — 0c2d12c
+- [x] 2.10 The corrected Playwright line cannot be misread as an e2e endorsement — 0c2d12c
+- [x] 2.11 The new churn paragraph stays consistent with §2's no-churn-for-likelihood rule — 0c2d12c
 
 ### Phase 3: §7 negative space, freshness stamps, and whole-document consistency
 
 #### Automated
 
-- [x] 3.1 The "Duplicate-flagging correctness" exclusion is removed
-- [x] 3.2 The "Template styling and layout" exclusion is retained
-- [x] 3.3 The new S-06/S-07 exclusion is present and names the 390px wrap nuance
-- [x] 3.4 No occurrence of 2026-08-19 remains in the file
-- [x] 3.5 The header reads Last updated: 2026-08-29
-- [x] 3.6 Every checked: date resolves to the single value 2026-08-29
-- [x] 3.7 Suite green: uv run manage.py test reports Ran 178 tests OK
-- [x] 3.8 Django system checks pass
-- [x] 3.9 git diff --stat lists only paths under context/
+- [x] 3.1 The "Duplicate-flagging correctness" exclusion is removed — 1df1cff
+- [x] 3.2 The "Template styling and layout" exclusion is retained — 1df1cff
+- [x] 3.3 The new S-06/S-07 exclusion is present and names the 390px wrap nuance — 1df1cff
+- [x] 3.4 No occurrence of 2026-08-19 remains in the file — 1df1cff
+- [x] 3.5 The header reads Last updated: 2026-08-29 — 1df1cff
+- [x] 3.6 Every checked: date resolves to the single value 2026-08-29 — 1df1cff
+- [x] 3.7 Suite green: uv run manage.py test reports Ran 178 tests OK — 1df1cff
+- [x] 3.8 Django system checks pass — 1df1cff
+- [x] 3.9 git diff --stat lists only paths under context/ — 1df1cff
 
 #### Manual
 
-- [ ] 3.10 The document reads end to end without a section contradicting another
-- [ ] 3.11 The retained styling exclusion reads as re-verified, not untouched
-- [ ] 3.12 The new exclusion would stop a contributor reaching for a visual-diff tool
-- [ ] 3.13 §7 no longer excludes anything §2 now claims as a risk
+- [x] 3.10 The document reads end to end without a section contradicting another — 1df1cff
+- [x] 3.11 The retained styling exclusion reads as re-verified, not untouched — 1df1cff
+- [x] 3.12 The new exclusion would stop a contributor reaching for a visual-diff tool — 1df1cff
+- [x] 3.13 §7 no longer excludes anything §2 now claims as a risk — 1df1cff
