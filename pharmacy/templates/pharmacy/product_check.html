@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load polish %}
+{% load polish static %}
 
 {% comment %}
     The licence this screen operates under: it states what is at home, and never
@@ -24,13 +24,16 @@
     {% endif %}
 
     {% comment %}
-        Same ids and role="listbox" markup as item_form.html so Phase 3's shared
-        module attaches to both screens without special-casing either. Inert
-        until then: this phase reaches the screen by URL.
+        Same ids and role="listbox" markup as item_form.html so the shared
+        module attaches to both screens without special-casing either. The
+        result URL rides on the input rather than being written out again in
+        JavaScript. The screen stays fully driveable by ?product= without any
+        of this.
     {% endcomment %}
     <label for="product-search">Nazwa leku</label>
     <input type="text" id="product-search" autocomplete="off"
-           placeholder="np. Apap, Xanax, Concor..." aria-describedby="suggestions">
+           placeholder="np. Apap, Xanax, Concor..." aria-describedby="suggestions"
+           data-result-url="{% url 'pharmacy:product_check' %}">
     <ul id="suggestions" class="suggestions" role="listbox" hidden></ul>
 
     {% if candidate %}
@@ -114,4 +117,12 @@
             qualifying again.
         {% endcomment %}
     {% endif %}
+
+    {% comment %}
+        Order matters and is the whole mechanism: both are deferred, and the
+        HTML spec executes deferred scripts in document order, so check.js can
+        rely on window.ProductSearch existing.
+    {% endcomment %}
+    <script src="{% static 'pharmacy/js/product-search.js' %}" defer></script>
+    <script src="{% static 'pharmacy/js/check.js' %}" defer></script>
 {% endblock %}

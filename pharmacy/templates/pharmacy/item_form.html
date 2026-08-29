@@ -30,5 +30,11 @@
         <button type="submit">Dodaj</button>
     </form>
 
+    {% comment %}
+        Order matters and is the whole mechanism: both are deferred, and the
+        HTML spec executes deferred scripts in document order, so
+        autocomplete.js can rely on window.ProductSearch existing.
+    {% endcomment %}
+    <script src="{% static 'pharmacy/js/product-search.js' %}" defer></script>
     <script src="{% static 'pharmacy/js/autocomplete.js' %}" defer></script>
 {% endblock %}

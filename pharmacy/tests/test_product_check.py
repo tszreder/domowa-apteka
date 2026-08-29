@@ -451,3 +451,48 @@ class ProductCheckQueryShapeTests(TestCase):
         # and 3 for the household (items+product via select_related, then
         # substance_links, then substances).
         self.assertEqual(small, 10)
+
+
+class ScriptOrderTests(TestCase):
+    """Both screens must load the shared module before their own script.
+
+    The only Phase 3 failure this project's test stack can observe. There is no
+    JS toolchain and no e2e layer, so nothing here proves the picker *works* —
+    what it does prove is that the two tags are present and correctly ordered.
+    Deferred scripts execute in document order, so a reversed pair leaves
+    `window.ProductSearch` undefined and the screen script throws on load, in
+    the browser, with nothing failing in CI.
+    """
+
+    def setUp(self) -> None:
+        self.household = Household.objects.create(name='Kowalscy')
+        self.member = User.objects.create_user(username='alice@example.com', password='pass12345')
+        Membership.objects.create(user=self.member, household=self.household)
+        self.client.force_login(self.member)
+
+    def _assert_module_precedes(self, url: str, screen_script: str) -> None:
+        body = self.client.get(url).content.decode()
+        module_at = body.find('pharmacy/js/product-search.js')
+        screen_at = body.find(screen_script)
+        self.assertNotEqual(module_at, -1, 'product-search.js is not loaded')
+        self.assertNotEqual(screen_at, -1, f'{screen_script} is not loaded')
+        self.assertLess(module_at, screen_at)
+
+    def test_check_screen_loads_the_module_before_check_js(self) -> None:
+        self._assert_module_precedes(
+            reverse('pharmacy:product_check'), 'pharmacy/js/check.js'
+        )
+
+    def test_add_screen_loads_the_module_before_autocomplete_js(self) -> None:
+        self._assert_module_precedes(
+            reverse('pharmacy:item_add'), 'pharmacy/js/autocomplete.js'
+        )
+
+    def test_check_screen_hands_its_result_url_to_the_search_input(self) -> None:
+        # check.js reads the route off the input rather than rebuilding "/check/"
+        # in JavaScript, so this attribute is what keeps one definition of it.
+        response = self.client.get(reverse('pharmacy:product_check'))
+
+        self.assertContains(
+            response, f'data-result-url="{reverse("pharmacy:product_check")}"'
+        )

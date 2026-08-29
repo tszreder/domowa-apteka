@@ -774,32 +774,32 @@ view, a form, a template, a pure function and three static files.
 
 #### Automated
 
-- [x] 2.1 New tests pass: `uv run manage.py test pharmacy.tests.test_product_check`
-- [x] 2.2 Full suite passes: `uv run manage.py test`
-- [x] 2.3 Type checking passes: `uv run mypy .`
-- [x] 2.4 Django system checks pass: `uv run manage.py check`
+- [x] 2.1 New tests pass: `uv run manage.py test pharmacy.tests.test_product_check` — a310c93
+- [x] 2.2 Full suite passes: `uv run manage.py test` — a310c93
+- [x] 2.3 Type checking passes: `uv run mypy .` — a310c93
+- [x] 2.4 Django system checks pass: `uv run manage.py check` — a310c93
 
 #### Manual
 
-- [x] 2.5 All four result states read correctly when reached by URL
-- [x] 2.6 Unresolved candidate the household does not hold refuses to compare rather than reporting no match
-- [x] 2.7 Unresolved candidate the household does hold is confirmed as already at home, with substitutes-not-checked beneath it
-- [x] 2.8 Every sentence states what is at home and never what to do about the prescription
-- [x] 2.9 Screen readable at ≈390 px viewport width
+- [x] 2.5 All four result states read correctly when reached by URL — a310c93
+- [x] 2.6 Unresolved candidate the household does not hold refuses to compare rather than reporting no match — a310c93
+- [x] 2.7 Unresolved candidate the household does hold is confirmed as already at home, with substitutes-not-checked beneath it — a310c93
+- [x] 2.8 Every sentence states what is at home and never what to do about the prescription — a310c93
+- [x] 2.9 Screen readable at ≈390 px viewport width — a310c93
 
 ### Phase 3: Shared product-search module
 
 #### Automated
 
-- [ ] 3.1 Script-order tests pass: `uv run manage.py test pharmacy.tests.test_product_check`
-- [ ] 3.2 Full suite passes: `uv run manage.py test`
-- [ ] 3.3 Type checking passes: `uv run mypy .`
-- [ ] 3.4 Django system checks pass: `uv run manage.py check`
-- [ ] 3.5 Static files collect without error: `uv run manage.py collectstatic --noinput`
+- [x] 3.1 Script-order tests pass: `uv run manage.py test pharmacy.tests.test_product_check`
+- [x] 3.2 Full suite passes: `uv run manage.py test`
+- [x] 3.3 Type checking passes: `uv run mypy .`
+- [x] 3.4 Django system checks pass: `uv run manage.py check`
+- [x] 3.5 Static files collect without error: `uv run manage.py collectstatic --noinput`
 
 #### Manual
 
-- [ ] 3.6 Add-flow regression sweep passes: suggestions, keyboard nav, producer step, selection clearing, save
-- [ ] 3.7 Add screen still shows the failure message on an expired session
-- [ ] 3.8 Check screen navigates to the result on pick
-- [ ] 3.9 Both flows verified at phone width
+- [x] 3.6 Add-flow regression sweep passes: suggestions, keyboard nav, producer step, selection clearing, save
+- [x] 3.7 Add screen still shows the failure message on an expired session
+- [x] 3.8 Check screen navigates to the result on pick
+- [x] 3.9 Both flows verified at phone width
