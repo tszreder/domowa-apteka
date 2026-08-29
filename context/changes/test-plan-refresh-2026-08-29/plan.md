@@ -552,12 +552,12 @@ after §3 Phase 4" markers and any external reference to phases 1–4 remain val
 
 #### Automated
 
-- [x] 1.1 Risk #7 row exists in §2 table with Impact High and Likelihood Medium
-- [x] 1.2 Risk Response Guidance has a #7 row with all six cells non-empty
-- [x] 1.3 No file path, anchor, function, or module name appears in the new §2 cells
-- [x] 1.4 The disproven "ad hoc" claim is absent from the document
-- [x] 1.5 The stale squash-merge clause is gone from §2
-- [x] 1.6 The §2 table has exactly 7 risk rows
+- [x] 1.1 Risk #7 row exists in §2 table with Impact High and Likelihood Medium — 4111993
+- [x] 1.2 Risk Response Guidance has a #7 row with all six cells non-empty — 4111993
+- [x] 1.3 No file path, anchor, function, or module name appears in the new §2 cells — 4111993
+- [x] 1.4 The disproven "ad hoc" claim is absent from the document — 4111993
+- [x] 1.5 The stale squash-merge clause is gone from §2 — 4111993
+- [x] 1.6 The §2 table has exactly 7 risk rows — 4111993
 
 #### Manual
 
@@ -569,14 +569,14 @@ after §3 Phase 4" markers and any external reference to phases 1–4 remain val
 
 #### Automated
 
-- [ ] 2.1 The park condition is gone from §3
-- [ ] 2.2 The Phase 4 invite-lifetime blocker survives
-- [ ] 2.3 §3 table has a Phase 5 row whose Risks covered cell contains #7
-- [ ] 2.4 The 14-modules / 150-methods counts are gone and 15 modules is present
-- [ ] 2.5 The "No Playwright MCP" line is gone
-- [ ] 2.6 No occurrence of squash-merge remains anywhere in the file
-- [ ] 2.7 The 69-commit figure is gone and 91 commits is present
-- [ ] 2.8 §4's test-data Notes cell mentions Phase 5
+- [x] 2.1 The park condition is gone from §3
+- [x] 2.2 The Phase 4 invite-lifetime blocker survives
+- [x] 2.3 §3 table has a Phase 5 row whose Risks covered cell contains #7
+- [x] 2.4 The 14-modules / 150-methods counts are gone and 15 modules is present
+- [x] 2.5 The "No Playwright MCP" line is gone
+- [x] 2.6 No occurrence of squash-merge remains anywhere in the file
+- [x] 2.7 The 69-commit figure is gone and 91 commits is present
+- [x] 2.8 §4's test-data Notes cell mentions Phase 5
 
 #### Manual
 

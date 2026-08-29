@@ -104,13 +104,16 @@ orchestrator updates Status as artifacts appear on disk.
 | 2 | Add-item integrity | Prove the chosen product is the saved product, that its substances match the source row, and that a resolution failure is visible — including one query-shape assertion for the one-second acknowledgement requirement | #1, #3, #4 | integration, unit, collision fixtures, query-count assertion | not started | — |
 | 3 | Ingestion and freshness without a deploy | Make the scheduled import path exercisable in-process, and prove a bad or stale snapshot is refused rather than served as current | #2 | integration, clock-injected assertions | not started | — |
 | 4 | Access boundaries and gate wiring | Prove ownership is checked per object and that invite artifacts stop working when intended, then wire the missing CI gates | #5, #6 | integration, falsification checks, gates | not started | — |
+| 5 | Duplicate relationship correctness | Prove group membership, shared-substance annotation, and display order are each derived from substance sets rather than from today's output — including one medicine overlapping several others at once | #7 | unit, integration, fan-out fixtures, falsification checks | not started | — |
 
-**Sequencing decision (2026-08-19).** Phases 1 and 2 run now. Phases 3 and 4
-are deliberately parked until roadmap slice S-03 (`duplicate-flagging-on-list`)
-ships. S-03 is a must-have (FR-003, US-03), is not built, and the PRD's hard
-deadline is 2026-09-14 under after-hours-only capacity — so the rollout yields
-the remaining evenings to the product's payoff after phase 2. Phases 3 and 4
-keep their rows and stay `not started`; re-run `/10x-test-plan` to resume them.
+**Sequencing decision (2026-08-29).** Phases 1 and 2 run now. The 2026-08-19
+decision held phases 3 and 4 behind roadmap slice S-03
+(`duplicate-flagging-on-list`), yielding the evenings before the PRD's
+2026-09-14 deadline to the product's payoff. S-03 shipped on 2026-08-25, so that
+condition is spent and no longer constrains the rollout. Phases 3, 4 and 5 are
+`not started` because nobody has started them — not because anything blocks
+them, with the single exception recorded immediately below. Re-run
+`/10x-test-plan` to pick up the next one.
 
 **Open decision blocking Phase 4.** The invite lifetime rule — whether links
 expire, whether they can be revoked, and on what condition — is unrecorded in
@@ -125,9 +128,9 @@ date so future readers can see which lines need re-verification.
 
 | Layer | Tool | Version | Notes |
 |---|---|---|---|
-| unit + integration | Django test runner (`manage.py test`) | Django 5.2.16 / Python 3.11.9 | 14 test modules, 150 test methods across the three apps. No pytest and no pytest-django — deliberately, the built-in runner covers every layer this plan needs |
-| typecheck | mypy + django-stubs | 2.3.0 | Wired in CI; scoped by `pyproject.toml` to the three app packages |
-| test data | XML fixtures under the registry app's test tree, plus in-test object creation | n/a | Collision fixtures for risk #1 do not exist yet — see Phase 2 |
+| unit + integration | Django test runner (`manage.py test`) | Django 5.2.16 / Python 3.11.9 | 15 test modules, 178 test methods across the three apps. No pytest and no pytest-django — deliberately, the built-in runner covers every layer this plan needs |
+| typecheck | mypy + django-stubs | mypy 2.3.0 / django-stubs 6.0.7 | Wired in CI; scoped by `pyproject.toml` to the three app packages |
+| test data | XML fixtures under the registry app's test tree, plus in-test object creation | n/a | Collision fixtures for risk #1 do not exist yet — see Phase 2. Fan-out fixtures for risk #7 — one substance drawing two or more partner products, and two distinct products sharing a display name — do not exist either; see Phase 5 |
 | query shape | `assertNumQueries` (Django built-in) | Django 5.2.16 | The chosen instrument for the one-second acknowledgement requirement — see §7 on why not wall-clock |
 | clock control | injected clock seam | n/a | Already established by the freshness work; reused rather than reinvented in Phase 3 |
 | HTTP boundary mocking | none yet — see Phase 3 | — | The registry download goes out over `requests`; the import path has no seam for a truncated or failed response yet |
@@ -136,23 +139,24 @@ date so future readers can see which lines need re-verification.
 | coverage measurement | none, and not planned | — | Line coverage is not the metric; the risk-to-test map from Phase 1 is (see §6.5) |
 | (optional) AI-native | agent-driven test-quality audit — checked: 2026-08-19 | n/a | An agent reads an assertion and judges whether it can fail, feeding Phase 1's falsification checks. **When NOT to use:** as a substitute for actually running the falsification — an agent's opinion that a test looks strong is not evidence that it goes red |
 | (rejected) AI-native | LLM-as-judge over resolved substance sets — checked: 2026-08-19 | n/a | Rejected on this product. The PRD's NFR requires substance identity to trace to the source registry row and never to be inferred; a model judging whether a resolution "looks right" supplies the oracle from a model instead of the registry. The deterministic comparison against the source row is both cheaper and the only correct one. **When NOT to use:** always, here |
-| (deferred) AI-native | selective multimodal review of the household list screen — checked: 2026-08-19 | n/a | The roadmap notes S-03 is the slice most likely to be judged on feel rather than correctness, which is where a visual judgement adds signal a DOM assertion cannot. Deferred because the screen does not exist yet. **When NOT to use:** on any screen whose correctness a DOM assertion already settles |
+| (deferred) AI-native | selective multimodal review of the household list screen — checked: 2026-08-29 | n/a | The roadmap notes S-03 is the slice most likely to be judged on feel rather than correctness, which is where a visual judgement adds signal a DOM assertion cannot. The screen now exists — S-03 shipped 2026-08-25 — but the deferral stands on a different ground than before: it shipped its semantics in text rather than in styling (verified, see §7), so a DOM assertion settles what a visual judgement would. **When NOT to use:** on any screen whose correctness a DOM assertion already settles |
 
 **Stack grounding tools (current session):**
-- Docs: Context7 via the `ctx7` CLI — confirmed that `StaticLiveServerTestCase` is Django's native browser-test host and `assertNumQueries` its native query-count assertion, both usable from the existing runner with no pytest migration; checked: 2026-08-19
-- Search: Exa MCP available, not used — every tool question resolved against primary framework docs; checked: 2026-08-19
-- Runtime/browser: Claude-in-Chrome MCP available. Usable for one-off manual verification of a rendered screen; not proposed as the automated e2e layer, since it drives a real browser session rather than a CI-reproducible one; checked: 2026-08-19
-- Provider/platform: GitHub through the `gh` CLI and Railway through its CLI, neither exposed as an MCP. No Playwright MCP in this session; checked: 2026-08-19
+- Docs: Context7 via the `ctx7` CLI — confirmed that `StaticLiveServerTestCase` is Django's native browser-test host and `assertNumQueries` its native query-count assertion, both usable from the existing runner with no pytest migration; checked: 2026-08-29
+- Search: Exa MCP available, not used — every tool question resolved against primary framework docs; checked: 2026-08-29
+- Runtime/browser: Claude-in-Chrome MCP and Playwright MCP are both available (the 2026-08-19 entry recorded no Playwright MCP; that is corrected). Either is usable for one-off manual verification of a rendered screen. Neither is proposed as the automated e2e layer: both drive a live browser out of an agent session rather than a CI-reproducible one, so `StaticLiveServerTestCase` remains the Phase 4 recommendation; checked: 2026-08-29
+- Provider/platform: GitHub through the `gh` CLI and Railway through its CLI, neither exposed as an MCP; checked: 2026-08-29
 
 **Churn context (not used as likelihood evidence).** Over the 30 days to
-2026-08-19 the scoped history holds 69 commits. Source-directory churn:
-`households/views.py` 7, `registry/management/` 6, `domowa_apteka/settings.py` 6,
-`households/urls.py` 5, `registry/models.py` 3, `registry/migrations/` 3. Two
-caveats cap what this is worth: the newest surfaces (the pharmacy app and the
-suggestion module) show a single commit each because their pull request was
-squash-merged, so churn understates the least-exercised code in the product;
-and the hardest-churning directories are the test trees themselves, which is
-weak evidence for a product failure.
+2026-08-29 the scoped history holds 91 commits. Directory-level churn:
+`households` 23, `registry` 14, `pharmacy` 11 — plus 11 more in the pharmacy
+test tree and 7 in its templates — `domowa_apteka` 8, and `.github/workflows` 7;
+the pharmacy list template alone was touched 4 times. `pharmacy/` is therefore a
+genuine hot spot now, at roughly 32 file-touches across its subdirectories
+against 1 at the previous refresh. That retires the 2026-08-19 caveat that the
+newest surfaces landed as one flattened commit each and so looked untouched. One
+caveat still caps what this is worth: the hardest-churning directories remain
+the test trees themselves, which is weak evidence for a product failure.
 
 ## 5. Quality Gates
 
