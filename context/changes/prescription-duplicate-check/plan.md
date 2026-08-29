@@ -791,15 +791,15 @@ view, a form, a template, a pure function and three static files.
 
 #### Automated
 
-- [x] 3.1 Script-order tests pass: `uv run manage.py test pharmacy.tests.test_product_check`
-- [x] 3.2 Full suite passes: `uv run manage.py test`
-- [x] 3.3 Type checking passes: `uv run mypy .`
-- [x] 3.4 Django system checks pass: `uv run manage.py check`
-- [x] 3.5 Static files collect without error: `uv run manage.py collectstatic --noinput`
+- [x] 3.1 Script-order tests pass: `uv run manage.py test pharmacy.tests.test_product_check` — 81d9235
+- [x] 3.2 Full suite passes: `uv run manage.py test` — 81d9235
+- [x] 3.3 Type checking passes: `uv run mypy .` — 81d9235
+- [x] 3.4 Django system checks pass: `uv run manage.py check` — 81d9235
+- [x] 3.5 Static files collect without error: `uv run manage.py collectstatic --noinput` — 81d9235
 
 #### Manual
 
-- [x] 3.6 Add-flow regression sweep passes: suggestions, keyboard nav, producer step, selection clearing, save
-- [x] 3.7 Add screen still shows the failure message on an expired session
-- [x] 3.8 Check screen navigates to the result on pick
-- [x] 3.9 Both flows verified at phone width
+- [x] 3.6 Add-flow regression sweep passes: suggestions, keyboard nav, producer step, selection clearing, save — 81d9235
+- [x] 3.7 Add screen still shows the failure message on an expired session — 81d9235
+- [x] 3.8 Check screen navigates to the result on pick — 81d9235
+- [x] 3.9 Both flows verified at phone width — 81d9235
