@@ -4,7 +4,10 @@
 
 {% block content %}
     <h1>{{ household.name }}</h1>
-    <p><a href="{% url 'pharmacy:item_add' %}" role="button">Dodaj lek</a></p>
+    <p>
+        <a href="{% url 'pharmacy:item_add' %}" role="button">Dodaj lek</a>
+        <a href="{% url 'pharmacy:product_check' %}">Sprawdź lek bez dodawania</a>
+    </p>
     {% if items %}
         {% comment %}
             `items` is non-empty but `groups` can still be: a household whose items

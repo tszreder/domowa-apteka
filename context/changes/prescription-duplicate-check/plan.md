@@ -426,6 +426,53 @@ property that distinguishes this screen from the add screen.
 - **Invalid-product message** — the form's error, rendered in the same
   `class="form-error"` shape `item_form.html` uses.
 
+  > **Amended 2026-08-30 during Phase 2, at the user's direction — what actually
+  > shipped.** Four changes to the contract above, all in the template only; no
+  > field of `CandidateCheck` or `CandidateMatch` was added, removed or renamed.
+  >
+  > 1. **Row labels are sentences, not noun phrases.** `SAME_PRODUCT` renders
+  >    *"Masz już N opakowań tego samego leku."*, `SAME_SUBSTANCES` *"Masz już lek
+  >    z tą samą substancją czynną."*, `SHARED_SUBSTANCE` *"Masz już lek, który ma
+  >    przynajmniej jedną wspólną substancję czynną."* The vocabulary still tracks
+  >    the household list's three relationships; the wording is fuller. `Zamienniki`
+  >    was deliberately not reused as a row label — neutral on a list screen, it
+  >    edges toward a substitution claim next to a prescription.
+  > 2. **A `SAME_PRODUCT` row repeats neither the product name nor a separate pack
+  >    count.** Both are redundant against the candidate heading directly above it,
+  >    and the count now sits inside the sentence. The other two kinds still name
+  >    their product and carry `Liczba opakowań: N` — knowing *which* other box is
+  >    the entire content of those rows.
+  > 3. **The candidate-substances line is suppressed when identity is the whole
+  >    answer**, via a new `CandidateCheck.only_same_product` property (true when
+  >    `matches` is non-empty and every match is `SAME_PRODUCT`). The line is the
+  >    presentation-level-picking mitigation, and it only earns its place while
+  >    there is a substance match for it to explain; nothing was decided by
+  >    substances when the answer came from a primary key. It still renders on a
+  >    no-match screen, and on a screen that shows both a same-product row and a
+  >    substitute.
+  > 4. **The uncomparable disclosure is not rendered at all.** The bullet above
+  >    describing when to show it is superseded. `uncomparable_count` is still
+  >    computed and still unit-tested in `test_duplicates.py`, so restoring the
+  >    line is a one-line template change.
+  >
+  > **What (4) costs, recorded rather than left implicit.** This was one of the two
+  > silent-guess traps named in Current State Analysis: a "nothing at home matches"
+  > verdict is now shown over a household the comparison only partly saw, with
+  > nothing on screen saying so. The decision was made on clutter grounds after
+  > seeing the line on every resolved screen in manual testing. If it is revisited,
+  > the narrower form — disclose only alongside the no-match statement, where it
+  > qualifies a verdict rather than decorating a match list — is where it earns its
+  > place. `ProductCheckUncomparableSuppressionTests` pins the removal so it stays
+  > a decision rather than something a later edit reintroduces by accident.
+  >
+  > **One consequence outside the template.** Putting a count inside a Polish
+  > sentence reintroduces the plural problem this plan's Critical Implementation
+  > Details dodged by mandating label-then-number phrasing. Polish takes three
+  > forms and `pluralize` gives two, so Phase 2 adds `pharmacy/templatetags/polish.py`
+  > with a `plural_pl` filter and `pharmacy/tests/test_polish_filters.py` covering
+  > the teens exception (12/13/14 take "many" despite ending in 2/3/4). The
+  > label-then-number rule still stands everywhere else on the screen.
+
 All copy is Polish. No sentence may recommend, discourage, or imply an action about the
 prescription.
 
@@ -713,32 +760,32 @@ view, a form, a template, a pure function and three static files.
 
 #### Automated
 
-- [x] 1.1 Unit tests pass: `uv run manage.py test pharmacy.tests.test_duplicates`
-- [x] 1.2 Full suite passes: `uv run manage.py test`
-- [x] 1.3 Type checking passes: `uv run mypy .`
-- [x] 1.4 Django system checks pass: `uv run manage.py check`
+- [x] 1.1 Unit tests pass: `uv run manage.py test pharmacy.tests.test_duplicates` — aaa4482
+- [x] 1.2 Full suite passes: `uv run manage.py test` — aaa4482
+- [x] 1.3 Type checking passes: `uv run mypy .` — aaa4482
+- [x] 1.4 Django system checks pass: `uv run manage.py check` — aaa4482
 
 #### Manual
 
-- [x] 1.5 Docstrings match the module's existing density — why, not what
-- [x] 1.6 `check_candidate` contains no direct set comparison; every relationship goes through `classify`
+- [x] 1.5 Docstrings match the module's existing density — why, not what — aaa4482
+- [x] 1.6 `check_candidate` contains no direct set comparison; every relationship goes through `classify` — aaa4482
 
 ### Phase 2: The check screen
 
 #### Automated
 
-- [ ] 2.1 New tests pass: `uv run manage.py test pharmacy.tests.test_product_check`
-- [ ] 2.2 Full suite passes: `uv run manage.py test`
-- [ ] 2.3 Type checking passes: `uv run mypy .`
-- [ ] 2.4 Django system checks pass: `uv run manage.py check`
+- [x] 2.1 New tests pass: `uv run manage.py test pharmacy.tests.test_product_check`
+- [x] 2.2 Full suite passes: `uv run manage.py test`
+- [x] 2.3 Type checking passes: `uv run mypy .`
+- [x] 2.4 Django system checks pass: `uv run manage.py check`
 
 #### Manual
 
-- [ ] 2.5 All four result states read correctly when reached by URL
-- [ ] 2.6 Unresolved candidate the household does not hold refuses to compare rather than reporting no match
-- [ ] 2.7 Unresolved candidate the household does hold is confirmed as already at home, with substitutes-not-checked beneath it
-- [ ] 2.8 Every sentence states what is at home and never what to do about the prescription
-- [ ] 2.9 Screen readable at ≈390 px viewport width
+- [x] 2.5 All four result states read correctly when reached by URL
+- [x] 2.6 Unresolved candidate the household does not hold refuses to compare rather than reporting no match
+- [x] 2.7 Unresolved candidate the household does hold is confirmed as already at home, with substitutes-not-checked beneath it
+- [x] 2.8 Every sentence states what is at home and never what to do about the prescription
+- [x] 2.9 Screen readable at ≈390 px viewport width
 
 ### Phase 3: Shared product-search module
 

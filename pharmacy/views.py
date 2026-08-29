@@ -9,10 +9,11 @@ from django.views.decorators.http import require_GET, require_POST
 
 from households.decorators import household_required
 from households.models import Household, Membership
+from registry.models import Product
 from registry.suggestions import search_presentations
 
-from .duplicates import build_list_view
-from .forms import ItemAddForm
+from .duplicates import CandidateCheck, build_list_view, check_candidate
+from .forms import ItemAddForm, ProductCheckForm
 from .models import Item
 
 
@@ -100,3 +101,45 @@ def item_delete(request: HttpRequest, pk: int) -> HttpResponse:
     item.delete()
     messages.success(request, f'Usunięto {item.product.name}.')
     return redirect(reverse('pharmacy:item_list'))
+
+
+@household_required
+@require_GET
+def product_check(request: HttpRequest) -> HttpResponse:
+    """Compare one candidate product against the household, writing nothing.
+
+    `require_GET` is the enforceable half of the promise the screen makes in
+    its own standing line: asking does not add anything to the list. There is
+    no `save()`, no `create()` and no `messages.*` call below, and a `POST`
+    is refused by the decorator rather than by convention.
+
+    A `?product=` id that is non-numeric, gone from the registry, or marked
+    inactive is a message, not a 404: the likeliest way to arrive at one is a
+    bookmark from before the last import, and a stale bookmark deserves a
+    sentence, not an error page.
+    """
+    household = _household_of(cast(User, request.user))
+    # Unbound when the parameter is absent, so an empty `/check/` is the
+    # search screen rather than a screen shouting about a missing field.
+    form = ProductCheckForm(request.GET) if 'product' in request.GET else None
+
+    candidate: Product | None = None
+    if form is not None and form.is_valid():
+        candidate = form.cleaned_data['product']
+
+    check: CandidateCheck | None = None
+    if candidate is not None:
+        # Same prefetch contract as `item_list`; `check_candidate` reads
+        # `product.substance_links` per item and would go N+1 without it.
+        check = check_candidate(
+            candidate,
+            Item.objects.filter(household=household)
+            .select_related('product')
+            .prefetch_related('product__substance_links__substance'),
+        )
+
+    return render(
+        request,
+        'pharmacy/product_check.html',
+        {'form': form, 'candidate': candidate, 'check': check},
+    )

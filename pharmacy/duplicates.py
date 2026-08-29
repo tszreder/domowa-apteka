@@ -264,6 +264,23 @@ class CandidateCheck:
     def resolved(self) -> bool:
         return bool(self.candidate_substances)
 
+    @property
+    def only_same_product(self) -> bool:
+        """Whether identity is the entire answer.
+
+        True when the household holds the candidate itself and nothing else
+        that shares its substances. The screen reads this to drop the line
+        naming the substances the comparison ran on: that line is the
+        transparency mitigation for picking at presentation level, and it
+        earns its place only while there is a *substance* match for it to
+        explain. Answering "you already have this exact product" was settled
+        by primary keys, so listing substances underneath it is noise.
+
+        False when `matches` is empty, so a no-match verdict still shows what
+        was searched for.
+        """
+        return bool(self.matches) and all(match.is_same_product for match in self.matches)
+
 
 def check_candidate(candidate: Product, items: Iterable[Item]) -> CandidateCheck:
     """Compare one candidate product against everything the household holds.
