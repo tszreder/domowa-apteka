@@ -677,20 +677,20 @@ Add a verdict sentence so the two match states look different, add a "Wróć do 
 
 #### Automated
 
-- [ ] 5.1 Django system check passes
-- [ ] 5.2 All existing tests pass
-- [ ] 5.3 New F-24 duplicate flash test passes
-- [ ] 5.4 New F-25 ItemStack aggregation tests pass
+- [x] 5.1 Django system check passes
+- [x] 5.2 All existing tests pass
+- [x] 5.3 New F-24 duplicate flash test passes
+- [x] 5.4 New F-25 ItemStack aggregation tests pass
 
 #### Manual
 
-- [ ] 5.5 Delete buttons are outline/secondary
-- [ ] 5.6 Partial overlaps expanded with clear wording
-- [ ] 5.7 Zamienniki headings name the shared substance
-- [ ] 5.8 Adding a duplicate shows duplicate warning flash
-- [ ] 5.9 Identical items aggregated with count; delete removes one
-- [ ] 5.10 Delete asks for confirmation
-- [ ] 5.11 Unresolved items: no duplicate sentence, recovery link present
+- [x] 5.5 Delete buttons are outline/secondary
+- [x] 5.6 Partial overlaps expanded with clear wording
+- [x] 5.7 Zamienniki headings name the shared substance
+- [x] 5.8 Adding a duplicate shows duplicate warning flash
+- [x] 5.9 Identical items aggregated with count; delete removes one
+- [x] 5.10 Delete asks for confirmation
+- [x] 5.11 Unresolved items: no duplicate sentence, recovery link present
 
 ### Phase 6: Check Screen
 

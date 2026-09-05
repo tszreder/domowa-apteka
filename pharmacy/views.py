@@ -85,6 +85,19 @@ def item_add(request: HttpRequest) -> HttpResponse:
                     f'Dodano {item.product.name}, ale nie udało się ustalić jego '
                     'substancji czynnej na podstawie rejestru.',
                 )
+            other_items = (
+                Item.objects.filter(household=household)
+                .exclude(pk=item.pk)
+                .select_related('product')
+                .prefetch_related('product__substance_links__substance')
+            )
+            check = check_candidate(item.product, other_items)
+            if check.matches:
+                matched_names = [m.product.name for m in check.matches]
+                messages.warning(
+                    request,
+                    f'Uwaga: masz już lek z tą samą substancją czynną ({", ".join(matched_names)}).',
+                )
             return redirect(reverse('pharmacy:item_list'))
     else:
         form = ItemAddForm()

@@ -5,7 +5,6 @@ described in the plan's "Critical Implementation Details": a regression to
 N+1 must fail CI, not be noticed in production.
 """
 
-import re
 from datetime import date, timedelta
 
 from django.contrib.auth.models import User
@@ -162,19 +161,9 @@ class ItemListRenderingTests(TestCase):
         content = response.content.decode()
 
         self.assertContains(response, 'class="partial-overlap-badge"', count=3)
-        summaries = re.findall(r'Wspólna substancja: ([^<]*)</summary>', content)
-        self.assertEqual(len(summaries), 3)
-        # The combo's summary names both singles. Their relative order comes
-        # from group order (added_at), not from set iteration; the substance
-        # ordering the badge itself controls is pinned in
-        # BuildListViewTests.test_shared_substances_are_ordered_alphabetically_not_by_set_iteration.
-        combo_summary = next(s for s in summaries if 'Apap Extra' in s and 'Sudafeed' in s)
-        self.assertIn('Apap Extra', combo_summary)
-        self.assertIn('Sudafeed', combo_summary)
+        self.assertContains(response, 'Częściowo wspólne substancje z innymi lekami', count=3)
         self.assertIn('Paracetamol: Apap Extra', content)
         self.assertIn('Pseudoefedryna: Sudafeed', content)
-        # each single shows only the combo as its partner
-        self.assertEqual(summaries.count('ManualTest Combo'), 2)
 
     def test_adding_to_an_older_cluster_moves_it_above_a_newer_single(self) -> None:
         """Pins the plan's ordering rule: a cluster sits at its newest member's `added_at`.

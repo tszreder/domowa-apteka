@@ -65,16 +65,15 @@ def classify(a: frozenset[str], b: frozenset[str]) -> Overlap:
 
 
 @dataclass(frozen=True)
+class ItemStack:
+    product: Product
+    representative: Item
+    count: int
+    producer_confirmed: bool
+
+
+@dataclass(frozen=True)
 class DuplicateGroup:
-    """One row the list renders: a full-duplicate cluster, or a single item.
-
-    `same_product` only means something when `is_cluster` is true — it is
-    the answer to "same-product repeat, or true zamienniki (different
-    products, same substances)". `partners` maps a shared substance's
-    display name to the product names it was matched against, for items in
-    *other* groups whose sets partially overlap this one's.
-    """
-
     items: list[Item]
     same_product: bool
     partners: dict[str, list[str]]
@@ -84,8 +83,35 @@ class DuplicateGroup:
         return len(self.items) > 1
 
     @property
+    def stacks(self) -> list['ItemStack']:
+        by_product: dict[int, list[Item]] = {}
+        order: list[int] = []
+        for item in self.items:
+            if item.product_id not in by_product:
+                by_product[item.product_id] = []
+                order.append(item.product_id)
+            by_product[item.product_id].append(item)
+        return [
+            ItemStack(
+                product=by_product[pid][0].product,
+                representative=by_product[pid][0],
+                count=len(by_product[pid]),
+                producer_confirmed=by_product[pid][0].producer_confirmed,
+            )
+            for pid in order
+        ]
+
+    @property
+    def substance_names(self) -> list[str]:
+        if not self.items:
+            return []
+        return [
+            link.substance.name
+            for link in self.items[0].product.substance_links.all()
+        ]
+
+    @property
     def partner_names(self) -> list[str]:
-        """Deduplicated, order-preserving union of partner labels across all shared substances."""
         names: list[str] = []
         for labels in self.partners.values():
             for label in labels:

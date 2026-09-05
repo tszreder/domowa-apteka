@@ -94,6 +94,24 @@ class ItemAddTests(TestCase):
             response.context['form'], 'product', 'Wybierz lek z listy podpowiedzi.'
         )
 
+    def test_adding_duplicate_shows_warning_flash(self) -> None:
+        para = Substance.objects.create(name='Paracetamol', name_key='paracetamol')
+        product = make_product('1', name='Apap')
+        ProductSubstance.objects.create(
+            product=product, substance=para,
+            source_field=SourceField.SUBSTANCE_ROW, source_order=0,
+        )
+        Item.objects.create(household=self.household, product=product)
+
+        response = self.client.post(
+            reverse('pharmacy:item_add'),
+            {'product': product.id, 'producer_confirmed': 'true'},
+            follow=True,
+        )
+
+        msgs = [str(m) for m in response.context['messages']]
+        self.assertTrue(any('Uwaga' in m for m in msgs))
+
     def test_unresolved_product_still_creates_item_and_warns(self) -> None:
         product = make_product('1', name='Peditrace')
 

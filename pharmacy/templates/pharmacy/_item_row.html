@@ -1,19 +1,40 @@
-<strong>{{ item.product.name }}</strong>
-{% if item.product.strength %}— {{ item.product.strength }}{% endif %}
-{% if item.product.pharmaceutical_form %}— {{ item.product.pharmaceutical_form }}{% endif %}
-{% if item.producer_confirmed %}
-    <br><small>{{ item.product.marketing_holder }}</small>
-{% endif %}
-{% if item.unresolved %}
-    <br><mark>Nie udało się ustalić substancji czynnej.</mark>
-{% else %}
+{% if stack %}
+    <strong>{{ stack.product.name }}</strong>
+    {% if stack.product.strength %}— {{ stack.product.strength }}{% endif %}
+    {% if stack.product.pharmaceutical_form %}— {{ stack.product.pharmaceutical_form }}{% endif %}
+    {% if stack.count > 1 %} <strong>×{{ stack.count }}</strong>{% endif %}
+    {% if stack.producer_confirmed %}
+        <br><small>{{ stack.product.marketing_holder }}</small>
+    {% endif %}
     <br>
-    {% for link in item.product.substance_links.all %}
+    {% for link in stack.product.substance_links.all %}
         {{ link.substance.name }}{% if not forloop.last %}, {% endif %}
     {% endfor %}
+    <br>
+    <form method="post" action="{% url 'pharmacy:item_delete' stack.representative.pk %}">
+        {% csrf_token %}
+        <button type="submit" class="secondary outline" onclick="return confirm('Usunąć {{ stack.product.name }}?')">Usuń</button>
+    </form>
+{% else %}
+    <strong>{{ item.product.name }}</strong>
+    {% if item.product.strength %}— {{ item.product.strength }}{% endif %}
+    {% if item.product.pharmaceutical_form %}— {{ item.product.pharmaceutical_form }}{% endif %}
+    {% if item.producer_confirmed %}
+        <br><small>{{ item.product.marketing_holder }}</small>
+    {% endif %}
+    {% if item.unresolved %}
+    {% else %}
+        <br>
+        {% for link in item.product.substance_links.all %}
+            {{ link.substance.name }}{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+    {% endif %}
+    <br>
+    <form method="post" action="{% url 'pharmacy:item_delete' item.pk %}">
+        {% csrf_token %}
+        <button type="submit" class="secondary outline" onclick="return confirm('Usunąć {{ item.product.name }}?')">Usuń</button>
+    </form>
+    {% if item.unresolved %}
+        <a href="{% url 'pharmacy:item_add' %}">Dodaj ponownie</a>
+    {% endif %}
 {% endif %}
-<br>
-<form method="post" action="{% url 'pharmacy:item_delete' item.pk %}">
-    {% csrf_token %}
-    <button type="submit">Usuń</button>
-</form>

@@ -1,6 +1,6 @@
 {% if group.partners %}
-    <details class="partial-overlap-badge">
-        <summary>Wspólna substancja: {{ group.partner_names|join:", " }}</summary>
+    <details open class="partial-overlap-badge">
+        <summary>Częściowo wspólne substancje z innymi lekami</summary>
         <ul class="partial-overlap-detail">
             {% for substance_name, partner_names in group.partners.items %}
                 <li>{{ substance_name }}: {{ partner_names|join:", " }}</li>
