@@ -1,15 +1,16 @@
 """Duplicate-relationship rule for household items, keyed on substance sets.
 
 Deliberately set-keyed (`frozenset[str]` in, `Overlap` out) rather than
-item-paired. The planned prescription-check slice compares a candidate
-registry `Product` the household does not own against household items; that
-candidate has no `Item` to pair against, so the rule deciding "are these
-duplicates" must not assume an `Item` exists on either side. A convenience
+item-paired. The prescription-check slice — `check_candidate` below — compares
+a candidate registry `Product` the household does not own against household
+items; that candidate has no `Item` to pair against, so the rule deciding "are
+these duplicates" must not assume an `Item` exists on either side. A convenience
 `classify(item_a, item_b)` would look natural here and would be wrong — it
 would force that slice to reimplement this rule against a bare `Product`,
 which is how two subtly different answers to "are these duplicates?" end up
-shipping in one app. `build_list_view` is the only function below allowed to
-know `Item` exists; `substance_keys` and `classify` never do.
+shipping in one app. `build_list_view` and `check_candidate` are the only
+functions below allowed to know `Item` exists; `substance_keys` and `classify`
+never do.
 
 Mirrors `registry/suggestions.py`'s shape: pure query/grouping functions, no
 HTTP attached, so the rules that decide whether this slice is correct are
@@ -173,3 +174,196 @@ def build_list_view(items: Iterable[Item]) -> ItemListView:
         for key in order
     ]
     return ItemListView(groups=groups, unresolved=unresolved)
+
+
+class MatchKind(Enum):
+    """How one household product relates to the candidate being checked.
+
+    `classify`'s `FULL` is split in two here, because to someone holding a
+    prescription the two halves are different facts: "you already have this
+    exact box" and "you have a different brand of the same thing" lead to
+    different sentences on the screen and different questions for the doctor.
+    Collapsing them would make the check say less than it knows.
+    """
+
+    SAME_PRODUCT = auto()
+    SAME_SUBSTANCES = auto()
+    SHARED_SUBSTANCE = auto()
+
+
+# Strongest first. Written out rather than read off `auto()`'s values: display
+# order is a product decision about which answer the user needs first, and it
+# must not change silently because someone reordered the enum members.
+_MATCH_ORDER = (MatchKind.SAME_PRODUCT, MatchKind.SAME_SUBSTANCES, MatchKind.SHARED_SUBSTANCE)
+
+
+@dataclass(frozen=True)
+class CandidateMatch:
+    """One household product the candidate matched, and what its row needs.
+
+    `items` is every box of that product the household holds, in caller order.
+    A list rather than a bare count because it is the seam `S-04` reads expiry
+    dates off when that slice lands, with no change to this signature;
+    `pack_count` derives from it so there is never a second source of truth
+    about how many boxes are at home.
+
+    `shared` is only meaningful for `SHARED_SUBSTANCE`. The other two kinds
+    leave it empty: their substance sets are identical to the candidate's by
+    definition, so naming them would only list the candidate's own substances
+    back at the reader.
+    """
+
+    product: Product
+    kind: MatchKind
+    shared: list[str]
+    items: list[Item]
+
+    @property
+    def pack_count(self) -> int:
+        return len(self.items)
+
+    # The enum is what tests assert on; these exist so the template needs no
+    # enum in its context, the same way `DuplicateGroup.same_product` already
+    # serves `item_list.html`.
+    @property
+    def is_same_product(self) -> bool:
+        return self.kind is MatchKind.SAME_PRODUCT
+
+    @property
+    def is_same_substances(self) -> bool:
+        return self.kind is MatchKind.SAME_SUBSTANCES
+
+    @property
+    def is_shared_substance(self) -> bool:
+        return self.kind is MatchKind.SHARED_SUBSTANCE
+
+
+@dataclass(frozen=True)
+class CandidateCheck:
+    """Render-ready answer to "does the household already hold this?".
+
+    `candidate_substances` is what the comparison actually ran on, carried so
+    the screen can show it rather than assert it. The check picks at
+    presentation level with no producer step, and `registry/suggestions.py`
+    records that 1.24% of presentation groups contain rows that disagree on
+    substances — disclosure is the mitigation for that, not a second question
+    to the user.
+
+    `resolved` being false is a refusal, not a "no" — see `check_candidate`.
+    `uncomparable_count` carries the same obligation for the other side of the
+    comparison: a household holding items whose own substances never resolved
+    makes "nothing at home matches" overstate what we know, so the count
+    travels with the verdict instead of being dropped on the floor.
+    """
+
+    candidate_substances: list[str]
+    matches: list[CandidateMatch]
+    uncomparable_count: int
+
+    @property
+    def resolved(self) -> bool:
+        return bool(self.candidate_substances)
+
+    @property
+    def only_same_product(self) -> bool:
+        """Whether identity is the entire answer.
+
+        True when the household holds the candidate itself and nothing else
+        that shares its substances. The screen reads this to drop the line
+        naming the substances the comparison ran on: that line is the
+        transparency mitigation for picking at presentation level, and it
+        earns its place only while there is a *substance* match for it to
+        explain. Answering "you already have this exact product" was settled
+        by primary keys, so listing substances underneath it is noise.
+
+        False when `matches` is empty, so a no-match verdict still shows what
+        was searched for.
+        """
+        return bool(self.matches) and all(match.is_same_product for match in self.matches)
+
+
+def check_candidate(candidate: Product, items: Iterable[Item]) -> CandidateCheck:
+    """Compare one candidate product against everything the household holds.
+
+    `items` must arrive prefetched exactly as `build_list_view` requires, and
+    `candidate` with `substance_links__substance`; every read below goes
+    through `.all()`, so the caller's prefetch is honoured and nothing issues a
+    query per item.
+
+    Identity is settled by `item.product_id == candidate.pk` — before, and
+    independently of, any substance comparison. That is the point: a primary
+    key the registry itself assigned is stronger evidence than a substance set
+    we derived from it, and it still holds when that derivation failed on
+    either side. So a candidate whose substances we could not establish is not
+    a total refusal; it can still answer "you already have exactly this at
+    home" and refuse only the substitute question, which is the part genuinely
+    unanswerable. Suppressing a known fact because a weaker one is missing is
+    its own kind of wrong answer.
+
+    Every *other* relationship goes through `classify`. No set is compared
+    directly here: the reason this module is set-keyed at all is so one answer
+    to "are these duplicates?" ships, not two that drift apart.
+    """
+    candidate_keys = substance_keys(candidate)
+    # Display names for the keys `substance_keys` collapsed. `name_key` is
+    # unique, so this cannot disagree with itself about a substance's spelling.
+    candidate_names = {
+        link.substance.name_key: link.substance.name for link in candidate.substance_links.all()
+    }
+
+    order: list[int] = []
+    members_by_product: dict[int, list[Item]] = {}
+    for item in items:
+        if item.product_id not in members_by_product:
+            members_by_product[item.product_id] = []
+            order.append(item.product_id)
+        members_by_product[item.product_id].append(item)
+
+    matches: list[CandidateMatch] = []
+    uncomparable_count = 0
+    for product_id in order:
+        members = members_by_product[product_id]
+        keys = substance_keys(members[0].product)
+        # Counted per box, not per product, and counted whether or not the
+        # candidate resolved: this is "how much of the household did the
+        # substance comparison not see", which the screen owes the user next to
+        # any verdict. An item that is the candidate's own product is counted
+        # here too when it is unresolved — it did not take part in a substance
+        # comparison either; it matched on identity.
+        if not keys:
+            uncomparable_count += len(members)
+
+        shared: list[str] = []
+        if product_id == candidate.pk:
+            kind = MatchKind.SAME_PRODUCT
+        else:
+            overlap = classify(candidate_keys, keys)
+            if overlap is Overlap.NONE:
+                continue
+            if overlap is Overlap.FULL:
+                kind = MatchKind.SAME_SUBSTANCES
+            else:
+                kind = MatchKind.SHARED_SUBSTANCE
+                # Sorted, not raw set iteration: `frozenset[str]` iterates in
+                # string-hash order, which Python randomises per process, so
+                # the same row would name its shared substances in a different
+                # order on the next reload, or from a second worker.
+                shared = sorted(candidate_names[key] for key in candidate_keys & keys)
+
+        matches.append(
+            CandidateMatch(
+                product=members[0].product,
+                kind=kind,
+                shared=shared,
+                items=members,
+            )
+        )
+
+    # Stable, so `Item.Meta.ordering` (`-added_at`) survives inside each tier
+    # for free — the same property `build_list_view` relies on.
+    matches.sort(key=lambda match: _MATCH_ORDER.index(match.kind))
+    return CandidateCheck(
+        candidate_substances=sorted(candidate_names.values()),
+        matches=matches,
+        uncomparable_count=uncomparable_count,
+    )

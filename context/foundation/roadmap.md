@@ -47,7 +47,7 @@ reality, and every other slice is downstream of it.
 | S-02 | `add-drug-with-substance-resolution` | add a pharmaceutical by name with registry-backed autocomplete, see its resolved active substance(s) — or a clear lookup-failure message — and have the item appear on the shared household list | F-01, S-01    | FR-001, FR-002, US-01        | done |
 | S-03 | `duplicate-flagging-on-list`       | see household list items flagged as full duplicates (identical substance sets) and partial duplicates (overlapping but not identical) | S-02          | FR-003, US-03                | done |
 | S-04 | `expiration-date-per-item`         | optionally record an expiration date when adding or editing an item                         | S-02          | FR-004                       | parked   |
-| S-05 | `prescription-duplicate-check`      | check a product they are about to buy against the household list **without adding it**, and see whether something already at home is a full or partial substance match | S-03          | FR-003, §Business Logic (see Q4) | proposed |
+| S-05 | `prescription-duplicate-check`      | check a product they are about to buy against the household list **without adding it**, and see whether something already at home is a full or partial substance match | S-03          | FR-003, §Business Logic (see Q4) | in-progress |
 | S-06 | `ux-audit-and-flow-fixes`           | reach every core action in fewer, clearer steps, on a layout criticised by walking the running app as a user rather than reading its templates as its author | S-03          | US-01, US-03, NFR (mobile web, 1 s ack) | proposed |
 | S-07 | `visual-refresh`                    | read the app as a finished product — one deliberate type, colour, spacing and state vocabulary in place of stock Pico defaults | S-06          | NFR (mobile web)             | proposed |
 
@@ -182,7 +182,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
   - Is the check purely transient, or does it leave a trace ("checked 2026-09-02, bought anyway")? Anything durable turns a read-only screen into a write and pulls in a model change; transient keeps the slice at one view and one template. — Owner: user. Block: no.
   - Where is the entry point — its own screen, or a field at the top of the existing list? `S-06`'s audit will have an opinion about this too, so whichever slice lands second should defer to the first. — Owner: user. Block: no.
 - **Risk:** Cheap by construction, and that was on purpose: `pharmacy/duplicates.py` was written set-keyed (`classify(a: frozenset[str], b: frozenset[str])`) rather than closed over a list of `Item`s, specifically so a candidate product that is not an item could be compared through the same rule. So the comparison is not where the risk lives. The framing is. A screen that says "you already have this" sits one wording away from saying "so you do not need that prescription" — a substitution claim the app is not licensed to make, and one the household will make anyway on the strength of the flag. The NFR that bans guessing applies to the sentence on the screen, not only to the data behind it. Scope is a substance-set fact, presented as a fact, next to the doctor rather than instead of them.
-- **Status:** proposed
+- **Status:** in-progress
 
 ### S-06: UX audit and the flow fixes it earns
 

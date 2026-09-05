@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% load polish static %}
+
+{% comment %}
+    The licence this screen operates under: it states what is at home, and never
+    what that means for the prescription. No sentence below recommends,
+    discourages, or implies an action — the doctor decides, and the screen is
+    read standing next to them.
+
+    Counts appear two ways. Inside a sentence they go through `plural_pl`,
+    because Polish has three plural forms and Django's `pluralize` handles two;
+    everywhere else they are a label followed by a number, which agrees for
+    every value and needs no rule.
+{% endcomment %}
+
+{% block title %}Sprawdź lek — Domowa Apteka{% endblock %}
+
+{% block content %}
+    <h1>Sprawdź lek</h1>
+    <p>Sprawdzenie niczego nie dodaje do listy leków.</p>
+
+    {% if form.product.errors %}
+        <p class="form-error">{{ form.product.errors|join:" " }}</p>
+    {% endif %}
+
+    {% comment %}
+        Same ids and role="listbox" markup as item_form.html so the shared
+        module attaches to both screens without special-casing either. The
+        result URL rides on the input rather than being written out again in
+        JavaScript. The screen stays fully driveable by ?product= without any
+        of this.
+    {% endcomment %}
+    <label for="product-search">Nazwa leku</label>
+    <input type="text" id="product-search" autocomplete="off"
+           placeholder="np. Apap, Xanax, Concor..." aria-describedby="suggestions"
+           data-result-url="{% url 'pharmacy:product_check' %}">
+    <ul id="suggestions" class="suggestions" role="listbox" hidden></ul>
+
+    {% if candidate %}
+        <section class="check-candidate">
+            <h2>{{ candidate.name }}{% if candidate.strength %} — {{ candidate.strength }}{% endif %}{% if candidate.pharmaceutical_form %} — {{ candidate.pharmaceutical_form }}{% endif %}</h2>
+            {% comment %}
+                Naming the substances the comparison used is the mitigation for
+                picking at presentation level: in the 1.24% of presentations
+                whose rows disagree on substances, the user can see what was
+                compared rather than having to trust it. Dropped when identity
+                is the whole answer — nothing was decided by substances there,
+                so the line would explain a comparison that did not happen.
+            {% endcomment %}
+            {% if check.candidate_substances and not check.only_same_product %}
+                <p>Porównano według substancji czynnych: {{ check.candidate_substances|join:", " }}.</p>
+            {% endif %}
+        </section>
+
+        {% comment %}
+            The match list comes before any refusal: when the candidate did not
+            resolve but the household holds it, the confirmation is the answer
+            and the limitation only qualifies it.
+
+            A same-product row repeats neither the name nor the strength — both
+            sit in the heading directly above it, and the only new fact it
+            carries is how many boxes are at home. The other two kinds must name
+            their product: the whole point is which *other* box it is.
+        {% endcomment %}
+        {% if check.matches %}
+            <ul class="check-matches">
+                {% for match in check.matches %}
+                    <li>
+                        {% if match.is_same_product %}
+                            <p class="check-match-label">Masz już {{ match.pack_count }} {{ match.pack_count|plural_pl:"opakowanie,opakowania,opakowań" }} tego samego leku.</p>
+                        {% else %}
+                            <p class="check-match-label">
+                                {% if match.is_same_substances %}
+                                    Masz już lek z tą samą substancją czynną.
+                                {% else %}
+                                    Masz już lek, który ma przynajmniej jedną wspólną substancję czynną.
+                                {% endif %}
+                            </p>
+                            <strong>{{ match.product.name }}</strong>
+                            {% if match.product.strength %}— {{ match.product.strength }}{% endif %}
+                            {% if match.product.pharmaceutical_form %}— {{ match.product.pharmaceutical_form }}{% endif %}
+                            <br>Liczba opakowań: {{ match.pack_count }}
+                            {% if match.shared %}
+                                <br>Wspólne substancje: {{ match.shared|join:", " }}
+                            {% endif %}
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        {% comment %}
+            Three mutually exclusive closing statements. The two refusals differ
+            by whether the household holds the product itself: identity is
+            answered from primary keys and survives a failed substance lookup, so
+            an unresolved candidate is only ever refused the substitute question.
+            The total refusal renders instead of a result list, never above an
+            empty one and never beside the no-match statement.
+        {% endcomment %}
+        {% if not check.resolved %}
+            {% if check.matches %}
+                <p class="check-refusal">Nie udało się ustalić substancji czynnej tego produktu, więc nie sprawdziliśmy, czy w domu są jego zamienniki.</p>
+            {% else %}
+                <p class="check-refusal">Nie udało się ustalić substancji czynnej tego produktu, więc nie można go porównać z lekami w domu.</p>
+            {% endif %}
+        {% elif not check.matches %}
+            <p>Żaden lek w domu nie zawiera tych substancji czynnych.</p>
+        {% endif %}
+
+        {% comment %}
+            `check.uncomparable_count` is deliberately not rendered. It counted
+            household boxes whose own substances never resolved, disclosing that
+            a "nothing matches" verdict was computed over a household the
+            comparison only partly saw. Removed as clutter on 2026-08-30 at the
+            user's direction; the count is still computed and unit-tested, so
+            restoring the line is a one-line change if the verdict ever needs
+            qualifying again.
+        {% endcomment %}
+    {% endif %}
+
+    {% comment %}
+        Order matters and is the whole mechanism: both are deferred, and the
+        HTML spec executes deferred scripts in document order, so check.js can
+        rely on window.ProductSearch existing.
+    {% endcomment %}
+    <script src="{% static 'pharmacy/js/product-search.js' %}" defer></script>
+    <script src="{% static 'pharmacy/js/check.js' %}" defer></script>
+{% endblock %}

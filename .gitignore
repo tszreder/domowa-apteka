@@ -33,6 +33,9 @@ local_settings.py
 !.claude/settings.json
 !.claude/hooks/
 
+# Browser automation output (console logs, page snapshots)
+.playwright-mcp/
+
 # OS / editor
 .DS_Store
 Thumbs.db
