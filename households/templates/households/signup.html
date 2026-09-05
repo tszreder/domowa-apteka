@@ -6,7 +6,18 @@
     <h1>Załóż konto</h1>
     <form method="post">
         {% csrf_token %}
-        {{ form }}
+        {% for field in form %}
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+                {% for error in field.errors %}
+                    <small class="form-error">{{ error }}</small>
+                {% endfor %}
+            {% endif %}
+            {% if field.help_text %}
+                <small>{{ field.help_text }}</small>
+            {% endif %}
+        {% endfor %}
         <button type="submit">Załóż konto</button>
     </form>
 {% endblock %}

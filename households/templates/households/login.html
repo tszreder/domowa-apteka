@@ -9,4 +9,6 @@
         {{ form }}
         <button type="submit">Zaloguj się</button>
     </form>
+    <p>Nie masz jeszcze konta? <a href="{% url 'households:signup' %}">Załóż konto</a></p>
+    <p><small>Resetowanie hasła nie jest jeszcze dostępne.</small></p>
 {% endblock %}

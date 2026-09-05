@@ -625,14 +625,14 @@ Add a verdict sentence so the two match states look different, add a "Wróć do 
 
 #### Automated
 
-- [ ] 2.1 Django system check passes
-- [ ] 2.2 All existing tests pass
+- [x] 2.1 Django system check passes
+- [x] 2.2 All existing tests pass
 
 #### Manual
 
-- [ ] 2.3 Password rules below input at 390×844
-- [ ] 2.4 No autocomplete console warnings
-- [ ] 2.5 Login page shows signup link and reset disclosure
+- [x] 2.3 Password rules below input at 390×844
+- [x] 2.4 No autocomplete console warnings
+- [x] 2.5 Login page shows signup link and reset disclosure
 
 ### Phase 3: Join + Household
 
