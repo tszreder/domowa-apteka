@@ -431,36 +431,36 @@ None — no model or schema changes.
 
 #### Automated
 
-- [ ] 1.1 Full suite passes: `uv run manage.py test` (228 tests)
-- [ ] 1.2 R1, R2, R3 each independently confirmed red then reverted; clean tree
-- [ ] 1.3 `context/foundation/risk-test-map.md` exists with a row for every risk #1–#6
+- [x] 1.1 Full suite passes: `uv run manage.py test` (228 tests)
+- [x] 1.2 R1, R2, R3 each independently confirmed red then reverted; clean tree
+- [x] 1.3 `context/foundation/risk-test-map.md` exists with a row for every risk #1–#6
 
 #### Manual
 
-- [ ] 1.4 Per-risk table checked against research.md for overstatement
+- [x] 1.4 Per-risk table checked against research.md for overstatement
 
 ### Phase 2: Test-Quality Repairs
 
 #### Automated
 
-- [ ] 2.1 `uv run manage.py test registry.tests.test_parser` passes
-- [ ] 2.2 `uv run manage.py test households.tests.test_access_control` passes
-- [ ] 2.3 Full suite passes: `uv run manage.py test` (228 tests)
-- [ ] 2.4 `uv run mypy` succeeds
+- [x] 2.1 `uv run manage.py test registry.tests.test_parser` passes
+- [x] 2.2 `uv run manage.py test households.tests.test_access_control` passes
+- [x] 2.3 Full suite passes: `uv run manage.py test` (228 tests)
+- [x] 2.4 `uv run mypy` succeeds
 
 #### Manual
 
-- [ ] 2.5 Renamed test's name accurately describes its assertion
-- [ ] 2.6 `test_access_control.py` docstring accurately scopes what it proves
+- [x] 2.5 Renamed test's name accurately describes its assertion
+- [x] 2.6 `test_access_control.py` docstring accurately scopes what it proves
 
 ### Phase 3: `test-plan.md` Corrections and Cookbook Fill-In
 
 #### Automated
 
-- [ ] 3.1 `git diff context/foundation/test-plan.md` touches only §4 and §6.5
-- [ ] 3.2 Full suite passes: `uv run manage.py test` (228 tests)
+- [x] 3.1 `git diff context/foundation/test-plan.md` touches only §4 and §6.5
+- [x] 3.2 Full suite passes: `uv run manage.py test` (228 tests)
 
 #### Manual
 
-- [ ] 3.3 Corrected §4 numbers match a fresh test-count run
-- [ ] 3.4 New §6.5 text is sufficient without opening risk-test-map.md first
+- [x] 3.3 Corrected §4 numbers match a fresh test-count run
+- [x] 3.4 New §6.5 text is sufficient without opening risk-test-map.md first

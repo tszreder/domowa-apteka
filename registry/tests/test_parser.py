@@ -246,9 +246,10 @@ class DenylistTests(ParserTestCase):
         product = self.product('Moviprep')
 
         self.assertEqual(product.links, ())
-        self.assertIn('produkt złożony', DENYLISTED_SUBSTANCE_KEYS)
 
-    def test_denylisted_names_never_reach_the_substance_vocabulary(self) -> None:
+    def test_denylisted_names_never_reach_the_resolved_substances(self) -> None:
+        # The internal vocabulary still accumulates denylisted keys (parser.py:164-171);
+        # _resolve_deferred blocks them at parser.py:287. This checks the post-resolution output.
         keys = {name_key for _, name_key in self.result.substances}
 
         self.assertEqual(keys & DENYLISTED_SUBSTANCE_KEYS, set())
