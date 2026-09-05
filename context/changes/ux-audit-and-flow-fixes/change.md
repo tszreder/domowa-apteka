@@ -1,7 +1,7 @@
 ---
 change_id: ux-audit-and-flow-fixes
 title: Ux audit and flow fixes
-status: preparing
+status: planned
 created: 2026-09-05
 updated: 2026-09-05
 archived_at: null
