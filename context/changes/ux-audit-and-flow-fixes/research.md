@@ -507,42 +507,45 @@ them blocking:
 
 ## Triage sheet
 
-For the user to fill in. `/10x-plan` reads the **In slice?** column.
+Filled in by the user 2026-09-05 (see `change.md` Notes for the two cross-cutting
+policies this triage rests on: copy rewriting is in scope; hierarchy/layout
+findings get a *role or information* fix now, with any new color/icon language
+left to S-07). `/10x-plan` reads the **In slice?** column.
 
 | ID | Screen | Kind | One line | In slice? |
 | --- | --- | --- | --- | --- |
-| F-01 | landing | gap | No body CTA; nav is the only way forward | |
-| F-02 | landing | flow | Logged-in user at `/` gets marketing page | |
-| F-03 | signup | layout | Password rules split label from field | |
-| F-04 | signup/login | gap | No `autocomplete`; no mobile autofill | |
-| F-05 | login | gap | No password reset and no mention of it | |
-| F-06 | household | layout | Invite link scrolls page sideways (~25 % of households) | |
-| F-07 | household | gap | No way to copy or share the invite link | |
-| F-08 | household | hierarchy | Only button on screen is the destructive one | |
-| F-09 | household | flow | Regenerate is unconfirmed; warning comes after | |
-| F-10 | household | flow | Member can render with no identity at all | |
-| F-11 | join | flow | **Invited existing user never joins** | |
-| F-12 | join | copy | Invite target never mentions the invitation | |
-| F-13 | join | gap | Successful join is never acknowledged | |
-| F-14 | add | flow | **Wrong error, and the typed name is wiped** | |
-| F-15 | add | layout | In-flow suggestion list sits under the keyboard | |
-| F-16 | add | hierarchy | Selection shows no resolved substance; label truncated | |
-| F-17 | add | hierarchy | Typeahead over two known producers | |
-| F-18 | add | layout | Strengths sort as strings — 80 mg after 500 mg | |
-| F-19 | add | layout | Two suggestions differing only by letter case | |
-| F-20 | add | flow | Trailing space returns zero results | |
-| F-21 | list | hierarchy | Delete is 17.8 % of the screen | |
-| F-22 | list | hierarchy | Partial-duplicate signal is 16px and collapsed | |
-| F-23 | list | hierarchy | Duplicate group has no warning treatment | |
-| F-24 | list | flow | Adding a duplicate does not say so | |
-| F-25 | list | flow | Identical rows, no count; `/check/` disagrees | |
-| F-26 | list | flow | Delete: one tap, no confirm, no undo | |
-| F-27 | list | gap | Unresolved items have no recovery action | |
-| F-28 | list | gap | No ordering, search, or filter over 2.9 screens | |
-| F-29 | list | layout | 136px header, not sticky | |
-| F-30 | list | copy | Same `<h1>` as `/household/` | |
-| F-31 | all | hierarchy | Flash messages render as bullets | |
-| F-32 | check | hierarchy | No verdict; two states look identical | |
-| F-33 | check | flow | No "add it anyway", no way back | |
-| F-34 | check | gap | Unreachable from nav; 21px entry link | |
-| F-35 | check | copy | Query cleared; result may read as stale | |
+| F-01 | landing | gap | No body CTA; nav is the only way forward | Yes — cheap, and it's the first screen a new user sees |
+| F-02 | landing | flow | Logged-in user at `/` gets marketing page | Yes |
+| F-03 | signup | layout | Password rules split label from field | Yes — template reorder, no design-system dependency |
+| F-04 | signup/login | gap | No `autocomplete`; no mobile autofill | Yes |
+| F-05 | login | gap | No password reset and no mention of it | Yes — copy only; no reset flow this slice |
+| F-06 | household | layout | Invite link scrolls page sideways (~25 % of households) | Yes |
+| F-07 | household | gap | No way to copy or share the invite link | Yes |
+| F-08 | household | hierarchy | Only button on screen is the destructive one | Yes — reassign to Pico's `secondary`/`outline` role, no new colors; palette itself is S-07 |
+| F-09 | household | flow | Regenerate is unconfirmed; warning comes after | Yes |
+| F-10 | household | flow | Member can render with no identity at all | Yes |
+| F-11 | join | flow | **Invited existing user never joins** | Yes — must-fix |
+| F-12 | join | copy | Invite target never mentions the invitation | Yes |
+| F-13 | join | gap | Successful join is never acknowledged | Yes |
+| F-14 | add | flow | **Wrong error, and the typed name is wiped** | Yes — must-fix |
+| F-15 | add | layout | In-flow suggestion list sits under the keyboard | Yes — root cause of F-14's mis-tap |
+| F-16 | add | hierarchy | Selection shows no resolved substance; label truncated | Yes — surfacing data the API already returns |
+| F-17 | add | hierarchy | Typeahead over two known producers | Yes — swap for `<select>`/radio when there are exactly 2 |
+| F-18 | add | layout | Strengths sort as strings — 80 mg after 500 mg | Yes — sort-key bug, no design decision involved |
+| F-19 | add | layout | Two suggestions differing only by letter case | Yes — add the holder to the label, data already available |
+| F-20 | add | flow | Trailing space returns zero results | Yes |
+| F-21 | list | hierarchy | Delete is 17.8 % of the screen | Yes — same role reassignment as F-08; how far to restructure is a planning detail |
+| F-22 | list | hierarchy | Partial-duplicate signal is 16px and collapsed | Yes — open by default + reword; no color needed |
+| F-23 | list | hierarchy | Duplicate group has no warning treatment | Yes — state the fact plainly in the heading; warning color/icon is S-07's (its own open question) |
+| F-24 | list | flow | Adding a duplicate does not say so | Yes |
+| F-25 | list | flow | Identical rows, no count; `/check/` disagrees | Yes — reuse `/check/`'s existing count data |
+| F-26 | list | flow | Delete: one tap, no confirm, no undo | Yes — add confirm; whether undo is also in reach is a planning-time sizing call |
+| F-27 | list | gap | Unresolved items have no recovery action | Yes — at minimum stop repeating the sentence and add a way back; a full retry-from-registry flow can follow up separately if it's bigger than expected |
+| F-28 | list | gap | No ordering, search, or filter over 2.9 screens | No — a feature in its own right, not a fix this audit earns; candidate for its own future slice |
+| F-29 | list | layout | 136px header, not sticky | Yes — `position: sticky` only, no palette/type-scale change |
+| F-30 | list | copy | Same `<h1>` as `/household/` | Yes |
+| F-31 | all | hierarchy | Flash messages render as bullets | Yes — strip the list-marker styling only; real alert-box treatment is S-07 |
+| F-32 | check | hierarchy | No verdict; two states look identical | Yes — add an explicit verdict sentence/emphasis in text; color-coded states are S-07's (its own open question) |
+| F-33 | check | flow | No "add it anyway", no way back | Yes |
+| F-34 | check | gap | Unreachable from nav; 21px entry link | Yes |
+| F-35 | check | copy | Query cleared; result may read as stale | Yes |
