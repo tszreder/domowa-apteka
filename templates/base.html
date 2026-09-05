@@ -11,14 +11,16 @@
     <header class="container">
         <nav>
             <ul>
-                <li><strong>Domowa Apteka</strong></li>
+                <li><a href="/"><strong>Domowa Apteka</strong></a></li>
             </ul>
             <ul>
                 {% if user.is_authenticated %}
-                    <li>
-                        {{ user.email }}{% if user.membership %} — <a href="{% url 'households:household_detail' %}">{{ user.membership.household.name }}</a>{% endif %}
-                    </li>
                     <li><a href="{% url 'pharmacy:item_list' %}">Lista leków</a></li>
+                    {% if user.membership %}
+                        <li><a href="{% url 'households:household_detail' %}">Gospodarstwo</a></li>
+                    {% endif %}
+                    <li><a href="{% url 'pharmacy:product_check' %}">Sprawdź lek</a></li>
+                    <li><small>{{ user.email|default:user.username }}</small></li>
                     <li>
                         <form method="post" action="{% url 'households:logout' %}">
                             {% csrf_token %}
@@ -34,11 +36,11 @@
     </header>
     <main class="container">
         {% if messages %}
-            <ul class="messages">
+            <div class="messages">
                 {% for message in messages %}
-                    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                    <div{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</div>
                 {% endfor %}
-            </ul>
+            </div>
         {% endif %}
         {% block content %}{% endblock %}
     </main>

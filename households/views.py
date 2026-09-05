@@ -30,12 +30,14 @@ def _household_of(user: User) -> Household:
 
 
 def landing(request: HttpRequest) -> HttpResponse:
+    if request.user.is_authenticated:
+        return redirect(reverse('pharmacy:item_list'))
     return render(request, 'households/landing.html')
 
 
 def signup(request: HttpRequest) -> HttpResponse:
     if request.user.is_authenticated:
-        return redirect('households:landing')
+        return redirect(reverse('pharmacy:item_list'))
 
     if request.method == 'POST':
         form = SignupForm(request.POST)

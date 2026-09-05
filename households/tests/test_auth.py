@@ -65,7 +65,7 @@ class SignupTests(TestCase):
             },
         )
 
-        self.assertRedirects(response, reverse('households:landing'))
+        self.assertRedirects(response, reverse('pharmacy:item_list'))
         self.assertFalse(User.objects.filter(username='someone-else@example.com').exists())
 
 

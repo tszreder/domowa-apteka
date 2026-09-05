@@ -607,19 +607,19 @@ Add a verdict sentence so the two match states look different, add a "Wróć do 
 
 #### Automated
 
-- [ ] 1.1 Django system check passes
-- [ ] 1.2 All existing tests pass
+- [x] 1.1 Django system check passes
+- [x] 1.2 All existing tests pass
 
 #### Manual
 
-- [ ] 1.3 Flash messages have no bullet markers at 390×844
-- [ ] 1.4 Header sticks to top when scrolling
-- [ ] 1.5 Brand is a clickable link
-- [ ] 1.6 Authenticated user at `/` redirected to `/list/`
-- [ ] 1.7 Nav shows Gospodarstwo, Lista leków, Sprawdź lek links
-- [ ] 1.8 Blank-email user shows username in nav
-- [ ] 1.9 Landing CTA buttons visible for anonymous
-- [ ] 1.10 List screen heading says "Lista leków"
+- [x] 1.3 Flash messages have no bullet markers at 390×844
+- [x] 1.4 Header sticks to top when scrolling
+- [x] 1.5 Brand is a clickable link
+- [x] 1.6 Authenticated user at `/` redirected to `/list/`
+- [x] 1.7 Nav shows Gospodarstwo, Lista leków, Sprawdź lek links
+- [x] 1.8 Blank-email user shows username in nav
+- [x] 1.9 Landing CTA buttons visible for anonymous
+- [x] 1.10 List screen heading says "Lista leków"
 
 ### Phase 2: Auth Screens
 
