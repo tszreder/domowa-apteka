@@ -638,19 +638,19 @@ Add a verdict sentence so the two match states look different, add a "Wróć do 
 
 #### Automated
 
-- [ ] 3.1 Django system check passes
-- [ ] 3.2 All existing tests pass
-- [ ] 3.3 New F-11 signal handler tests pass
+- [x] 3.1 Django system check passes
+- [x] 3.2 All existing tests pass
+- [x] 3.3 New F-11 signal handler tests pass
 
 #### Manual
 
-- [ ] 3.4 Invite link wraps within viewport
-- [ ] 3.5 Copy button works and shows feedback
-- [ ] 3.6 Regenerate is outline and asks for confirmation
-- [ ] 3.7 Blank-email member shows username
-- [ ] 3.8 F-11: login via invite link joins the household
-- [ ] 3.9 Signup via invite shows household name and join acknowledgement
-- [ ] 3.10 Signup without invite redirects to household creation with pre-filled name
+- [x] 3.4 Invite link wraps within viewport
+- [x] 3.5 Copy button works and shows feedback
+- [x] 3.6 Regenerate is outline and asks for confirmation
+- [x] 3.7 Blank-email member shows username
+- [x] 3.8 F-11: login via invite link joins the household
+- [x] 3.9 Signup via invite shows household name and join acknowledgement
+- [x] 3.10 Signup without invite redirects to household creation with pre-filled name
 
 ### Phase 4: Add Medicine Form
 

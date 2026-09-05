@@ -7,16 +7,30 @@
 
     <h2>Zaproś kogoś</h2>
     <p>Udostępnij ten link, aby dołączyć do gospodarstwa:</p>
-    <p><code>{{ invite_url }}</code></p>
+    <p><code class="invite-link" data-invite-url="{{ invite_url }}">{{ invite_url }}</code></p>
+    <p>
+        <button type="button" id="copy-invite">Kopiuj link</button>
+    </p>
     <form method="post" action="{% url 'households:regenerate_invite' %}">
         {% csrf_token %}
-        <button type="submit">Wygeneruj nowy link</button>
+        <button type="submit" class="secondary outline" onclick="return confirm('Wygenerowanie nowego linku unieważni obecny. Kontynuować?')">Wygeneruj nowy link</button>
     </form>
 
     <h2>Członkowie</h2>
     <ul>
         {% for member in members %}
-            <li>{{ member.user.email }} — dołączył(a) {{ member.joined_at|date:"d.m.Y" }}</li>
+            <li>{{ member.user.email|default:member.user.username }} — dołączył(a) {{ member.joined_at|date:"d.m.Y" }}</li>
         {% endfor %}
     </ul>
+
+    <script>
+    document.getElementById('copy-invite').addEventListener('click', function() {
+        var btn = this;
+        var url = document.querySelector('.invite-link').getAttribute('data-invite-url');
+        navigator.clipboard.writeText(url).then(function() {
+            btn.textContent = 'Skopiowano!';
+            setTimeout(function() { btn.textContent = 'Kopiuj link'; }, 2000);
+        });
+    });
+    </script>
 {% endblock %}

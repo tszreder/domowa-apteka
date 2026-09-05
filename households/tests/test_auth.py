@@ -6,7 +6,7 @@ from households.models import Household, Membership
 
 
 class SignupTests(TestCase):
-    def test_signup_creates_user_household_and_membership(self) -> None:
+    def test_signup_without_invite_redirects_to_household_create(self) -> None:
         response = self.client.post(
             reverse('households:signup'),
             {
@@ -16,10 +16,9 @@ class SignupTests(TestCase):
             },
         )
 
-        self.assertRedirects(response, '/list/')
+        self.assertRedirects(response, '/list/', target_status_code=302)
         user = User.objects.get(username='alice@example.com')
-        membership = Membership.objects.get(user=user)
-        self.assertTrue(Household.objects.filter(pk=membership.household_id).exists())
+        self.assertFalse(Membership.objects.filter(user=user).exists())
 
     def test_stored_username_is_lowercase_regardless_of_submitted_case(self) -> None:
         self.client.post(

@@ -15,6 +15,17 @@ header {
     padding: 0.5rem 0;
 }
 
+.invite-link {
+    word-break: break-all;
+    display: block;
+}
+
+.secondary.outline {
+    background-color: transparent;
+    border: 1px solid var(--pico-muted-border-color, currentColor);
+    color: var(--pico-muted-color, currentColor);
+}
+
 .duplicate-cluster {
     border: 1px solid var(--pico-primary-border, currentColor);
     border-radius: var(--pico-border-radius, 0.25rem);

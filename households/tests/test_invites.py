@@ -58,8 +58,7 @@ class JoinViewTests(TestCase):
         )
 
         carol = User.objects.get(username='carol@example.com')
-        membership = Membership.objects.get(user=carol)
-        self.assertNotEqual(membership.household_id, self.household.id)
+        self.assertFalse(Membership.objects.filter(user=carol).exists())
 
     def test_authenticated_household_less_user_confirms_then_joins_on_post(self) -> None:
         superuser = User.objects.create_superuser(
@@ -142,7 +141,7 @@ class JoinViewTests(TestCase):
 
 
 class SignupWithStaleInviteTests(TestCase):
-    def test_signup_falls_back_to_new_household_when_stashed_token_no_longer_resolves(self) -> None:
+    def test_signup_with_stale_token_creates_user_without_household(self) -> None:
         household = Household.objects.create(name='Kowalscy')
         owner = User.objects.create_user(username='alice@example.com', password='pass12345')
         Membership.objects.create(user=owner, household=household)
@@ -160,10 +159,75 @@ class SignupWithStaleInviteTests(TestCase):
             },
         )
 
-        self.assertRedirects(response, '/list/')
+        self.assertRedirects(response, '/list/', target_status_code=302)
         bob = User.objects.get(username='bob@example.com')
-        membership = Membership.objects.get(user=bob)
-        self.assertNotEqual(membership.household_id, household.id)
+        self.assertFalse(Membership.objects.filter(user=bob).exists())
+
+
+class InviteTokenOnLoginTests(TestCase):
+    """F-11: invite token consumed on login via signal handler."""
+
+    def setUp(self) -> None:
+        self.household = Household.objects.create(name='Kowalscy')
+        self.owner = User.objects.create_user(username='alice@example.com', password='pass12345')
+        Membership.objects.create(user=self.owner, household=self.household)
+        self.existing_user = User.objects.create_user(
+            username='bob@example.com', password='pass12345'
+        )
+
+    def test_login_with_invite_token_creates_membership(self) -> None:
+        join_url = reverse('households:join', kwargs={'token': self.household.invite_token})
+        self.client.get(join_url)
+
+        self.client.post(
+            reverse('households:login'),
+            {'username': 'bob@example.com', 'password': 'pass12345'},
+        )
+
+        self.assertTrue(Membership.objects.filter(user=self.existing_user).exists())
+        membership = Membership.objects.get(user=self.existing_user)
+        self.assertEqual(membership.household_id, self.household.id)
+
+    def test_stale_token_on_login_does_nothing(self) -> None:
+        join_url = reverse('households:join', kwargs={'token': self.household.invite_token})
+        self.client.get(join_url)
+        self.household.regenerate_invite_token()
+
+        self.client.post(
+            reverse('households:login'),
+            {'username': 'bob@example.com', 'password': 'pass12345'},
+        )
+
+        self.assertFalse(Membership.objects.filter(user=self.existing_user).exists())
+
+    def test_user_already_in_household_gets_info(self) -> None:
+        other_household = Household.objects.create(name='Nowakowie')
+        Membership.objects.create(user=self.existing_user, household=other_household)
+
+        join_url = reverse('households:join', kwargs={'token': self.household.invite_token})
+        self.client.get(join_url)
+
+        response = self.client.post(
+            reverse('households:login'),
+            {'username': 'bob@example.com', 'password': 'pass12345'},
+            follow=True,
+        )
+
+        membership = Membership.objects.get(user=self.existing_user)
+        self.assertEqual(membership.household_id, other_household.id)
+        msgs = [str(m) for m in response.context['messages']]
+        self.assertTrue(any('innego' in m for m in msgs))
+
+    def test_token_cleared_from_session_after_login(self) -> None:
+        join_url = reverse('households:join', kwargs={'token': self.household.invite_token})
+        self.client.get(join_url)
+
+        self.client.post(
+            reverse('households:login'),
+            {'username': 'bob@example.com', 'password': 'pass12345'},
+        )
+
+        self.assertNotIn(INVITE_TOKEN_SESSION_KEY, self.client.session)
 
 
 class RegenerateInviteTests(TestCase):

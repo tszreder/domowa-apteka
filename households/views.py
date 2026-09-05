@@ -19,12 +19,6 @@ INVITE_TOKEN_SESSION_KEY = 'invite_token'
 
 
 def _household_of(user: User) -> Household:
-    """Household of a user `household_required` has already vouched for.
-
-    The reverse one-to-one is invisible to django-stubs, and the decorator has
-    already resolved (and cached) it on the instance, so this reads the cache
-    without a second query.
-    """
     membership = cast(Membership, getattr(user, 'membership'))
     return membership.household
 
@@ -39,31 +33,35 @@ def signup(request: HttpRequest) -> HttpResponse:
     if request.user.is_authenticated:
         return redirect(reverse('pharmacy:item_list'))
 
+    invite_token = request.session.get(INVITE_TOKEN_SESSION_KEY)
+    invite_household = None
+    if invite_token:
+        invite_household = Household.objects.filter(invite_token=invite_token).first()
+
     if request.method == 'POST':
         form = SignupForm(request.POST)
         if form.is_valid():
-            invite_token = request.session.pop(INVITE_TOKEN_SESSION_KEY, None)
-            invite_expired = False
+            consumed_token = request.session.pop(INVITE_TOKEN_SESSION_KEY, None)
             with transaction.atomic():
                 user = form.save()
                 household = None
-                if invite_token:
-                    household = Household.objects.filter(invite_token=invite_token).first()
-                    invite_expired = household is None
-                if household is None:
-                    local_part = form.cleaned_data['email'].split('@')[0]
-                    household = Household.objects.create(name=local_part)
-                Membership.objects.create(user=user, household=household)
+                if consumed_token:
+                    household = Household.objects.filter(invite_token=consumed_token).first()
+                if household:
+                    Membership.objects.create(user=user, household=household)
             auth_login(request, user)
-            if invite_expired:
-                messages.info(
-                    request,
-                    'Link zaproszenia był już nieaktualny, więc założono nowe gospodarstwo domowe.',
+            if household:
+                messages.success(
+                    request, f'Dołączyłeś do gospodarstwa „{household.name}".'
                 )
             return redirect(settings.LOGIN_REDIRECT_URL)
     else:
         form = SignupForm()
-    return render(request, 'households/signup.html', {'form': form})
+    return render(
+        request,
+        'households/signup.html',
+        {'form': form, 'invite_household': invite_household},
+    )
 
 
 def join(request: HttpRequest, token: str) -> HttpResponse:
@@ -78,13 +76,11 @@ def join(request: HttpRequest, token: str) -> HttpResponse:
     if not hasattr(user, 'membership'):
         if request.method != 'POST':
             return render(request, 'households/join_confirm.html', {'household': household})
-        # get_or_create absorbs the IntegrityError a concurrent insert would raise and
-        # re-gets the winner's row, so a double-submitted confirmation cannot 500.
         membership, created = Membership.objects.get_or_create(
             user=user, defaults={'household': household}
         )
         if created:
-            messages.success(request, f'Dołączono do gospodarstwa „{household.name}”.')
+            messages.success(request, f'Dołączono do gospodarstwa „{household.name}".')
             return redirect('households:household_detail')
     else:
         membership = user.membership
@@ -134,5 +130,11 @@ def household_create(request: HttpRequest) -> HttpResponse:
                 Membership.objects.create(user=user, household=household)
             return redirect('households:household_detail')
     else:
-        form = HouseholdCreateForm()
+        initial = {}
+        if user.email:
+            initial['name'] = user.email.split('@')[0]
+        form = HouseholdCreateForm(initial=initial)
+        if not hasattr(user, '_household_create_prompted'):
+            messages.info(request, 'Utwórz swoje gospodarstwo domowe, aby zacząć.')
+            user._household_create_prompted = True  # type: ignore[attr-defined]
     return render(request, 'households/household_create.html', {'form': form})
