@@ -15,7 +15,7 @@
   // again here: one definition of where the check screen lives.
   const resultUrl = searchInput.dataset.resultUrl;
 
-  const { presentationLabel, attachPresentationSearch } = window.ProductSearch;
+  const { presentationLabel, attachPresentationSearch, clearList } = window.ProductSearch;
 
   attachPresentationSearch({
     input: searchInput,
@@ -24,6 +24,7 @@
       // Set before navigating so the field reads as picked while the next page
       // loads, rather than sitting on the half-typed query.
       searchInput.value = presentationLabel(presentation);
+      clearList(suggestionsList);
       window.location = `${resultUrl}?product=${encodeURIComponent(
         presentation.default_product_id
       )}`;

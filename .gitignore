@@ -31,6 +31,9 @@ local_settings.py
 # Agent tooling (10x toolkit skills/prompts — kept local, not committed)
 .claude/
 
+# Browser automation output (console logs, page snapshots)
+.playwright-mcp/
+
 # OS / editor
 .DS_Store
 Thumbs.db

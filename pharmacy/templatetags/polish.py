@@ -27,15 +27,17 @@ def plural_pl(count: object, forms: str) -> str:
     Not cosmetic. "2 opakowań" reads as broken Polish to every user of this
     app, and a two-form `pluralize` produces exactly that for 2, 3 and 4.
     """
-    one, few, many = forms.split(',')
+    parts = forms.split(',')
     # A filter is not the place to raise on a template author's typo, so an
-    # unusable value falls back rather than 500-ing the page; "many" is the
-    # form that reads least wrong against a stray value.
-    if not isinstance(count, (int, float, str)):
-        return many
+    # unusable value falls back rather than 500-ing the page. This covers the
+    # form-spec argument too: a malformed "one,few,many" triple is the same
+    # kind of typo as a bad count, and unpacking it must not raise either.
+    if len(parts) != 3:
+        return forms
+    one, few, many = parts
     try:
-        n = abs(int(count))
-    except ValueError:
+        n = abs(int(count))  # type: ignore[call-overload]
+    except (TypeError, ValueError, OverflowError):
         return many
     if n == 1:
         return one

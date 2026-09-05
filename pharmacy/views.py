@@ -119,9 +119,10 @@ def product_check(request: HttpRequest) -> HttpResponse:
     sentence, not an error page.
     """
     household = _household_of(cast(User, request.user))
-    # Unbound when the parameter is absent, so an empty `/check/` is the
-    # search screen rather than a screen shouting about a missing field.
-    form = ProductCheckForm(request.GET) if 'product' in request.GET else None
+    # Unbound when the parameter is absent or empty, so `/check/` and
+    # `/check/?product=` both render the search screen rather than shouting
+    # about a missing field the visitor never tried to fill in.
+    form = ProductCheckForm(request.GET) if request.GET.get('product') else None
 
     candidate: Product | None = None
     if form is not None and form.is_valid():

@@ -498,6 +498,29 @@ properties (`--pico-muted-border-color`, `--pico-border-radius`) the way
 `.duplicate-cluster-items` already does. Skip entirely if unstyled markup reads
 acceptably.
 
+> **Amended 2026-08-30, in commit `3795b15` — exceeded the budget above.** The
+> `.check-matches` rule itself shipped within budget (`static/css/app.css:45-61`,
+> reusing the same Pico custom properties as `.duplicate-cluster-items`). What
+> the budget did not anticipate: eight further rules for `.suggestions`, its
+> `:empty`/`[hidden]`/`:hover`/`.active` states, `.suggestion-message`, and
+> `.form-error` (`static/css/app.css:63-109`) — styling for the shared picker
+> widget, not the check screen's match list.
+>
+> **Why.** `attachKeyboardNav` (later moved verbatim into `product-search.js`
+> in Phase 3 §1) has always toggled an `active` class on the highlighted
+> suggestion, and no stylesheet in this project ever had a rule for it, nor for
+> `.suggestions` or `.suggestion-message` — Pico is classless, so nothing else
+> painted them either. Measured in a browser before fixing: arrow keys moved
+> the class correctly and Enter picked the right row, but the active option
+> computed to the same transparent background as every other row, so the
+> keyboard path was functionally correct and looked broken. The defect
+> predates this slice — it belongs to the add screen's pre-existing picker —
+> but surfaced here because this slice is what exercised the picker by hand
+> (Phase 3's manual sweep, §3.6).
+>
+> See Phase 3 §2's amendment for the one behaviour change landed in the same
+> commit. Recorded per `impl-review.md` F1.
+
 #### 7. Integration tests
 
 **File**: `pharmacy/tests/test_product_check.py` (new)
@@ -615,6 +638,24 @@ calling the shared helpers. Replaces its own search wiring with one
 `attachPresentationSearch({ input: searchInput, list: suggestionsList, onPick: pickPresentation, onInput: clearSelection })`
 call. The early `if (!searchInput) return;` guard stays — it is what keeps the script
 inert on pages without the field.
+
+> **Amended 2026-08-30, in commit `3795b15` — one behaviour change, against
+> this plan's "No changes to the add flow's behaviour."** A `focus` listener
+> was added to `producerSearchInput` (`autocomplete.js:106-109`) that renders
+> the unfiltered producer list on focus. Before this, the producer field
+> showed no options until the user typed a substring of a holder's name — the
+> list is already delivered in memory with no debounce and no fetch, so there
+> was nothing to protect by withholding it, and no way to discover a holder's
+> name without guessing it first. Verified on a 6-holder presentation: 0
+> options before focus, 6 after.
+>
+> This is new add-screen behaviour, not a pure move, and falls outside this
+> phase's own boundary on the plan's own terms. It shipped anyway, in a commit
+> deliberately held out of this phase's commit (`81d9235`) so that one stays a
+> pure move — the two are separable in git history if this needs reverting.
+> Kept on the merits (Fix A, `impl-review.md` F1): the field was previously
+> undiscoverable without a guess, which is exactly the class of defect this
+> phase's manual add-flow sweep (§3.6) exists to catch.
 
 #### 3. The check screen picker
 
