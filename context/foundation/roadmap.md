@@ -3,7 +3,7 @@ project: domowa-apteka
 version: 2
 status: draft
 created: 2026-08-03
-updated: 2026-08-29
+updated: 2026-09-05
 prd_version: 1
 main_goal: speed
 top_blocker: decisions
@@ -47,7 +47,7 @@ reality, and every other slice is downstream of it.
 | S-02 | `add-drug-with-substance-resolution` | add a pharmaceutical by name with registry-backed autocomplete, see its resolved active substance(s) — or a clear lookup-failure message — and have the item appear on the shared household list | F-01, S-01    | FR-001, FR-002, US-01        | done |
 | S-03 | `duplicate-flagging-on-list`       | see household list items flagged as full duplicates (identical substance sets) and partial duplicates (overlapping but not identical) | S-02          | FR-003, US-03                | done |
 | S-04 | `expiration-date-per-item`         | optionally record an expiration date when adding or editing an item                         | S-02          | FR-004                       | parked   |
-| S-05 | `prescription-duplicate-check`      | check a product they are about to buy against the household list **without adding it**, and see whether something already at home is a full or partial substance match | S-03          | FR-003, §Business Logic (see Q4) | in-progress |
+| S-05 | `prescription-duplicate-check`      | check a product they are about to buy against the household list **without adding it**, and see whether something already at home is a full or partial substance match | S-03          | FR-003, §Business Logic (see Q4) | done |
 | S-06 | `ux-audit-and-flow-fixes`           | reach every core action in fewer, clearer steps, on a layout criticised by walking the running app as a user rather than reading its templates as its author | S-03          | US-01, US-03, NFR (mobile web, 1 s ack) | proposed |
 | S-07 | `visual-refresh`                    | read the app as a finished product — one deliberate type, colour, spacing and state vocabulary in place of stock Pico defaults | S-06          | NFR (mobile web)             | proposed |
 
@@ -182,7 +182,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
   - Is the check purely transient, or does it leave a trace ("checked 2026-09-02, bought anyway")? Anything durable turns a read-only screen into a write and pulls in a model change; transient keeps the slice at one view and one template. — Owner: user. Block: no.
   - Where is the entry point — its own screen, or a field at the top of the existing list? `S-06`'s audit will have an opinion about this too, so whichever slice lands second should defer to the first. — Owner: user. Block: no.
 - **Risk:** Cheap by construction, and that was on purpose: `pharmacy/duplicates.py` was written set-keyed (`classify(a: frozenset[str], b: frozenset[str])`) rather than closed over a list of `Item`s, specifically so a candidate product that is not an item could be compared through the same rule. So the comparison is not where the risk lives. The framing is. A screen that says "you already have this" sits one wording away from saying "so you do not need that prescription" — a substitution claim the app is not licensed to make, and one the household will make anyway on the strength of the flag. The NFR that bans guessing applies to the sentence on the screen, not only to the data behind it. Scope is a substance-set fact, presented as a fact, next to the doctor rather than instead of them.
-- **Status:** in-progress
+- **Status:** done
 
 ### S-06: UX audit and the flow fixes it earns
 
@@ -254,3 +254,4 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **S-02: an adult can add a pharmaceutical by typing its name with registry-backed autocomplete, see which active substance(s) the app resolved for it — or a clear message that lookup failed — and have the item appear on the shared household list where other members see it without a manual refresh step.** — Archived 2026-08-19 → `context/archive/2026-08-14-add-drug-with-substance-resolution/`. Lesson: —.
 - **F-02: (foundation) registry data refreshes on a schedule, and the app records and surfaces its own last-successful-run timestamp rather than inferring freshness from the scheduler.** — Archived 2026-08-20 → `context/archive/2026-08-14-registry-freshness-refresh/`. Lesson: —.
 - **S-03: an adult viewing the shared household list sees items whose active-substance sets are identical flagged as full duplicates, items whose sets overlap but differ flagged as partial duplicates, and items whose substances could not be resolved shown separately rather than grouped or guessed into a relationship.** — Archived 2026-08-25 → `context/archive/2026-08-24-duplicate-flagging-on-list/`. Lesson: —.
+- **S-05: an adult standing in a doctor's office can type or pick a product the household does *not* own — the one just prescribed, or a proposed alternative — and see straight away whether something already at home is a full substance match (identical set) or a partial one (overlapping but not identical), with nothing written to the household list as a side effect.** — Archived 2026-09-05 → `context/archive/2026-08-29-prescription-duplicate-check/`. Lesson: —.
