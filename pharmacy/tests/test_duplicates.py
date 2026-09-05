@@ -6,9 +6,10 @@ names that anti-pattern explicitly.
 """
 
 from collections.abc import Iterable
-from datetime import date
+from datetime import date, timedelta
 
 from django.test import SimpleTestCase, TestCase
+from django.utils import timezone
 
 from households.models import Household
 from pharmacy.duplicates import (
@@ -489,6 +490,48 @@ class CheckCandidateTests(TestCase):
         self.assertEqual(
             [match.kind for match in result.matches],
             [MatchKind.SAME_PRODUCT, MatchKind.SAME_SUBSTANCES, MatchKind.SHARED_SUBSTANCE],
+        )
+
+    def test_within_tier_order_is_newest_first(self) -> None:
+        """`Item.Meta.ordering` (`-added_at`) survives the tier sort for free.
+
+        This module's Critical Implementation Details documents that the tier
+        sort is stable, so newest-first survives inside each tier — the same
+        property `build_list_view` relies on. `test_matches_are_ordered_strongest_first`
+        does not pin this: it places one match per tier, so it only proves tier
+        boundaries. Replacing the sort key with
+        `(_MATCH_ORDER.index(match.kind), match.product.name)` would destroy
+        the documented stability and still pass that test.
+        """
+        para = make_substance('Paracetamol', 'paracetamol')
+        pseudo = make_substance('Pseudoefedryna', 'pseudoefedryna')
+
+        candidate = make_product('1', name='Combo')
+        link(candidate, para, order=0)
+        link(candidate, pseudo, order=1)
+        older_match = make_product('2', name='Apap')
+        link(older_match, para)
+        newer_match = make_product('3', name='Sudafed')
+        link(newer_match, pseudo)
+
+        older_item = self.make_item(older_match)
+        newer_item = self.make_item(newer_match)
+        # `added_at` is `auto_now_add`, so both land within one tick and
+        # cannot be spread on create. Write the intended spread explicitly,
+        # the way `test_item_list.py` does for the same reason.
+        base = timezone.now() - timedelta(days=1)
+        Item.objects.filter(pk=older_item.pk).update(added_at=base)
+        Item.objects.filter(pk=newer_item.pk).update(added_at=base + timedelta(hours=1))
+
+        result = self._check(candidate)
+
+        self.assertEqual(
+            [match.kind for match in result.matches],
+            [MatchKind.SHARED_SUBSTANCE, MatchKind.SHARED_SUBSTANCE],
+        )
+        self.assertEqual(
+            [match.product.pk for match in result.matches],
+            [newer_match.pk, older_match.pk],
         )
 
     def test_shared_substances_are_ordered_alphabetically_not_by_set_iteration(self) -> None:

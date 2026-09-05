@@ -1,9 +1,9 @@
 ---
 change_id: prescription-duplicate-check
 title: Prescription duplicate check
-status: implemented
+status: impl_reviewed
 created: 2026-08-29
-updated: 2026-08-30
+updated: 2026-09-05
 archived_at: null
 ---
 

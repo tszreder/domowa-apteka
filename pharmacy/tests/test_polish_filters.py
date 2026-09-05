@@ -5,6 +5,8 @@ Pure logic: no DB, no request. The teens cases are the ones a naive
 explicitly rather than left to a spot check.
 """
 
+from decimal import Decimal
+
 from django.test import SimpleTestCase
 
 from pharmacy.templatetags.polish import plural_pl
@@ -45,3 +47,26 @@ class PluralPlTests(SimpleTestCase):
         # A template filter must not 500 a page over a typo in a variable name.
         self.assertEqual(plural_pl(None, FORMS), 'opakowań')
         self.assertEqual(plural_pl('abc', FORMS), 'opakowań')
+
+    def test_an_overflowing_float_falls_back_rather_than_raising(self) -> None:
+        # int(float('inf')) raises OverflowError, not ValueError — a distinct
+        # exception the guard must also catch.
+        self.assertEqual(plural_pl(float('inf'), FORMS), 'opakowań')
+
+    def test_a_decimal_count_is_not_silently_misclassified(self) -> None:
+        # Decimal is outside the old int/float/str whitelist; it must be
+        # coerced like any other numeric type, not treated as non-numeric.
+        self.assertEqual(plural_pl(Decimal('1'), FORMS), 'opakowanie')
+        self.assertEqual(plural_pl(Decimal('2'), FORMS), 'opakowania')
+        self.assertEqual(plural_pl(Decimal('5'), FORMS), 'opakowań')
+
+    def test_a_numeric_string_is_coerced(self) -> None:
+        self.assertEqual(plural_pl('2', FORMS), 'opakowania')
+
+    def test_a_negative_count_uses_its_absolute_value(self) -> None:
+        self.assertEqual(plural_pl(-2, FORMS), 'opakowania')
+
+    def test_a_malformed_form_spec_falls_back_rather_than_raising(self) -> None:
+        # `forms.split(',')` must not raise on a template author's typo any
+        # more than an unusable `count` does.
+        self.assertEqual(plural_pl(2, 'only-one-form'), 'only-one-form')

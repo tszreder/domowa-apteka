@@ -13,7 +13,9 @@ absent, and that pairing is unreadable when both are 90-character Polish
 sentences repeated at each call site.
 """
 
+import re
 from datetime import date
+from pathlib import Path
 
 from django.contrib.auth.models import User
 from django.db import connection
@@ -39,8 +41,9 @@ NO_MATCH = 'Żaden lek w domu nie zawiera tych substancji czynnych.'
 TOTAL_REFUSAL = 'nie można go porównać z lekami w domu'
 PARTIAL_REFUSAL = 'nie sprawdziliśmy, czy w domu są jego zamienniki'
 COMPARISON_BASIS = 'Porównano według substancji czynnych'
-UNCOMPARABLE = 'Leków w domu bez ustalonej substancji czynnej:'
 INVALID_PRODUCT = 'Ten produkt nie jest już dostępny w rejestrze.'
+
+TEMPLATE_PATH = Path(__file__).resolve().parent.parent / 'templates' / 'pharmacy' / 'product_check.html'
 
 
 def make_product(registry_id: str, name: str = 'Apap', **overrides: object) -> Product:
@@ -127,6 +130,17 @@ class ProductCheckResultStateTests(TestCase):
         # Nothing was asked, so nothing may be answered — including a refusal.
         self.assertNotContains(response, NO_MATCH)
         self.assertNotContains(response, TOTAL_REFUSAL)
+
+    def test_empty_product_parameter_renders_the_search_screen_not_a_required_field_error(self) -> None:
+        # `?product=` is present but empty — a stray `&` from a template, not
+        # a submitted id. It must fall through the same path as no parameter
+        # at all, not bind the form and surface Django's generic required
+        # error.
+        response = self.client.get(reverse('pharmacy:product_check'), {'product': ''})
+
+        self.assertContains(response, 'Sprawdź lek')
+        self.assertIsNone(response.context['form'])
+        self.assertNotContains(response, 'To pole jest wymagane.')
 
     def test_household_holding_the_same_product_gets_the_same_product_label(self) -> None:
         candidate = make_product('1', name='Apap', strength='500 mg')
@@ -310,8 +324,8 @@ class ProductCheckUncomparableSuppressionTests(TestCase):
             reverse('pharmacy:product_check'), {'product': candidate.pk}
         )
 
+        self.assertEqual(response.context['check'].uncomparable_count, 1)
         self.assertContains(response, NO_MATCH)
-        self.assertNotContains(response, UNCOMPARABLE)
 
     def test_not_disclosed_when_the_candidate_itself_did_not_resolve(self) -> None:
         candidate = make_product('1', name='Nutriflex')
@@ -320,8 +334,22 @@ class ProductCheckUncomparableSuppressionTests(TestCase):
             reverse('pharmacy:product_check'), {'product': candidate.pk}
         )
 
+        self.assertEqual(response.context['check'].uncomparable_count, 1)
         self.assertContains(response, TOTAL_REFUSAL)
-        self.assertNotContains(response, UNCOMPARABLE)
+
+    def test_uncomparable_count_is_not_wired_into_an_active_template_tag(self) -> None:
+        """Pins the removal decision itself, independent of any fixture or wording.
+
+        `{% comment %}` blocks never reach rendered output, so an
+        `assertNotContains` against the HTTP response cannot tell a suppressed
+        disclosure from one reintroduced with different copy. Reading the
+        template source — with comment blocks stripped — is what actually pins
+        "this field is not wired into a live tag".
+        """
+        source = TEMPLATE_PATH.read_text(encoding='utf-8')
+        live_source = re.sub(r'{%-?\s*comment\s*-?%}.*?{%-?\s*endcomment\s*-?%}', '', source, flags=re.DOTALL)
+
+        self.assertNotIn('uncomparable_count', live_source)
 
 
 class ProductCheckWritesNothingTests(TestCase):
