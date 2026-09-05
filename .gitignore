@@ -28,8 +28,10 @@ local_settings.py
 .env.*
 !.env.example
 
-# Agent tooling (10x toolkit skills/prompts — kept local, not committed)
-.claude/
+# Agent tooling (10x toolkit skills/prompts, worktrees, personal permissions — kept local, not committed)
+.claude/*
+!.claude/settings.json
+!.claude/hooks/
 
 # OS / editor
 .DS_Store
