@@ -656,22 +656,22 @@ Add a verdict sentence so the two match states look different, add a "Wróć do 
 
 #### Automated
 
-- [ ] 4.1 Django system check passes
-- [ ] 4.2 All existing tests pass
-- [ ] 4.3 New F-14 error message test passes
-- [ ] 4.4 New F-20 trim test passes
+- [x] 4.1 Django system check passes
+- [x] 4.2 All existing tests pass
+- [x] 4.3 New F-14 error message test passes
+- [x] 4.4 New F-20 trim test passes
 
 #### Manual
 
-- [ ] 4.5 Submit disabled until suggestion picked
-- [ ] 4.6 Server error says "Wybierz lek z listy podpowiedzi"
-- [ ] 4.7 Typed text preserved on re-render
-- [ ] 4.8 Suggestions overlay content (not in-flow)
-- [ ] 4.9 Substance preview shown after pick
-- [ ] 4.10 Producer uses native `<select>`
-- [ ] 4.11 Strengths sort numerically
-- [ ] 4.12 Holder visible in suggestion labels
-- [ ] 4.13 Trimmed query returns results
+- [x] 4.5 Submit disabled until suggestion picked
+- [x] 4.6 Server error says "Wybierz lek z listy podpowiedzi"
+- [x] 4.7 Typed text preserved on re-render
+- [x] 4.8 Suggestions overlay content (not in-flow)
+- [x] 4.9 Substance preview shown after pick
+- [x] 4.10 Producer uses native `<select>`
+- [x] 4.11 Strengths sort numerically
+- [x] 4.12 Holder visible in suggestion labels
+- [x] 4.13 Trimmed query returns results
 
 ### Phase 5: List Screen
 

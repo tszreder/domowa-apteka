@@ -88,7 +88,12 @@ def item_add(request: HttpRequest) -> HttpResponse:
             return redirect(reverse('pharmacy:item_list'))
     else:
         form = ItemAddForm()
-    return render(request, 'pharmacy/item_form.html', {'form': form})
+    search_text = request.POST.get('search_text', '') if request.method == 'POST' else ''
+    return render(
+        request,
+        'pharmacy/item_form.html',
+        {'form': form, 'search_text': search_text},
+    )
 
 
 @household_required

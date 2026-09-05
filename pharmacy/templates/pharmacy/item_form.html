@@ -13,21 +13,28 @@
     <form method="post" novalidate>
         {% csrf_token %}
         <label for="product-search">Nazwa leku</label>
-        <input type="text" id="product-search" autocomplete="off"
-               placeholder="np. Apap, Xanax, Concor..." aria-describedby="suggestions">
-        <ul id="suggestions" class="suggestions" role="listbox" hidden></ul>
+        <div class="search-wrapper">
+            <input type="text" id="product-search" autocomplete="off"
+                   placeholder="np. Apap, Xanax, Concor..." aria-describedby="suggestions"
+                   value="{{ search_text }}">
+            <ul id="suggestions" class="suggestions" role="listbox" hidden></ul>
+        </div>
+        <input type="hidden" name="search_text" id="search-text-hidden" value="{{ search_text }}">
+
+        <div id="substance-preview" hidden></div>
 
         <div id="producer-field" hidden>
-            <label for="producer-search">Producent (opcjonalnie)</label>
-            <input type="text" id="producer-search" autocomplete="off"
-                   placeholder="Zacznij pisać nazwę producenta...">
-            <ul id="producer-suggestions" class="suggestions" role="listbox" hidden></ul>
+            <label for="producer-select">Producent (opcjonalnie)</label>
+            <select id="producer-select" hidden>
+                <option value="">Wybierz producenta (opcjonalnie)</option>
+            </select>
         </div>
 
         {{ form.product }}
         {{ form.producer_confirmed }}
 
-        <button type="submit">Dodaj</button>
+        <button type="submit" id="submit-btn" disabled>Dodaj</button>
+        <small>Wybierz lek z listy podpowiedzi, aby dodać.</small>
     </form>
 
     {% comment %}

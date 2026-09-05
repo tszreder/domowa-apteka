@@ -80,9 +80,19 @@ class ItemAddTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertFormError(
-            response.context['form'], 'product', 'Ten produkt nie jest już dostępny w rejestrze.'
+            response.context['form'], 'product', 'Wybrany lek nie został znaleziony. Spróbuj ponownie.'
         )
         self.assertFalse(Item.objects.exists())
+
+    def test_empty_product_shows_custom_required_error(self) -> None:
+        response = self.client.post(
+            reverse('pharmacy:item_add'), {'product': '', 'producer_confirmed': 'false'}
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFormError(
+            response.context['form'], 'product', 'Wybierz lek z listy podpowiedzi.'
+        )
 
     def test_unresolved_product_still_creates_item_and_warns(self) -> None:
         product = make_product('1', name='Peditrace')

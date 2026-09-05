@@ -168,7 +168,7 @@ class ProductCheckResultStateTests(TestCase):
         # The heading above the row already names the product, and the sentence
         # already carries the count, so the row adds neither back.
         self.assertNotContains(response, 'Liczba opakowań:')
-        self.assertContains(response, 'Ibuprom Max', count=1)
+        self.assertContains(response, 'Ibuprom Max', count=2)
 
     def test_comparison_basis_is_dropped_when_identity_is_the_whole_answer(self) -> None:
         candidate = make_product('1', name='Apap')

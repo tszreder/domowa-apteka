@@ -31,10 +31,12 @@
         of this.
     {% endcomment %}
     <label for="product-search">Nazwa leku</label>
-    <input type="text" id="product-search" autocomplete="off"
-           placeholder="np. Apap, Xanax, Concor..." aria-describedby="suggestions"
-           data-result-url="{% url 'pharmacy:product_check' %}">
-    <ul id="suggestions" class="suggestions" role="listbox" hidden></ul>
+    <div class="search-wrapper">
+        <input type="text" id="product-search" autocomplete="off"
+               placeholder="np. Apap, Xanax, Concor..." aria-describedby="suggestions"
+               data-result-url="{% url 'pharmacy:product_check' %}"{% if candidate %} value="{{ candidate.name }}{% if candidate.strength %} — {{ candidate.strength }}{% endif %}{% if candidate.pharmaceutical_form %} — {{ candidate.pharmaceutical_form }}{% endif %}"{% endif %}>
+        <ul id="suggestions" class="suggestions" role="listbox" hidden></ul>
+    </div>
 
     {% if candidate %}
         <section class="check-candidate">

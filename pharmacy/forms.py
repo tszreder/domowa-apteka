@@ -13,7 +13,8 @@ class ItemAddForm(forms.ModelForm):
         queryset=Product.objects.filter(is_active=True),
         widget=forms.HiddenInput,
         error_messages={
-            'invalid_choice': 'Ten produkt nie jest już dostępny w rejestrze.',
+            'required': 'Wybierz lek z listy podpowiedzi.',
+            'invalid_choice': 'Wybrany lek nie został znaleziony. Spróbuj ponownie.',
         },
     )
     producer_confirmed = forms.BooleanField(required=False, widget=forms.HiddenInput)

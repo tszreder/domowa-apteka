@@ -91,14 +91,25 @@ header {
    here until 2026-08-30: arrow keys moved the selection correctly and Enter
    picked the right row, but nothing painted, so the keyboard path looked
    broken while working perfectly. Verified in a browser before fixing. */
+.search-wrapper {
+    position: relative;
+}
+
 .suggestions {
     list-style: none;
-    margin: 0 0 1rem;
+    margin: 0;
     padding: 0;
     border: 1px solid var(--pico-muted-border-color, currentColor);
     border-radius: var(--pico-border-radius, 0.25rem);
     max-height: 16rem;
     overflow-y: auto;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    z-index: 20;
+    background: var(--pico-background-color);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .suggestions:empty,
