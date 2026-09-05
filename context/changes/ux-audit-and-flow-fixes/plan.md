@@ -696,12 +696,12 @@ Add a verdict sentence so the two match states look different, add a "Wróć do 
 
 #### Automated
 
-- [ ] 6.1 Django system check passes
-- [ ] 6.2 All existing tests pass
+- [x] 6.1 Django system check passes
+- [x] 6.2 All existing tests pass
 
 #### Manual
 
-- [ ] 6.3 Full-match verdict differs from partial-match verdict
-- [ ] 6.4 No-match verdict says "Nie masz tego leku…"
-- [ ] 6.5 "Wróć do listy" link present and works
-- [ ] 6.6 Query text persists in input after check
+- [x] 6.3 Full-match verdict differs from partial-match verdict
+- [x] 6.4 No-match verdict says "Nie masz tego leku…"
+- [x] 6.5 "Wróć do listy" link present and works
+- [x] 6.6 Query text persists in input after check

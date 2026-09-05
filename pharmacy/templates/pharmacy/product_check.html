@@ -64,6 +64,16 @@
             carries is how many boxes are at home. The other two kinds must name
             their product: the whole point is which *other* box it is.
         {% endcomment %}
+        {% if check.resolved and check.matches %}
+            {% with first_match=check.matches.0 %}
+                {% if first_match.is_same_product or first_match.is_same_substances %}
+                    <p><strong>Masz już lek z tą samą substancją czynną w domu.</strong></p>
+                {% elif first_match.is_shared_substance %}
+                    <p><strong>Masz lek z częściowo wspólnymi substancjami czynnymi.</strong></p>
+                {% endif %}
+            {% endwith %}
+        {% endif %}
+
         {% if check.matches %}
             <ul class="check-matches">
                 {% for match in check.matches %}
@@ -106,18 +116,10 @@
                 <p class="check-refusal">Nie udało się ustalić substancji czynnej tego produktu, więc nie można go porównać z lekami w domu.</p>
             {% endif %}
         {% elif not check.matches %}
-            <p>Żaden lek w domu nie zawiera tych substancji czynnych.</p>
+            <p><strong>Nie masz tego leku ani zamienników w domu.</strong></p>
         {% endif %}
 
-        {% comment %}
-            `check.uncomparable_count` is deliberately not rendered. It counted
-            household boxes whose own substances never resolved, disclosing that
-            a "nothing matches" verdict was computed over a household the
-            comparison only partly saw. Removed as clutter on 2026-08-30 at the
-            user's direction; the count is still computed and unit-tested, so
-            restoring the line is a one-line change if the verdict ever needs
-            qualifying again.
-        {% endcomment %}
+        <p><a href="{% url 'pharmacy:item_list' %}">Wróć do listy</a></p>
     {% endif %}
 
     {% comment %}
