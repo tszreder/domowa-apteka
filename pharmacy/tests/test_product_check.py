@@ -37,7 +37,7 @@ AS_OF = date(2026, 8, 13)
 SAME_PRODUCT_LABEL = 'tego samego leku'
 SAME_SUBSTANCES_LABEL = 'Masz już lek z tą samą substancją czynną'
 SHARED_SUBSTANCE_LABEL = 'Masz już lek, który ma przynajmniej jedną wspólną substancję czynną'
-NO_MATCH = 'Żaden lek w domu nie zawiera tych substancji czynnych.'
+NO_MATCH = 'Nie masz tego leku ani zamienników w domu.'
 TOTAL_REFUSAL = 'nie można go porównać z lekami w domu'
 PARTIAL_REFUSAL = 'nie sprawdziliśmy, czy w domu są jego zamienniki'
 COMPARISON_BASIS = 'Porównano według substancji czynnych'
@@ -168,7 +168,7 @@ class ProductCheckResultStateTests(TestCase):
         # The heading above the row already names the product, and the sentence
         # already carries the count, so the row adds neither back.
         self.assertNotContains(response, 'Liczba opakowań:')
-        self.assertContains(response, 'Ibuprom Max', count=1)
+        self.assertContains(response, 'Ibuprom Max', count=2)
 
     def test_comparison_basis_is_dropped_when_identity_is_the_whole_answer(self) -> None:
         candidate = make_product('1', name='Apap')

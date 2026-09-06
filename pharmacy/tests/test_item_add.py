@@ -80,9 +80,37 @@ class ItemAddTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertFormError(
-            response.context['form'], 'product', 'Ten produkt nie jest już dostępny w rejestrze.'
+            response.context['form'], 'product', 'Wybrany lek nie został znaleziony. Spróbuj ponownie.'
         )
         self.assertFalse(Item.objects.exists())
+
+    def test_empty_product_shows_custom_required_error(self) -> None:
+        response = self.client.post(
+            reverse('pharmacy:item_add'), {'product': '', 'producer_confirmed': 'false'}
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFormError(
+            response.context['form'], 'product', 'Wybierz lek z listy podpowiedzi.'
+        )
+
+    def test_adding_duplicate_shows_warning_flash(self) -> None:
+        para = Substance.objects.create(name='Paracetamol', name_key='paracetamol')
+        product = make_product('1', name='Apap')
+        ProductSubstance.objects.create(
+            product=product, substance=para,
+            source_field=SourceField.SUBSTANCE_ROW, source_order=0,
+        )
+        Item.objects.create(household=self.household, product=product)
+
+        response = self.client.post(
+            reverse('pharmacy:item_add'),
+            {'product': product.id, 'producer_confirmed': 'true'},
+            follow=True,
+        )
+
+        msgs = [str(m) for m in response.context['messages']]
+        self.assertTrue(any('Uwaga' in m for m in msgs))
 
     def test_unresolved_product_still_creates_item_and_warns(self) -> None:
         product = make_product('1', name='Peditrace')

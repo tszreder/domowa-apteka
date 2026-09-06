@@ -48,7 +48,7 @@ reality, and every other slice is downstream of it.
 | S-03 | `duplicate-flagging-on-list`       | see household list items flagged as full duplicates (identical substance sets) and partial duplicates (overlapping but not identical) | S-02          | FR-003, US-03                | done |
 | S-04 | `expiration-date-per-item`         | optionally record an expiration date when adding or editing an item                         | S-02          | FR-004                       | parked   |
 | S-05 | `prescription-duplicate-check`      | check a product they are about to buy against the household list **without adding it**, and see whether something already at home is a full or partial substance match | S-03          | FR-003, §Business Logic (see Q4) | done |
-| S-06 | `ux-audit-and-flow-fixes`           | reach every core action in fewer, clearer steps, on a layout criticised by walking the running app as a user rather than reading its templates as its author | S-03          | US-01, US-03, NFR (mobile web, 1 s ack) | proposed |
+| S-06 | `ux-audit-and-flow-fixes`           | reach every core action in fewer, clearer steps, on a layout criticised by walking the running app as a user rather than reading its templates as its author | S-03          | US-01, US-03, NFR (mobile web, 1 s ack) | planning |
 | S-07 | `visual-refresh`                    | read the app as a finished product — one deliberate type, colour, spacing and state vocabulary in place of stock Pico defaults | S-06          | NFR (mobile web)             | proposed |
 
 ## Streams
@@ -196,7 +196,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
   - Which findings are in scope? The audit will surface more than one slice can carry. The triage is a product decision and belongs to the user, not to whoever wrote the audit. — Owner: user. **Block: yes, at plan time** — `/10x-plan` cannot start against an unranked findings list without silently choosing scope for itself.
   - Is Polish the only UI language, and is copy rewriting inside this slice or outside it? Wording is usually half of any findings list, and it is the half that changes what the screens *mean*. — Owner: user. Block: no.
 - **Risk:** The audit is what makes this slice honest, and it lands as this change's research artifact (`context/changes/ux-audit-and-flow-fixes/ux-audit.md`), not as a roadmap item of its own — a findings list is not a user-visible outcome, so by this roadmap's own rule it is not a slice. Two hazards. First, an audit written by the same agent that wrote the templates grades its own homework: it must be produced by driving the deployed app as a user, on a phone-width viewport, naming screen and observed behaviour per finding, without reading the template source first. Second, an unbounded findings list becomes an unbounded slice, which is why the triage above blocks planning rather than merely informing it. Sequenced after `S-03` because the duplicate presentation is the app's payoff and the thing most worth auditing — auditing before it shipped would have audited the wrong app.
-- **Status:** proposed
+- **Status:** planning
 
 ### S-07: Visual refresh
 

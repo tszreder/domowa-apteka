@@ -97,9 +97,13 @@
   }
 
   function presentationLabel(presentation) {
-    return [presentation.name, presentation.strength, presentation.form]
-      .filter(Boolean)
-      .join(' — ');
+    var parts = [presentation.name, presentation.strength, presentation.form]
+      .filter(Boolean);
+    var holder = presentation.producers && presentation.producers[0]
+      ? presentation.producers[0].holder
+      : '';
+    if (holder) parts.push(holder);
+    return parts.join(' — ');
   }
 
   // Wires `input` to `/suggestions/` and renders picks into `list`. Every piece

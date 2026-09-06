@@ -5,40 +5,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}Domowa Apteka{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/pico.min.css' %}">
-    <link rel="stylesheet" href="{% static 'css/app.css' %}">
+    <link rel="stylesheet" href="{% static 'css/app.css' %}?v=2">
 </head>
 <body>
     <header class="container">
         <nav>
             <ul>
-                <li><strong>Domowa Apteka</strong></li>
+                <li><a href="/"><strong>Domowa apteka</strong></a></li>
             </ul>
             <ul>
                 {% if user.is_authenticated %}
-                    <li>
-                        {{ user.email }}{% if user.membership %} — <a href="{% url 'households:household_detail' %}">{{ user.membership.household.name }}</a>{% endif %}
-                    </li>
-                    <li><a href="{% url 'pharmacy:item_list' %}">Lista leków</a></li>
-                    <li>
-                        <form method="post" action="{% url 'households:logout' %}">
-                            {% csrf_token %}
-                            <button type="submit">Wyloguj</button>
-                        </form>
-                    </li>
+                    <li class="user-identity">{{ user.email|default:user.username }}(<a href="#" onclick="document.getElementById('logout-form').submit();return false">wyloguj</a>)</li>
+                    <form method="post" action="{% url 'households:logout' %}" id="logout-form" hidden>{% csrf_token %}</form>
                 {% else %}
                     <li><a href="{% url 'households:login' %}">Zaloguj się</a></li>
                     <li><a href="{% url 'households:signup' %}" role="button">Załóż konto</a></li>
                 {% endif %}
             </ul>
         </nav>
+        {% if user.is_authenticated %}
+            <nav class="nav-links">
+                <ul>
+                    <li><a href="{% url 'pharmacy:item_list' %}">Lista leków</a></li>
+                    {% if user.membership %}
+                        <li><a href="{% url 'households:household_detail' %}">Rodzina</a></li>
+                    {% endif %}
+                    <li><a href="{% url 'pharmacy:product_check' %}">Sprawdź lek</a></li>
+                </ul>
+            </nav>
+        {% endif %}
     </header>
     <main class="container">
         {% if messages %}
-            <ul class="messages">
+            <div class="messages">
                 {% for message in messages %}
-                    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                    <div{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</div>
                 {% endfor %}
-            </ul>
+            </div>
         {% endif %}
         {% block content %}{% endblock %}
     </main>

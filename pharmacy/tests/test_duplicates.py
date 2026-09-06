@@ -15,6 +15,7 @@ from households.models import Household
 from pharmacy.duplicates import (
     CandidateCheck,
     ItemListView,
+    ItemStack,
     MatchKind,
     Overlap,
     build_list_view,
@@ -568,3 +569,52 @@ class CheckCandidateTests(TestCase):
             result.candidate_substances,
             ['Amoksycylina', 'Ibuprofen', 'Paracetamol', 'Witamina C'],
         )
+
+
+class ItemStackTests(TestCase):
+    def setUp(self) -> None:
+        self.household = Household.objects.create(name='Kowalscy')
+
+    def make_item(self, product: Product, **overrides: object) -> Item:
+        return Item.objects.create(household=self.household, product=product, **overrides)
+
+    def test_stacks_aggregate_identical_products(self) -> None:
+        substance = make_substance('Paracetamol', 'paracetamol')
+        product = make_product('1', name='Apap')
+        link(product, substance)
+        self.make_item(product)
+        self.make_item(product)
+        self.make_item(product)
+
+        view = build_list_view(
+            Item.objects.filter(household=self.household)
+            .select_related('product')
+            .prefetch_related('product__substance_links__substance')
+        )
+
+        self.assertEqual(len(view.groups), 1)
+        stacks = view.groups[0].stacks
+        self.assertEqual(len(stacks), 1)
+        self.assertEqual(stacks[0].count, 3)
+        self.assertIsInstance(stacks[0], ItemStack)
+
+    def test_stacks_separate_different_products_with_same_substances(self) -> None:
+        substance = make_substance('Paracetamol', 'paracetamol')
+        product_a = make_product('1', name='Apap')
+        link(product_a, substance)
+        product_b = make_product('2', name='Panadol')
+        link(product_b, substance)
+        self.make_item(product_a)
+        self.make_item(product_b)
+
+        view = build_list_view(
+            Item.objects.filter(household=self.household)
+            .select_related('product')
+            .prefetch_related('product__substance_links__substance')
+        )
+
+        self.assertEqual(len(view.groups), 1)
+        stacks = view.groups[0].stacks
+        self.assertEqual(len(stacks), 2)
+        self.assertEqual(stacks[0].count, 1)
+        self.assertEqual(stacks[1].count, 1)

@@ -6,6 +6,7 @@ the plan's "Critical Implementation Details" and "Key Discoveries" for why
 these two rules (grouping, tiebreak) exist and what they must hold against.
 """
 
+import re
 from collections import defaultdict
 from dataclasses import dataclass
 from functools import reduce
@@ -101,6 +102,7 @@ def search_presentations(query: str, limit: int = 10) -> list[Presentation]:
     production Postgres. The OR stays cheap only because `limit` bounds it
     to ≤10 triples — it is not a general-purpose fetch.
     """
+    query = query.strip()
     if len(query) < 2:
         return []
 
@@ -126,6 +128,16 @@ def search_presentations(query: str, limit: int = 10) -> list[Presentation]:
     ):
         rows_by_key[(row.name, row.strength, row.pharmaceutical_form)].append(row)
 
-    # Iterating `keys` preserves the SQL ordering; `rows_by_key` is only a
-    # lookup, so its insertion order is never relied on.
-    return [_build_presentation(rows_by_key[key]) for key in keys]
+    presentations = [_build_presentation(rows_by_key[key]) for key in keys]
+    presentations.sort(key=lambda p: (_strength_sort_key(p.strength), p.name))
+    return presentations
+
+
+def _strength_sort_key(strength: str) -> float:
+    m = re.match(r'[\d.,]+', strength)
+    if m:
+        try:
+            return float(m.group().replace(',', '.'))
+        except ValueError:
+            pass
+    return float('inf')

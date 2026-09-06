@@ -59,6 +59,16 @@ class SuggestionsEndpointContractTests(TestCase):
 
         self.assertEqual(response.json(), {'results': []})
 
+    def test_trimmed_query_returns_same_results(self) -> None:
+        response_clean = self.client.get(
+            reverse('pharmacy:product_suggestions'), {'q': 'apap'}
+        )
+        response_padded = self.client.get(
+            reverse('pharmacy:product_suggestions'), {'q': ' apap '}
+        )
+
+        self.assertEqual(response_clean.json(), response_padded.json())
+
     def test_response_is_application_json(self) -> None:
         response = self.client.get(reverse('pharmacy:product_suggestions'), {'q': 'apap'})
 

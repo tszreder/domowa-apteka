@@ -1,30 +1,129 @@
 /* Override seam for the vendored classless stylesheet. */
 
+header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--pico-background-color);
+}
+
+.user-identity {
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+.nav-links {
+    margin-top: -0.5rem;
+    padding-bottom: 0;
+}
+
+.messages {
+    margin: 0 0 1rem;
+}
+
+.messages > div {
+    padding: 0.5rem 0;
+}
+
+.landing-illustration {
+    font-size: 3rem;
+    text-align: center;
+    margin: 1.5rem 0;
+}
+
+.landing-features {
+    padding-inline-start: 1.25rem;
+    line-height: 1.6;
+}
+
+.landing-features li {
+    margin-block-end: 0.5rem;
+}
+
+.invite-link {
+    word-break: break-all;
+    display: block;
+}
+
+.secondary.outline {
+    background-color: transparent;
+    border: 1px solid var(--pico-muted-border-color, currentColor);
+    color: var(--pico-muted-color, currentColor);
+}
+
+/* Item row card layout */
+.item-card {
+    border: 1px solid var(--pico-form-element-border-color, #444);
+    border-radius: var(--pico-border-radius, 0.25rem);
+    padding: 0.75rem;
+    margin-block-end: 0.75rem;
+}
+
+.item-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 0.25rem;
+}
+
+.item-card-header strong {
+    font-size: 1rem;
+}
+
+a.item-card-delete {
+    color: var(--pico-muted-color, currentColor);
+    font-size: 0.85rem;
+    text-decoration: none;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+a.item-card-delete:hover {
+    color: var(--pico-del-color, currentColor);
+}
+
+.item-card-form {
+    font-size: 0.8rem;
+    color: var(--pico-muted-color, currentColor);
+}
+
+.item-card-substance {
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+
+.item-card-meta {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.8rem;
+    color: var(--pico-muted-color, currentColor);
+    flex-wrap: wrap;
+}
+
+.item-card-meta span {
+    white-space: nowrap;
+}
+
 .duplicate-cluster {
     border: 1px solid var(--pico-primary-border, currentColor);
     border-radius: var(--pico-border-radius, 0.25rem);
     padding: 0.75rem 1rem;
     margin-block-end: 1rem;
-    list-style: none;
+}
+
+.duplicate-cluster .item-card {
+    border: none;
+    padding: 0.5rem 0;
+    margin-block-end: 0;
+}
+
+.duplicate-cluster .item-card:not(:last-of-type) {
+    border-bottom: 1px dashed var(--pico-muted-border-color, currentColor);
 }
 
 .duplicate-cluster-label {
     margin: 0 0 0.5rem;
     font-weight: bold;
-}
-
-.duplicate-cluster-items {
-    margin: 0;
-    padding: 0;
-}
-
-.duplicate-cluster-items > li {
-    list-style: none;
-    padding-block: 0.5rem;
-}
-
-.duplicate-cluster-items > li:not(:last-child) {
-    border-bottom: 1px dashed var(--pico-muted-border-color, currentColor);
 }
 
 .partial-overlap-badge {
@@ -37,9 +136,11 @@
     cursor: pointer;
 }
 
-.partial-overlap-detail {
+.partial-overlap-detail,
+.partial-overlap-detail li {
     margin: 0.25rem 0 0;
-    padding-inline-start: 1.25rem;
+    padding-inline-start: 1rem;
+    list-style: none;
 }
 
 .check-matches {
@@ -60,19 +161,25 @@
     font-weight: bold;
 }
 
-/* The product picker's option list, shared by the add and check screens.
-   `.active` is set by attachKeyboardNav in product-search.js and had no rule
-   here until 2026-08-30: arrow keys moved the selection correctly and Enter
-   picked the right row, but nothing painted, so the keyboard path looked
-   broken while working perfectly. Verified in a browser before fixing. */
+.search-wrapper {
+    position: relative;
+}
+
 .suggestions {
     list-style: none;
-    margin: 0 0 1rem;
+    margin: 0;
     padding: 0;
     border: 1px solid var(--pico-muted-border-color, currentColor);
     border-radius: var(--pico-border-radius, 0.25rem);
     max-height: 16rem;
     overflow-y: auto;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    z-index: 20;
+    background: var(--pico-background-color);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .suggestions:empty,
@@ -95,8 +202,6 @@
     color: var(--pico-secondary-inverse, inherit);
 }
 
-/* A failure message is not an option: `optionsOf` already keeps arrow keys off
-   it, and it must not offer a pointer or a hover state either. */
 .suggestions > li.suggestion-message,
 .suggestions > li.suggestion-message:hover {
     cursor: default;
