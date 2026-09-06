@@ -607,101 +607,101 @@ Add a verdict sentence so the two match states look different, add a "Wróć do 
 
 #### Automated
 
-- [x] 1.1 Django system check passes
-- [x] 1.2 All existing tests pass
+- [x] 1.1 Django system check passes — 7d7d707
+- [x] 1.2 All existing tests pass — 7d7d707
 
 #### Manual
 
-- [x] 1.3 Flash messages have no bullet markers at 390×844
-- [x] 1.4 Header sticks to top when scrolling
-- [x] 1.5 Brand is a clickable link
-- [x] 1.6 Authenticated user at `/` redirected to `/list/`
-- [x] 1.7 Nav shows Gospodarstwo, Lista leków, Sprawdź lek links
-- [x] 1.8 Blank-email user shows username in nav
-- [x] 1.9 Landing CTA buttons visible for anonymous
-- [x] 1.10 List screen heading says "Lista leków"
+- [x] 1.3 Flash messages have no bullet markers at 390×844 — 7d7d707
+- [x] 1.4 Header sticks to top when scrolling — 7d7d707
+- [x] 1.5 Brand is a clickable link — 7d7d707
+- [x] 1.6 Authenticated user at `/` redirected to `/list/` — 7d7d707
+- [x] 1.7 Nav shows Gospodarstwo, Lista leków, Sprawdź lek links — 7d7d707
+- [x] 1.8 Blank-email user shows username in nav — 7d7d707
+- [x] 1.9 Landing CTA buttons visible for anonymous — 7d7d707
+- [x] 1.10 List screen heading says "Lista leków" — 7d7d707
 
 ### Phase 2: Auth Screens
 
 #### Automated
 
-- [x] 2.1 Django system check passes
-- [x] 2.2 All existing tests pass
+- [x] 2.1 Django system check passes — 5af87fa
+- [x] 2.2 All existing tests pass — 5af87fa
 
 #### Manual
 
-- [x] 2.3 Password rules below input at 390×844
-- [x] 2.4 No autocomplete console warnings
-- [x] 2.5 Login page shows signup link and reset disclosure
+- [x] 2.3 Password rules below input at 390×844 — 5af87fa
+- [x] 2.4 No autocomplete console warnings — 5af87fa
+- [x] 2.5 Login page shows signup link and reset disclosure — 5af87fa
 
 ### Phase 3: Join + Household
 
 #### Automated
 
-- [x] 3.1 Django system check passes
-- [x] 3.2 All existing tests pass
-- [x] 3.3 New F-11 signal handler tests pass
+- [x] 3.1 Django system check passes — 91a60d9
+- [x] 3.2 All existing tests pass — 91a60d9
+- [x] 3.3 New F-11 signal handler tests pass — 91a60d9
 
 #### Manual
 
-- [x] 3.4 Invite link wraps within viewport
-- [x] 3.5 Copy button works and shows feedback
-- [x] 3.6 Regenerate is outline and asks for confirmation
-- [x] 3.7 Blank-email member shows username
-- [x] 3.8 F-11: login via invite link joins the household
-- [x] 3.9 Signup via invite shows household name and join acknowledgement
-- [x] 3.10 Signup without invite redirects to household creation with pre-filled name
+- [x] 3.4 Invite link wraps within viewport — 91a60d9
+- [x] 3.5 Copy button works and shows feedback — 91a60d9
+- [x] 3.6 Regenerate is outline and asks for confirmation — 91a60d9
+- [x] 3.7 Blank-email member shows username — 91a60d9
+- [x] 3.8 F-11: login via invite link joins the household — 91a60d9
+- [x] 3.9 Signup via invite shows household name and join acknowledgement — 91a60d9
+- [x] 3.10 Signup without invite redirects to household creation with pre-filled name — 91a60d9
 
 ### Phase 4: Add Medicine Form
 
 #### Automated
 
-- [x] 4.1 Django system check passes
-- [x] 4.2 All existing tests pass
-- [x] 4.3 New F-14 error message test passes
-- [x] 4.4 New F-20 trim test passes
+- [x] 4.1 Django system check passes — f09bb48
+- [x] 4.2 All existing tests pass — f09bb48
+- [x] 4.3 New F-14 error message test passes — f09bb48
+- [x] 4.4 New F-20 trim test passes — f09bb48
 
 #### Manual
 
-- [x] 4.5 Submit disabled until suggestion picked
-- [x] 4.6 Server error says "Wybierz lek z listy podpowiedzi"
-- [x] 4.7 Typed text preserved on re-render
-- [x] 4.8 Suggestions overlay content (not in-flow)
-- [x] 4.9 Substance preview shown after pick
-- [x] 4.10 Producer uses native `<select>`
-- [x] 4.11 Strengths sort numerically
-- [x] 4.12 Holder visible in suggestion labels
-- [x] 4.13 Trimmed query returns results
+- [x] 4.5 Submit disabled until suggestion picked — f09bb48
+- [x] 4.6 Server error says "Wybierz lek z listy podpowiedzi" — f09bb48
+- [x] 4.7 Typed text preserved on re-render — f09bb48
+- [x] 4.8 Suggestions overlay content (not in-flow) — f09bb48
+- [x] 4.9 Substance preview shown after pick — f09bb48
+- [x] 4.10 Producer uses native `<select>` — f09bb48
+- [x] 4.11 Strengths sort numerically — f09bb48
+- [x] 4.12 Holder visible in suggestion labels — f09bb48
+- [x] 4.13 Trimmed query returns results — f09bb48
 
 ### Phase 5: List Screen
 
 #### Automated
 
-- [x] 5.1 Django system check passes
-- [x] 5.2 All existing tests pass
-- [x] 5.3 New F-24 duplicate flash test passes
-- [x] 5.4 New F-25 ItemStack aggregation tests pass
+- [x] 5.1 Django system check passes — cb7109e
+- [x] 5.2 All existing tests pass — cb7109e
+- [x] 5.3 New F-24 duplicate flash test passes — cb7109e
+- [x] 5.4 New F-25 ItemStack aggregation tests pass — cb7109e
 
 #### Manual
 
-- [x] 5.5 Delete buttons are outline/secondary
-- [x] 5.6 Partial overlaps expanded with clear wording
-- [x] 5.7 Zamienniki headings name the shared substance
-- [x] 5.8 Adding a duplicate shows duplicate warning flash
-- [x] 5.9 Identical items aggregated with count; delete removes one
-- [x] 5.10 Delete asks for confirmation
-- [x] 5.11 Unresolved items: no duplicate sentence, recovery link present
+- [x] 5.5 Delete buttons are outline/secondary — cb7109e
+- [x] 5.6 Partial overlaps expanded with clear wording — cb7109e
+- [x] 5.7 Zamienniki headings name the shared substance — cb7109e
+- [x] 5.8 Adding a duplicate shows duplicate warning flash — cb7109e
+- [x] 5.9 Identical items aggregated with count; delete removes one — cb7109e
+- [x] 5.10 Delete asks for confirmation — cb7109e
+- [x] 5.11 Unresolved items: no duplicate sentence, recovery link present — cb7109e
 
 ### Phase 6: Check Screen
 
 #### Automated
 
-- [x] 6.1 Django system check passes
-- [x] 6.2 All existing tests pass
+- [x] 6.1 Django system check passes — 870ffc6
+- [x] 6.2 All existing tests pass — 870ffc6
 
 #### Manual
 
-- [x] 6.3 Full-match verdict differs from partial-match verdict
-- [x] 6.4 No-match verdict says "Nie masz tego leku…"
-- [x] 6.5 "Wróć do listy" link present and works
-- [x] 6.6 Query text persists in input after check
+- [x] 6.3 Full-match verdict differs from partial-match verdict — 870ffc6
+- [x] 6.4 No-match verdict says "Nie masz tego leku…" — 870ffc6
+- [x] 6.5 "Wróć do listy" link present and works — 870ffc6
+- [x] 6.6 Query text persists in input after check — 870ffc6

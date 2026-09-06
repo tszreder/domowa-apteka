@@ -3,7 +3,7 @@ project: domowa-apteka
 version: 2
 status: draft
 created: 2026-08-03
-updated: 2026-09-05
+updated: 2026-09-06
 prd_version: 1
 main_goal: speed
 top_blocker: decisions
@@ -48,7 +48,7 @@ reality, and every other slice is downstream of it.
 | S-03 | `duplicate-flagging-on-list`       | see household list items flagged as full duplicates (identical substance sets) and partial duplicates (overlapping but not identical) | S-02          | FR-003, US-03                | done |
 | S-04 | `expiration-date-per-item`         | optionally record an expiration date when adding or editing an item                         | S-02          | FR-004                       | parked   |
 | S-05 | `prescription-duplicate-check`      | check a product they are about to buy against the household list **without adding it**, and see whether something already at home is a full or partial substance match | S-03          | FR-003, §Business Logic (see Q4) | done |
-| S-06 | `ux-audit-and-flow-fixes`           | reach every core action in fewer, clearer steps, on a layout criticised by walking the running app as a user rather than reading its templates as its author | S-03          | US-01, US-03, NFR (mobile web, 1 s ack) | planning |
+| S-06 | `ux-audit-and-flow-fixes`           | reach every core action in fewer, clearer steps, on a layout criticised by walking the running app as a user rather than reading its templates as its author | S-03          | US-01, US-03, NFR (mobile web, 1 s ack) | done |
 | S-07 | `visual-refresh`                    | read the app as a finished product — one deliberate type, colour, spacing and state vocabulary in place of stock Pico defaults | S-06          | NFR (mobile web)             | proposed |
 
 ## Streams
@@ -196,7 +196,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
   - Which findings are in scope? The audit will surface more than one slice can carry. The triage is a product decision and belongs to the user, not to whoever wrote the audit. — Owner: user. **Block: yes, at plan time** — `/10x-plan` cannot start against an unranked findings list without silently choosing scope for itself.
   - Is Polish the only UI language, and is copy rewriting inside this slice or outside it? Wording is usually half of any findings list, and it is the half that changes what the screens *mean*. — Owner: user. Block: no.
 - **Risk:** The audit is what makes this slice honest, and it lands as this change's research artifact (`context/changes/ux-audit-and-flow-fixes/ux-audit.md`), not as a roadmap item of its own — a findings list is not a user-visible outcome, so by this roadmap's own rule it is not a slice. Two hazards. First, an audit written by the same agent that wrote the templates grades its own homework: it must be produced by driving the deployed app as a user, on a phone-width viewport, naming screen and observed behaviour per finding, without reading the template source first. Second, an unbounded findings list becomes an unbounded slice, which is why the triage above blocks planning rather than merely informing it. Sequenced after `S-03` because the duplicate presentation is the app's payoff and the thing most worth auditing — auditing before it shipped would have audited the wrong app.
-- **Status:** planning
+- **Status:** done
 
 ### S-07: Visual refresh
 
@@ -255,3 +255,4 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **F-02: (foundation) registry data refreshes on a schedule, and the app records and surfaces its own last-successful-run timestamp rather than inferring freshness from the scheduler.** — Archived 2026-08-20 → `context/archive/2026-08-14-registry-freshness-refresh/`. Lesson: —.
 - **S-03: an adult viewing the shared household list sees items whose active-substance sets are identical flagged as full duplicates, items whose sets overlap but differ flagged as partial duplicates, and items whose substances could not be resolved shown separately rather than grouped or guessed into a relationship.** — Archived 2026-08-25 → `context/archive/2026-08-24-duplicate-flagging-on-list/`. Lesson: —.
 - **S-05: an adult standing in a doctor's office can type or pick a product the household does *not* own — the one just prescribed, or a proposed alternative — and see straight away whether something already at home is a full substance match (identical set) or a partial one (overlapping but not identical), with nothing written to the household list as a side effect.** — Archived 2026-09-05 → `context/archive/2026-08-29-prescription-duplicate-check/`. Lesson: —.
+- **S-06: an adult can reach each core action — add an item, scan the list for duplicates, invite a member — in fewer and more obvious steps, with ordering, labels, and affordances chosen from a written audit of the running app instead of from whatever the templates grew into over five slices.** — Archived 2026-09-06 → `context/archive/2026-09-05-ux-audit-and-flow-fixes/`. Lesson: —.
