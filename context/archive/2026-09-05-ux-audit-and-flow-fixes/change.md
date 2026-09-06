@@ -1,10 +1,10 @@
 ---
 change_id: ux-audit-and-flow-fixes
 title: Ux audit and flow fixes
-status: implemented
+status: archived
 created: 2026-09-05
-updated: 2026-09-05
-archived_at: null
+updated: 2026-09-06
+archived_at: 2026-09-06T21:14:44Z
 ---
 
 ## Notes
