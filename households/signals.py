@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.contrib.auth.models import User
 from django.contrib.auth.signals import user_logged_in
 from django.dispatch import receiver
 from django.http import HttpRequest
@@ -10,7 +11,7 @@ INVITE_TOKEN_SESSION_KEY = 'invite_token'
 
 @receiver(user_logged_in)
 def consume_invite_token_on_login(
-    sender: type, request: HttpRequest, user: object, **kwargs: object
+    sender: type, request: HttpRequest, user: User, **kwargs: object
 ) -> None:
     token = request.session.pop(INVITE_TOKEN_SESSION_KEY, None)
     if not token:
@@ -21,7 +22,7 @@ def consume_invite_token_on_login(
         return
 
     if hasattr(user, 'membership'):
-        if user.membership.household_id == household.id:  # type: ignore[union-attr]
+        if user.membership.household_id == household.id:
             messages.info(request, f'Już należysz do gospodarstwa „{household.name}".')
         else:
             messages.info(
