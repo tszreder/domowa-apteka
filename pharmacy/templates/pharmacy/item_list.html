@@ -10,10 +10,10 @@
     </p>
     {% if items %}
         {% if list_view.groups %}
-            <ul class="item-list">
+            <div class="item-list">
                 {% for group in list_view.groups %}
                     {% if group.is_cluster %}
-                        <li class="duplicate-cluster">
+                        <div class="duplicate-cluster">
                             <p class="duplicate-cluster-label">
                                 {% if group.same_product %}
                                     Ten sam produkt dodany wielokrotnie
@@ -21,32 +21,28 @@
                                     Zamienniki — substancja czynna: {{ group.substance_names|join:", " }}
                                 {% endif %}
                             </p>
-                            <ul class="duplicate-cluster-items">
-                                {% for stack in group.stacks %}
-                                    <li>{% include "pharmacy/_item_row.html" %}</li>
-                                {% endfor %}
-                            </ul>
+                            {% for stack in group.stacks %}
+                                {% include "pharmacy/_item_row.html" %}
+                            {% endfor %}
                             {% include "pharmacy/_partial_overlap_badge.html" %}
-                        </li>
+                        </div>
                     {% else %}
                         {% with stack=group.stacks.0 %}
-                            <li>
-                                {% include "pharmacy/_item_row.html" %}
-                                {% include "pharmacy/_partial_overlap_badge.html" %}
-                            </li>
+                            {% include "pharmacy/_item_row.html" %}
+                            {% include "pharmacy/_partial_overlap_badge.html" %}
                         {% endwith %}
                     {% endif %}
                 {% endfor %}
-            </ul>
+            </div>
         {% endif %}
         {% if list_view.unresolved %}
             <section class="unresolved-section">
                 <h2>Nie udało się ustalić substancji</h2>
-                <ul class="item-list">
+                <div class="item-list">
                     {% for item in list_view.unresolved %}
-                        <li class="unresolved">{% include "pharmacy/_item_row.html" %}</li>
+                        {% include "pharmacy/_item_row.html" %}
                     {% endfor %}
-                </ul>
+                </div>
             </section>
         {% endif %}
     {% else %}

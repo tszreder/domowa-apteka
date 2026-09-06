@@ -86,7 +86,7 @@ class ItemListRenderingTests(TestCase):
 
         response = self.client.get(reverse('pharmacy:item_list'))
 
-        self.assertContains(response, 'class="unresolved"')
+        self.assertContains(response, 'class="unresolved-section"')
 
     def test_producer_shown_only_when_confirmed(self) -> None:
         product = make_product('3', name='Concor Cor 2,5', marketing_holder='Merck')

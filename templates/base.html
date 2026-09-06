@@ -5,22 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}Domowa Apteka{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/pico.min.css' %}">
-    <link rel="stylesheet" href="{% static 'css/app.css' %}">
+    <link rel="stylesheet" href="{% static 'css/app.css' %}?v=2">
 </head>
 <body>
     <header class="container">
         <nav>
             <ul>
-                <li><a href="/"><strong>Domowa Apteka</strong></a></li>
+                <li><a href="/"><strong>Domowa apteka</strong></a></li>
             </ul>
             <ul>
                 {% if user.is_authenticated %}
-                    <li><a href="{% url 'pharmacy:item_list' %}">Lista leków</a></li>
-                    {% if user.membership %}
-                        <li><a href="{% url 'households:household_detail' %}">Rodzina</a></li>
-                    {% endif %}
-                    <li><a href="{% url 'pharmacy:product_check' %}">Sprawdź lek</a></li>
-                    <li class="user-identity">{{ user.email|default:user.username }} (<a href="#" onclick="document.getElementById('logout-form').submit();return false">wyloguj</a>)</li>
+                    <li class="user-identity">{{ user.email|default:user.username }}(<a href="#" onclick="document.getElementById('logout-form').submit();return false">wyloguj</a>)</li>
                     <form method="post" action="{% url 'households:logout' %}" id="logout-form" hidden>{% csrf_token %}</form>
                 {% else %}
                     <li><a href="{% url 'households:login' %}">Zaloguj się</a></li>
@@ -28,6 +23,17 @@
                 {% endif %}
             </ul>
         </nav>
+        {% if user.is_authenticated %}
+            <nav class="nav-links">
+                <ul>
+                    <li><a href="{% url 'pharmacy:item_list' %}">Lista leków</a></li>
+                    {% if user.membership %}
+                        <li><a href="{% url 'households:household_detail' %}">Rodzina</a></li>
+                    {% endif %}
+                    <li><a href="{% url 'pharmacy:product_check' %}">Sprawdź lek</a></li>
+                </ul>
+            </nav>
+        {% endif %}
     </header>
     <main class="container">
         {% if messages %}

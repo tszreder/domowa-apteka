@@ -10,8 +10,10 @@
     </div>
     <div class="item-card-meta">
         {% if stack.producer_confirmed %}<span>🏭 {{ stack.product.marketing_holder }}</span>{% endif %}
-        {% if stack.product.pharmaceutical_form %}<span>💊 {{ stack.product.pharmaceutical_form }}{% if stack.product.strength %} ({{ stack.product.strength }}){% endif %}</span>{% endif %}
     </div>
+    {% if stack.product.pharmaceutical_form %}
+        <div class="item-card-form">💊 {{ stack.product.pharmaceutical_form }}{% if stack.product.strength %} ({{ stack.product.strength }}){% endif %}</div>
+    {% endif %}
 </div>
 {% else %}
 <div class="item-card">
@@ -29,7 +31,9 @@
     {% endif %}
     <div class="item-card-meta">
         {% if item.producer_confirmed %}<span>🏭 {{ item.product.marketing_holder }}</span>{% endif %}
-        {% if item.product.pharmaceutical_form %}<span>💊 {{ item.product.pharmaceutical_form }}{% if item.product.strength %} ({{ item.product.strength }}){% endif %}</span>{% endif %}
     </div>
+    {% if item.product.pharmaceutical_form %}
+        <div class="item-card-form">💊 {{ item.product.pharmaceutical_form }}{% if item.product.strength %} ({{ item.product.strength }}){% endif %}</div>
+    {% endif %}
 </div>
 {% endif %}

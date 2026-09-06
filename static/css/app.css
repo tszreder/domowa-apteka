@@ -12,6 +12,10 @@ header {
     white-space: nowrap;
 }
 
+.nav-links {
+    margin-top: -0.5rem;
+    padding-bottom: 0;
+}
 
 .messages {
     margin: 0 0 1rem;
@@ -49,7 +53,7 @@ header {
 
 /* Item row card layout */
 .item-card {
-    border: 1px solid var(--pico-muted-border-color, currentColor);
+    border: 1px solid var(--pico-form-element-border-color, #444);
     border-radius: var(--pico-border-radius, 0.25rem);
     padding: 0.75rem;
     margin-block-end: 0.75rem;
@@ -70,10 +74,17 @@ a.item-card-delete {
     color: var(--pico-muted-color, currentColor);
     font-size: 0.85rem;
     text-decoration: none;
+    margin-left: auto;
+    flex-shrink: 0;
 }
 
 a.item-card-delete:hover {
     color: var(--pico-del-color, currentColor);
+}
+
+.item-card-form {
+    font-size: 0.8rem;
+    color: var(--pico-muted-color, currentColor);
 }
 
 .item-card-substance {
@@ -98,22 +109,21 @@ a.item-card-delete:hover {
     border-radius: var(--pico-border-radius, 0.25rem);
     padding: 0.75rem 1rem;
     margin-block-end: 1rem;
-    list-style: none;
+}
+
+.duplicate-cluster .item-card {
+    border: none;
+    padding: 0.5rem 0;
+    margin-block-end: 0;
+}
+
+.duplicate-cluster .item-card:not(:last-of-type) {
+    border-bottom: 1px dashed var(--pico-muted-border-color, currentColor);
 }
 
 .duplicate-cluster-label {
     margin: 0 0 0.5rem;
     font-weight: bold;
-}
-
-.duplicate-cluster-items {
-    margin: 0;
-    padding: 0;
-}
-
-.duplicate-cluster-items > li {
-    list-style: none;
-    padding-block: 0.25rem;
 }
 
 .partial-overlap-badge {
@@ -126,9 +136,11 @@ a.item-card-delete:hover {
     cursor: pointer;
 }
 
-.partial-overlap-detail {
+.partial-overlap-detail,
+.partial-overlap-detail li {
     margin: 0.25rem 0 0;
-    padding-inline-start: 1.25rem;
+    padding-inline-start: 1rem;
+    list-style: none;
 }
 
 .check-matches {
