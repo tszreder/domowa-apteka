@@ -1,40 +1,35 @@
 {% if stack %}
-    <strong>{{ stack.product.name }}</strong>
-    {% if stack.product.strength %}— {{ stack.product.strength }}{% endif %}
-    {% if stack.product.pharmaceutical_form %}— {{ stack.product.pharmaceutical_form }}{% endif %}
-    {% if stack.count > 1 %} <strong>×{{ stack.count }}</strong>{% endif %}
-    {% if stack.producer_confirmed %}
-        <br><small>{{ stack.product.marketing_holder }}</small>
-    {% endif %}
-    <br>
-    {% for link in stack.product.substance_links.all %}
-        {{ link.substance.name }}{% if not forloop.last %}, {% endif %}
-    {% endfor %}
-    <br>
-    <form method="post" action="{% url 'pharmacy:item_delete' stack.representative.pk %}">
-        {% csrf_token %}
-        <button type="submit" class="secondary outline" onclick="return confirm('Usunąć {{ stack.product.name }}?')">Usuń</button>
-    </form>
+<div class="item-card">
+    <div class="item-card-header">
+        <strong>{{ stack.product.name }}{% if stack.count > 1 %} &times;{{ stack.count }}{% endif %}</strong>
+        <form method="post" action="{% url 'pharmacy:item_delete' stack.representative.pk %}" id="delete-{{ stack.representative.pk }}" hidden>{% csrf_token %}</form>
+        <a href="#" class="item-card-delete" onclick="if(confirm('Usunąć {{ stack.product.name }}?'))document.getElementById('delete-{{ stack.representative.pk }}').submit();return false">🗑 usuń</a>
+    </div>
+    <div class="item-card-substance">
+        🧪 {% for link in stack.product.substance_links.all %}{{ link.substance.name }}{% if not forloop.last %}, {% endif %}{% endfor %}
+    </div>
+    <div class="item-card-meta">
+        {% if stack.producer_confirmed %}<span>🏭 {{ stack.product.marketing_holder }}</span>{% endif %}
+        {% if stack.product.pharmaceutical_form %}<span>💊 {{ stack.product.pharmaceutical_form }}{% if stack.product.strength %} ({{ stack.product.strength }}){% endif %}</span>{% endif %}
+    </div>
+</div>
 {% else %}
-    <strong>{{ item.product.name }}</strong>
-    {% if item.product.strength %}— {{ item.product.strength }}{% endif %}
-    {% if item.product.pharmaceutical_form %}— {{ item.product.pharmaceutical_form }}{% endif %}
-    {% if item.producer_confirmed %}
-        <br><small>{{ item.product.marketing_holder }}</small>
-    {% endif %}
-    {% if item.unresolved %}
-    {% else %}
-        <br>
-        {% for link in item.product.substance_links.all %}
-            {{ link.substance.name }}{% if not forloop.last %}, {% endif %}
-        {% endfor %}
-    {% endif %}
-    <br>
-    <form method="post" action="{% url 'pharmacy:item_delete' item.pk %}">
-        {% csrf_token %}
-        <button type="submit" class="secondary outline" onclick="return confirm('Usunąć {{ item.product.name }}?')">Usuń</button>
-    </form>
+<div class="item-card">
+    <div class="item-card-header">
+        <strong>{{ item.product.name }}</strong>
+        <form method="post" action="{% url 'pharmacy:item_delete' item.pk %}" id="delete-{{ item.pk }}" hidden>{% csrf_token %}</form>
+        <a href="#" class="item-card-delete" onclick="if(confirm('Usunąć {{ item.product.name }}?'))document.getElementById('delete-{{ item.pk }}').submit();return false">🗑 usuń</a>
+    </div>
     {% if item.unresolved %}
         <a href="{% url 'pharmacy:item_add' %}">Dodaj ponownie</a>
+    {% else %}
+        <div class="item-card-substance">
+            🧪 {% for link in item.product.substance_links.all %}{{ link.substance.name }}{% if not forloop.last %}, {% endif %}{% endfor %}
+        </div>
     {% endif %}
+    <div class="item-card-meta">
+        {% if item.producer_confirmed %}<span>🏭 {{ item.product.marketing_holder }}</span>{% endif %}
+        {% if item.product.pharmaceutical_form %}<span>💊 {{ item.product.pharmaceutical_form }}{% if item.product.strength %} ({{ item.product.strength }}){% endif %}</span>{% endif %}
+    </div>
+</div>
 {% endif %}

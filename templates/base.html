@@ -20,21 +20,14 @@
                         <li><a href="{% url 'households:household_detail' %}">Rodzina</a></li>
                     {% endif %}
                     <li><a href="{% url 'pharmacy:product_check' %}">Sprawdź lek</a></li>
+                    <li class="user-identity">{{ user.email|default:user.username }} (<a href="#" onclick="document.getElementById('logout-form').submit();return false">wyloguj</a>)</li>
+                    <form method="post" action="{% url 'households:logout' %}" id="logout-form" hidden>{% csrf_token %}</form>
                 {% else %}
                     <li><a href="{% url 'households:login' %}">Zaloguj się</a></li>
                     <li><a href="{% url 'households:signup' %}" role="button">Załóż konto</a></li>
                 {% endif %}
             </ul>
         </nav>
-        {% if user.is_authenticated %}
-            <div class="user-bar">
-                <small>{{ user.email|default:user.username }}</small>
-                <form method="post" action="{% url 'households:logout' %}">
-                    {% csrf_token %}
-                    <button type="submit" class="secondary outline">Wyloguj</button>
-                </form>
-            </div>
-        {% endif %}
     </header>
     <main class="container">
         {% if messages %}
