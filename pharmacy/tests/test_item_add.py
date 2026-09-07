@@ -3,12 +3,15 @@
 from datetime import date
 
 from django.contrib.auth.models import User
+from django.db import connection
 from django.test import TestCase
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 
 from households.models import Household, Membership
 from pharmacy.models import Item
 from registry.models import Product, ProductSubstance, SourceField, Substance
+from registry.suggestions import search_presentations
 
 AS_OF = date(2026, 8, 13)
 
@@ -169,6 +172,42 @@ class ItemAddTests(TestCase):
         item = Item.objects.get()
         self.assertFalse(item.producer_confirmed)
 
+    def test_collision_persists_default_product_and_its_own_substances(self) -> None:
+        # The "Sortis 20" shape (registry/tests/test_suggestions.py:151-167):
+        # two rows share name/strength/form with no distinguishing producer
+        # (no marketing_holder on either) and disagree on substances. Proves
+        # the suggestions-layer tiebreak is what item_add actually persists,
+        # not just what search_presentations reports.
+        atorvastatinum = Substance.objects.create(name='Atorvastatinum', name_key='atorvastatinum')
+        atorvastatinum_calcicum = Substance.objects.create(
+            name='Atorvastatinum calcicum', name_key='atorvastatinum_calcicum'
+        )
+        higher = make_product('200', name='Sortis 20')
+        ProductSubstance.objects.create(
+            product=higher, substance=atorvastatinum_calcicum,
+            source_field=SourceField.SUBSTANCE_ROW, source_order=0,
+        )
+        lower = make_product('100', name='Sortis 20')
+        ProductSubstance.objects.create(
+            product=lower, substance=atorvastatinum,
+            source_field=SourceField.SUBSTANCE_ROW, source_order=0,
+        )
+
+        presentation = search_presentations('sortis')[0]
+        response = self.client.post(
+            reverse('pharmacy:item_add'),
+            {'product': presentation.default_product_id, 'producer_confirmed': 'false'},
+        )
+
+        self.assertRedirects(response, reverse('pharmacy:item_list'))
+        item = Item.objects.get()
+        self.assertEqual(item.product_id, presentation.default_product_id)
+        self.assertEqual(item.product_id, lower.id)
+        persisted_substances = [link.substance.name for link in item.product.substance_links.all()]
+        self.assertEqual(persisted_substances, presentation.substances)
+        self.assertEqual(persisted_substances, ['Atorvastatinum'])
+        self.assertFalse(item.producer_confirmed)
+
     def test_member_of_household_b_cannot_see_item_household_a_just_added(self) -> None:
         product = make_product('1', name='Apap Extra')
         self.client.post(
@@ -188,3 +227,59 @@ class ItemAddTests(TestCase):
         response = other_client.get(reverse('pharmacy:item_list'))
 
         self.assertNotContains(response, 'Apap Extra')
+
+
+class ItemAddQueryShapeTests(TestCase):
+    """The N+1 guard for item_add's substance reads, pinned the way
+    `test_product_check.py:421-481`'s `ProductCheckQueryShapeTests` pins
+    product_check's.
+
+    The claim under test is that the query count does not move with the
+    added product's substance count — asserted by measuring at 1 substance
+    and at 3 and demanding the same number, so a regression to the repeated
+    unprefetched `item.product.substance_links.all()` reads (views.py, three
+    times) fails CI rather than being noticed in production.
+    """
+
+    def _measure(self, substance_count: int) -> int:
+        """POST a fresh product with `substance_count` substances.
+
+        Each measurement gets its own household and client, held at zero
+        other items: reusing a household across calls would let the first
+        call's item show up as an "other item" in the second, moving the
+        count for a reason unrelated to substance count.
+        """
+        household = Household.objects.create(name=f'H{substance_count}')
+        member = User.objects.create_user(
+            username=f'user{substance_count}@example.com', password='pass12345'
+        )
+        Membership.objects.create(user=member, household=household)
+        client = self.client_class()
+        client.force_login(member)
+
+        product = make_product(f'q{substance_count}', name=f'Produkt {substance_count}')
+        for i in range(substance_count):
+            substance = Substance.objects.create(
+                name=f'Substancja {substance_count}-{i}',
+                name_key=f'substancja_{substance_count}_{i}',
+            )
+            ProductSubstance.objects.create(
+                product=product, substance=substance,
+                source_field=SourceField.SUBSTANCE_ROW, source_order=i,
+            )
+
+        with CaptureQueriesContext(connection) as captured:
+            response = client.post(
+                reverse('pharmacy:item_add'),
+                {'product': product.id, 'producer_confirmed': 'true'},
+            )
+        self.assertEqual(response.status_code, 302)
+        return len(captured)
+
+    def test_query_count_does_not_grow_with_substance_count(self) -> None:
+        small = self._measure(1)
+        large = self._measure(3)
+
+        # The N+1 guard: one substance or three, the request costs the same.
+        self.assertEqual(small, large)
+        self.assertEqual(small, 10)

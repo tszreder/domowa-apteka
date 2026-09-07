@@ -185,13 +185,29 @@ the relevant rollout phase ships; before that, the sub-section reads
 
 ### 6.1 Adding a unit test
 
-- TBD — see §3 Phase 2, for the pattern that asserts a resolved substance
-  set against its source registry row rather than against parser output.
+- For a substance-resolution claim, assert against the **source data**, not
+  against whatever the code under test currently outputs.
+  `registry/tests/test_parser.py` is the canonical example: every expected
+  substance set is read off `fixtures/sample-products.xml` (and documented in
+  `fixtures/README.md`), never off a prior run of the parser. This is what
+  makes a test able to fail when the parser regresses — an assertion derived
+  from the parser's own output can never catch the parser being wrong.
 
 ### 6.2 Adding an integration test
 
-- TBD — see §3 Phase 2, for the pattern that drives the suggestion and save
-  path with name-collision fixtures and asserts which product was persisted.
+- For a persistence claim that has an upstream "what should happen" function
+  (a suggestions layer, a resolver, a computed default), derive the expected
+  value from that same function, then drive the real save path and assert on
+  what was actually persisted — never hardcode the id the fixture "should"
+  produce. `pharmacy/tests/test_item_add.py`'s
+  `test_collision_persists_default_product_and_its_own_substances` is the
+  pattern: it calls `search_presentations` the same way the client does, and
+  the second row of a collision-fixture built as `registry/tests/test_suggestions.py`
+  pins it (`test_default_is_lowest_registry_id_when_rows_disagree_on_substances`),
+  then POSTs `presentation.default_product_id` through `pharmacy:item_add` and
+  asserts the persisted `Item.product_id` and its substances against
+  `presentation`'s own fields — so a future change to the tiebreak rule moves
+  both sides of the assertion together instead of silently drifting.
 
 ### 6.3 Adding an e2e test
 
@@ -227,6 +243,30 @@ The risk-to-test map lives at `context/foundation/risk-test-map.md`. It contains
 
 (Filled in as phases land — two or three lines per phase capturing anything
 surprising the rollout taught.)
+
+**§3 Phase 2 (add-item-integrity)**:
+
+- A `ModelChoiceField`-resolved FK read more than once downstream (here,
+  `item.product.substance_links` read three times across `views.py` and
+  `duplicates.py`) needs its `prefetch_related` at the **form's** queryset,
+  not the view — `ModelForm.save()` keeps the exact prefetch-cached instance
+  `ModelChoiceField.clean()` returned, so the form-level fix requires no
+  view-level restructuring. `ProductCheckForm` already established this
+  pattern; `ItemAddForm` now follows it too.
+- The two-size query-count comparison `test_product_check.py` established
+  (`ProductCheckQueryShapeTests`) generalizes beyond `product_check` — it
+  proved out again for `item_add`'s substance-count axis
+  (`ItemAddQueryShapeTests`), holding household size at zero across both
+  measurements so substance count was the only variable moving.
+- Risk #4 (a resolution failure treated as success or silently dropped)
+  required **no new test**. Existing coverage — `test_duplicates.py`'s unit
+  layer and `test_item_list.py`'s real-view layer — was already complete at
+  the start of this phase. The derived `unresolved` property plus
+  `classify()`'s empty-set guard is confirmed as the final, permanent design;
+  no stored `resolution_status` field will be added — matching the precedent
+  set by an earlier archived plan that explicitly rejected a stored boolean
+  here on drift-risk grounds (re-import could leave it stale). See
+  `context/changes/add-item-integrity/plan.md`, "What We're NOT Doing".
 
 ## 7. What We Deliberately Don't Test
 

@@ -10,7 +10,9 @@ class ItemAddForm(forms.ModelForm):
     # and rendering 20,245 <option> tags would violate the one-second NFR.
     # The JavaScript autocomplete (Phase 3 § 4) sets this field's value.
     product = forms.ModelChoiceField(
-        queryset=Product.objects.filter(is_active=True),
+        queryset=Product.objects.filter(is_active=True).prefetch_related(
+            'substance_links__substance'
+        ),
         widget=forms.HiddenInput,
         error_messages={
             'required': 'Wybierz lek z listy podpowiedzi.',
