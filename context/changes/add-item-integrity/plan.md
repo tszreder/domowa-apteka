@@ -404,10 +404,10 @@ None. No schema changes in this phase.
 
 #### Automated
 
-- [x] 3.1 Named existing tests still pass: `uv run manage.py test pharmacy.tests.test_duplicates pharmacy.tests.test_item_list`
-- [x] 3.2 Full suite passes: `uv run manage.py test`
-- [x] 3.3 Typecheck passes: `uv run mypy`
+- [x] 3.1 Named existing tests still pass: `uv run manage.py test pharmacy.tests.test_duplicates pharmacy.tests.test_item_list` — 5858ab3
+- [x] 3.2 Full suite passes: `uv run manage.py test` — 5858ab3
+- [x] 3.3 Typecheck passes: `uv run mypy` — 5858ab3
 
 #### Manual
 
-- [x] 3.4 Updated §6.1/§6.2/§6.6 entries read as accurate to what was actually committed
+- [x] 3.4 Updated §6.1/§6.2/§6.6 entries read as accurate to what was actually committed — 5858ab3
