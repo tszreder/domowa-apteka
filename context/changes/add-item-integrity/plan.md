@@ -391,23 +391,23 @@ None. No schema changes in this phase.
 
 #### Automated
 
-- [x] 2.1 Query-shape test passes and is deterministic: `uv run manage.py test pharmacy.tests.test_item_add`
-- [x] 2.2 Falsification recorded: reverting the prefetch makes the test go red, then re-applied
-- [x] 2.3 Existing `test_item_add.py` tests unaffected: `uv run manage.py test pharmacy.tests.test_item_add`
-- [x] 2.4 Typecheck passes: `uv run mypy`
+- [x] 2.1 Query-shape test passes and is deterministic: `uv run manage.py test pharmacy.tests.test_item_add` — 93fa793
+- [x] 2.2 Falsification recorded: reverting the prefetch makes the test go red, then re-applied — 93fa793
+- [x] 2.3 Existing `test_item_add.py` tests unaffected: `uv run manage.py test pharmacy.tests.test_item_add` — 93fa793
+- [x] 2.4 Typecheck passes: `uv run mypy` — 93fa793
 
 #### Manual
 
-- [x] 2.5 Add-item flow still works end to end in the browser, including the duplicate-warning message
+- [x] 2.5 Add-item flow still works end to end in the browser, including the duplicate-warning message — 93fa793
 
 ### Phase 3: Risk #4 confirmation and cookbook update
 
 #### Automated
 
-- [ ] 3.1 Named existing tests still pass: `uv run manage.py test pharmacy.tests.test_duplicates pharmacy.tests.test_item_list`
-- [ ] 3.2 Full suite passes: `uv run manage.py test`
-- [ ] 3.3 Typecheck passes: `uv run mypy`
+- [x] 3.1 Named existing tests still pass: `uv run manage.py test pharmacy.tests.test_duplicates pharmacy.tests.test_item_list`
+- [x] 3.2 Full suite passes: `uv run manage.py test`
+- [x] 3.3 Typecheck passes: `uv run mypy`
 
 #### Manual
 
-- [ ] 3.4 Updated §6.1/§6.2/§6.6 entries read as accurate to what was actually committed
+- [x] 3.4 Updated §6.1/§6.2/§6.6 entries read as accurate to what was actually committed
