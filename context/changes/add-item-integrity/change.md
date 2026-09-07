@@ -1,7 +1,7 @@
 ---
 change_id: add-item-integrity
 title: Add-item integrity: product identity, substance match, and resolution failure
-status: new
+status: preparing
 created: 2026-09-07
 updated: 2026-09-07
 archived_at: null
