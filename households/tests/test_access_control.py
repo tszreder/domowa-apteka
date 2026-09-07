@@ -6,6 +6,20 @@ from households.models import Household, Membership
 
 
 class CrossHouseholdIsolationTests(TestCase):
+    """Proves that household *resolution* is scoped to the logged-in user's own membership.
+
+    What this class proves: every view that calls `_household_of(request.user)` returns
+    the household the logged-in user belongs to, never another household's record
+    (households/views.py copy of `_household_of`).
+
+    What this class does NOT prove: that household-owned records (Items, etc.) never leak
+    across household boundaries. No Item is created for household_a in setUp, so
+    `assertNotContains(response, household_a.name)` cannot observe item-level leakage.
+    The item-level isolation guarantee is proven in:
+      - pharmacy/tests/test_item_list.py::test_item_in_household_a_never_appears_for_member_of_household_b
+      - pharmacy/tests/test_product_check.py
+    """
+
     def setUp(self) -> None:
         self.household_a = Household.objects.create(name='Kowalscy')
         self.household_b = Household.objects.create(name='Nowakowie')

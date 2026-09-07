@@ -100,7 +100,7 @@ orchestrator updates Status as artifacts appear on disk.
 
 | # | Phase name | Goal (one line) | Risks covered | Test types | Status | Change folder |
 |---|---|---|---|---|---|---|
-| 1 | Coverage truth pass | Produce a written risk-to-test map and prove the assertions claiming to protect risks #1–#6 can fail — bounded to those assertions, ceiling of roughly twelve falsification checks, not a sweep of the whole suite | #1–#6 (verification, not new coverage) | suite audit, falsification checks, repair of unfalsifiable tests | not started | `testing-coverage-truth-pass` (proposed id — folder not yet created) |
+| 1 | Coverage truth pass | Produce a written risk-to-test map and prove the assertions claiming to protect risks #1–#6 can fail — bounded to those assertions, ceiling of roughly twelve falsification checks, not a sweep of the whole suite | #1–#6 (verification, not new coverage) | suite audit, falsification checks, repair of unfalsifiable tests | complete | `testing-coverage-truth-pass` |
 | 2 | Add-item integrity | Prove the chosen product is the saved product, that its substances match the source row, and that a resolution failure is visible — including one query-shape assertion for the one-second acknowledgement requirement | #1, #3, #4 | integration, unit, collision fixtures, query-count assertion | not started | — |
 | 3 | Ingestion and freshness without a deploy | Make the scheduled import path exercisable in-process, and prove a bad or stale snapshot is refused rather than served as current | #2 | integration, clock-injected assertions | not started | — |
 | 4 | Access boundaries and gate wiring | Prove ownership is checked per object and that invite artifacts stop working when intended, then wire the missing CI gates | #5, #6 | integration, falsification checks, gates | not started | — |
@@ -128,11 +128,11 @@ date so future readers can see which lines need re-verification.
 
 | Layer | Tool | Version | Notes |
 |---|---|---|---|
-| unit + integration | Django test runner (`manage.py test`) | Django 5.2.16 / Python 3.11.9 | 15 test modules, 178 test methods across the three apps. No pytest and no pytest-django — deliberately, the built-in runner covers every layer this plan needs |
+| unit + integration | Django test runner (`manage.py test`) | Django 5.2.16 / Python 3.11.9 | 17 test modules, 228 test methods across the three apps (measured 2026-09-05). No pytest and no pytest-django — deliberately, the built-in runner covers every layer this plan needs |
 | typecheck | mypy + django-stubs | mypy 2.3.0 / django-stubs 6.0.7 | Wired in CI; scoped by `pyproject.toml` to the three app packages |
 | test data | XML fixtures under the registry app's test tree, plus in-test object creation | n/a | Collision fixtures for risk #1 do not exist yet — see Phase 2. Fan-out fixtures for risk #7 — one substance drawing two or more partner products, and two distinct products sharing a display name — do not exist either; see Phase 5 |
 | query shape | `assertNumQueries` (Django built-in) | Django 5.2.16 | The chosen instrument for the one-second acknowledgement requirement — see §7 on why not wall-clock |
-| clock control | injected clock seam | n/a | Already established by the freshness work; reused rather than reinvented in Phase 3 |
+| clock control | monkeypatched clock (`timezone.now` patched directly in tests; not an injectable seam) | n/a | `test_freshness.py:86` patches the module attribute directly; Phase 3 reuses this pattern rather than introducing a proper injectable wrapper |
 | HTTP boundary mocking | none yet — see Phase 3 | — | The registry download goes out over `requests`; the import path has no seam for a truncated or failed response yet |
 | e2e | none yet — see Phase 4 | — | `StaticLiveServerTestCase` is Django's native host for a browser-driven test and needs no pytest migration |
 | lint + format | none yet — see Phase 4 | — | No ruff, black, or equivalent anywhere in the repo (verified by grep over `pyproject.toml` and the workflow) |
@@ -205,10 +205,23 @@ the relevant rollout phase ships; before that, the sub-section reads
 
 ### 6.5 Proving a test can fail, and the risk-coverage map
 
-- TBD — see §3 Phase 1. This entry becomes the canonical answer to two
-  questions: how to record that a test was watched to go red for the right
-  reason, and where the risk-to-test map lives so "what is actually tested?"
-  has a written answer rather than a feeling.
+The risk-to-test map lives at `context/foundation/risk-test-map.md`. It contains:
+
+- A **per-risk table** (risks #1–#6) with Status, the falsifiable test(s) that actually
+  protect each risk, and notes on any known gaps.
+- A **falsification ledger**: one row per mutation applied, dated, with the target module
+  run and the observed result.
+- The **"How to record a falsification"** convention (reproduced briefly below).
+
+**Short procedure** (full text with examples in `risk-test-map.md`):
+1. Identify the assertion and the production-code line it claims to protect.
+2. Apply the smallest mutation that should break exactly that behaviour.
+3. Run the narrowest containing module (`uv run manage.py test <app>.<module>`).
+4. Confirm the test goes red with the expected failure. If it stays green, the assertion
+   is not falsifiable — repair it or record the gap honestly; never mark the risk "covered."
+5. Revert (`git checkout -- <file>`); confirm `git status --porcelain` is empty.
+6. Append one row to the ledger in `risk-test-map.md` and update the per-risk table if
+   the risk's Status changes.
 
 ### 6.6 Per-rollout-phase notes
 
