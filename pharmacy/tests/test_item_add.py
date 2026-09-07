@@ -9,6 +9,7 @@ from django.urls import reverse
 from households.models import Household, Membership
 from pharmacy.models import Item
 from registry.models import Product, ProductSubstance, SourceField, Substance
+from registry.suggestions import search_presentations
 
 AS_OF = date(2026, 8, 13)
 
@@ -167,6 +168,42 @@ class ItemAddTests(TestCase):
         )
 
         item = Item.objects.get()
+        self.assertFalse(item.producer_confirmed)
+
+    def test_collision_persists_default_product_and_its_own_substances(self) -> None:
+        # The "Sortis 20" shape (registry/tests/test_suggestions.py:151-167):
+        # two rows share name/strength/form with no distinguishing producer
+        # (no marketing_holder on either) and disagree on substances. Proves
+        # the suggestions-layer tiebreak is what item_add actually persists,
+        # not just what search_presentations reports.
+        atorvastatinum = Substance.objects.create(name='Atorvastatinum', name_key='atorvastatinum')
+        atorvastatinum_calcicum = Substance.objects.create(
+            name='Atorvastatinum calcicum', name_key='atorvastatinum_calcicum'
+        )
+        higher = make_product('200', name='Sortis 20')
+        ProductSubstance.objects.create(
+            product=higher, substance=atorvastatinum_calcicum,
+            source_field=SourceField.SUBSTANCE_ROW, source_order=0,
+        )
+        lower = make_product('100', name='Sortis 20')
+        ProductSubstance.objects.create(
+            product=lower, substance=atorvastatinum,
+            source_field=SourceField.SUBSTANCE_ROW, source_order=0,
+        )
+
+        presentation = search_presentations('sortis')[0]
+        response = self.client.post(
+            reverse('pharmacy:item_add'),
+            {'product': presentation.default_product_id, 'producer_confirmed': 'false'},
+        )
+
+        self.assertRedirects(response, reverse('pharmacy:item_list'))
+        item = Item.objects.get()
+        self.assertEqual(item.product_id, presentation.default_product_id)
+        self.assertEqual(item.product_id, lower.id)
+        persisted_substances = [link.substance.name for link in item.product.substance_links.all()]
+        self.assertEqual(persisted_substances, presentation.substances)
+        self.assertEqual(persisted_substances, ['Atorvastatinum'])
         self.assertFalse(item.producer_confirmed)
 
     def test_member_of_household_b_cannot_see_item_household_a_just_added(self) -> None:
