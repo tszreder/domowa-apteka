@@ -36,6 +36,9 @@ local_settings.py
 # Browser automation output (console logs, page snapshots)
 .playwright-mcp/
 
+# Manual/ad-hoc screenshots (kept local, not committed)
+/screenshots/
+
 # OS / editor
 .DS_Store
 Thumbs.db
