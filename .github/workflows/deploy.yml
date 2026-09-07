@@ -39,6 +39,14 @@ jobs:
       - name: Install dependencies
         run: uv sync --locked
 
+      # The `playwright` pip package (added in #39) only ships the driver;
+      # the browser binary itself is a separate download this runner has
+      # never made, unlike a dev machine that ran `playwright install`
+      # once by hand. --with-deps also pulls the OS libraries a bare
+      # ubuntu-latest runner lacks for headless Chromium to launch at all.
+      - name: Install Playwright browser
+        run: uv run playwright install --with-deps chromium
+
       # No .env and no secrets needed: settings.py defaults DEBUG to False,
       # falls back to the scaffold SECRET_KEY, and uses SQLite when
       # DATABASE_URL is unset.
