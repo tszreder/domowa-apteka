@@ -378,27 +378,27 @@ None. No schema changes in this phase.
 
 #### Automated
 
-- [x] 1.1 New test passes: `uv run manage.py test pharmacy.tests.test_item_add`
-- [x] 1.2 Full pharmacy + registry suite still passes: `uv run manage.py test pharmacy registry`
-- [x] 1.3 Typecheck passes: `uv run mypy`
-- [x] 1.4 Falsification recorded: tiebreak swap makes the test go red, then reverted
+- [x] 1.1 New test passes: `uv run manage.py test pharmacy.tests.test_item_add` — b656aaa
+- [x] 1.2 Full pharmacy + registry suite still passes: `uv run manage.py test pharmacy registry` — b656aaa
+- [x] 1.3 Typecheck passes: `uv run mypy` — b656aaa
+- [x] 1.4 Falsification recorded: tiebreak swap makes the test go red, then reverted — b656aaa
 
 #### Manual
 
-- [x] 1.5 None required (documented as N/A — risk unreachable through manual testing alone)
+- [x] 1.5 None required (documented as N/A — risk unreachable through manual testing alone) — b656aaa
 
 ### Phase 2: N+1 fix and query-shape assertion
 
 #### Automated
 
-- [ ] 2.1 Query-shape test passes and is deterministic: `uv run manage.py test pharmacy.tests.test_item_add`
-- [ ] 2.2 Falsification recorded: reverting the prefetch makes the test go red, then re-applied
-- [ ] 2.3 Existing `test_item_add.py` tests unaffected: `uv run manage.py test pharmacy.tests.test_item_add`
-- [ ] 2.4 Typecheck passes: `uv run mypy`
+- [x] 2.1 Query-shape test passes and is deterministic: `uv run manage.py test pharmacy.tests.test_item_add`
+- [x] 2.2 Falsification recorded: reverting the prefetch makes the test go red, then re-applied
+- [x] 2.3 Existing `test_item_add.py` tests unaffected: `uv run manage.py test pharmacy.tests.test_item_add`
+- [x] 2.4 Typecheck passes: `uv run mypy`
 
 #### Manual
 
-- [ ] 2.5 Add-item flow still works end to end in the browser, including the duplicate-warning message
+- [x] 2.5 Add-item flow still works end to end in the browser, including the duplicate-warning message
 
 ### Phase 3: Risk #4 confirmation and cookbook update
 
