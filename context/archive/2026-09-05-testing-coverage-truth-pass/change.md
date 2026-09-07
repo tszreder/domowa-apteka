@@ -1,10 +1,10 @@
 ---
 change_id: testing-coverage-truth-pass
 title: "Coverage truth pass: prove the tests claiming to protect risks #1-#6 can fail"
-status: complete
+status: archived
 created: 2026-09-05
-updated: 2026-09-05
-archived_at: null
+updated: 2026-09-07
+archived_at: 2026-09-07T00:00:00Z
 ---
 
 ## Notes
